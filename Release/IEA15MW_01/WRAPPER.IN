@@ -1,0 +1,10 @@
+! Input for the master DLL. It contains the name and input files of the sub-DLLs that will be called by the master DLL (DISCON.dll by default).
+
+! Do not change lines before this line. You can add additional DLLs after the number of DLLs, each should have a SubDLLName and SubDLLInputName. The DLLs will be called by the sequence below. No empty lines between each sub-DLL is allowed.
+3             			! NumberofSubDLLs	- The number of sub-DLLs
+"LDP_v1.dll"			! SubDLLName        - The name of the sub-DLL to be called (lidar data processing)
+"LDP_v1.IN"   			! SubDLLInputName   - The name of the sub-DLL input parameter file name
+"FFP_v1.dll" 			! SubDLLName        - The name of the sub-DLL to be called (feedforward controller)
+"FFP_v1.IN"  			! SubDLLInputName   - The name of the sub-DLL input parameter file name
+"ROSCO_v2d6.dll" 		! SubDLLName        - The name of the sub-DLL to be called (feedback controller)
+"ROSCO_v2d6.IN"   		! SubDLLInputName   - The name of the sub-DLL input parameter file name

@@ -1,0 +1,15 @@
+! Collective pitch feedforward parameters for perfect wind preview. Please do not change the number of lines.
+
+!------- FILTERS AND TIMING ----------------------------------------------------------
+1    	    ! FlagLPF             	- Enable low-pass filter (flag) [0/1]
+0.1467	    ! f_cutoff_LP	   			- Corner frequency (-3dB) of the low-pass filter [rad/s]
+1    	    ! FlagNotch             	- Enable notch filter (flag) [0/1]
+0.1841          ! f_cutoff_Notch        - Corner frequency of the notch filter [rad/s]
+0.0017     ! betaNum_Notch	       - Dampening constant in numerator of Notch filter transfer function
+0.1706      ! betaDen_Notch	       - Dampening constant in denominator of Notch filter transfer function             
+3.1681    	! T_buffer        		- Buffer time for filtered REWS signal [s]
+
+!------- STATIC PITCH CURVE ---------------------
+19     	! n_StaticPitchCurve  	- Number of points in static pitch curve [-]
+2 9.3 10 11	12 13 14 15	16	17	18	19	20	21	22	23	24	25	30      	! StaticWind  	- Wind speed  values in static pitch curve [m/s]
+0.0000	0.0000	0.0000	0.0614	0.1130	0.1491	0.1790	0.2055	0.2296	0.2521	0.2732	0.2932	0.3124	0.3308	0.3485	0.3657	0.3824	0.3987	0.4100    	! StaticPitch 	- Pitch angle values in static pitch curve [rad]

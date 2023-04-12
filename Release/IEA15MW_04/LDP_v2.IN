@@ -1,0 +1,7 @@
+! Lidar data processing parameters. Please do not change the number of lines.
+
+!------- LIDAR TRAJECTORY -----------------------------------------------------
+4	                		! NumberOfBeams  	- Number of beams measuring at different directions [-]
+15 15 -15 -15            	! Lidar_Azimuth    	- The beam azimuth angles(relative to xz plane)in the lidar local coordinate system  [deg]
+12.09 -12.09 -12.09 12.09  	! Lidar_Elevation  	- The beam elevation angles (relative to the (xy) horizontal plane) in the lidar local coordinate system [deg]
+1 ! MC_Mode 					- Motion Compensation mode {0: no MC, 1: full MC)	[-]     

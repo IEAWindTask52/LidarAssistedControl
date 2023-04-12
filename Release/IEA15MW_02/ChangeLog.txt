@@ -1,0 +1,12 @@
+The OpenFAST files have been downloaded from
+https://github.com/IEAWindTask37/IEA-15-240-RWT
+using the last commit in OpenFAST folder before changing to v3.1 on March 3, 2022:
+gbarter: reducing test time and aligning all input files to v3, ed7e726, on Feb 25
+https://github.com/IEAWindTask37/IEA-15-240-RWT/tree/ed7e726062a1355fd0355cdb4fba739fb682ff9e
+
+The ROSCO input file is from
+https://github.com/NREL/ROSCO/blob/main/Test_Cases/IEA-15-240-RWT-UMaineSemi/DISCON-UMaineSemi.IN
+using the latest version
+dzalkind: Update Cp file paths, Cp table, tested locally, d0821e6, on Apr 5
+https://github.com/IEAWindTask37/IEA-15-240-RWT/tree/d0821e67e4ae808a76d24690e05575cd2be11942
+including Cp_Ct_Cq.IEA15MW.txt
