@@ -2,5 +2,8 @@
 *.outb
 *.out
 *.dbg
+*.pyc
+.idea/
 TurbulentWind
 SimulationResults
+
