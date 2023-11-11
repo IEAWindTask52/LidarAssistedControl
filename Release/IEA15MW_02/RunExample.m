@@ -68,7 +68,7 @@ hold on; grid on; box on
 plot(FB.Time,       FB.Wind1VelX);
 plot(R_FBFF.Time, 	R_FBFF.REWS);
 plot(R_FBFFMC.Time,	R_FBFFMC.REWS);
-legend('Hub height wind speed','REWS feedback-feedforward','REWS feedback-feedforward with MC','NumColumns',1)
+legend('Hub height wind speed','REWS feedback-feedforward','REWS feedback-feedforward with MC')
 ylabel('[m/s]');
 
 MyAxes(3) = subplot(n,1,2);
@@ -77,7 +77,7 @@ plot(FB.Time,       FB.BldPitch1);
 plot(FBFF.Time,     FBFF.BldPitch1);
 plot(FBFFMC.Time,	FBFFMC.BldPitch1);
 ylabel({'BldPitch1'; ' [deg]'});
-legend('feedback only','feedback-feedforward','feedback-feedforward with MC','NumColumns',2)
+legend('feedback only','feedback-feedforward','feedback-feedforward with MC')
 
 MyAxes(2) = subplot(n,1,3);
 hold on; grid on; box on

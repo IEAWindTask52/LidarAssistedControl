@@ -1,3 +1,18 @@
+# IEA15MW_01: IEA 15 MW monopile + perfect wind preview from a single point 
+# lidar system.
+# Origin and changes in files: see ChangeLog.txt.
+# Purpose:
+# Here, we use a perfect wind preview to demonstrate that the collective
+# pitch feedforward controller (designed with SLOW) is able to reduce
+# significantly the rotor speed variation when OpenFAST is disturbed by an
+# Extreme Operating Gust. Here, only the rotational GenDOF is enabled.  
+# Result:       
+# Change in rotor over speed:  -96.9 %
+# Authors: 		
+# David Schlipf, Feng Guo, Simon Weich, Aravind Venkatachalapathy
+# Copyright (c) 2022 Flensburg University of Applied Sciences, WETI
+
+# Setup
 import shutil
 import os
 import sys
