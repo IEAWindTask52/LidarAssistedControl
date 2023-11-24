@@ -25,10 +25,10 @@ Seed_vec            = [1:nSeed];                % [-]  	vector of seeds
 
 % Parameters postprocessing (can be adjusted, but will provide different results)
 t_start             = 60;                       % [s] 	ignore data before for STD and spectra
-nDataPerBlock       = 2^14;                     % [-]  	data per block, here 2^14/80 s = 204.8 s, so we have a frequency resolution of 1/204.8 Hz = 0.0049 Hz  
 Fs                	= 80;                       % [Hz]  sampling frequenzy, same as in *.fst
+nDataPerBlock       = 600/2*Fs;                 % [-]  	data per block, here 2 blocks per 600 s (TMax-t_start)
 vWindow             = hamming(nDataPerBlock);   % [-] 	window for estimation
-nFFT                = [];                       % [-]  	number of FFT, default: nextpow2(nDataPerBlock); 
+nFFT                = [];                       % [-]  	number of FFT, default: 2^nextpow2(nDataPerBlock); 
 nOverlap            = [];                       % [-]  	samples of overlap, default: 50% overlap
 R                   = 120;                      % [m]  	rotor radius to calculate REWS
 
@@ -125,8 +125,8 @@ for iSeed = 1:nSeed
     FBFF                = ReadFASTbinaryIntoStruct(FASTresultFile);
 	R_FBFF              = ReadROSCOtextIntoStruct(ROSCOresultFile);
 
-    % Plot time results
-    figure('Name',['Seed ',num2str(Seed)])
+    % Plot rotor speed
+    figure('Name',['Rotor speed seed ',num2str(Seed)])
     hold on; grid on; box on
     plot(FB.Time,       FB.RotSpeed);
     plot(FBFF.Time,     FBFF.RotSpeed);
@@ -145,47 +145,40 @@ for iSeed = 1:nSeed
     % Estimate auto- and cross-spectra of REWS
     TurbSimResultFile                 	= ['TurbulentWind\URef_18_Seed_',num2str(Seed,'%02d'),'.wnd'];   
     [REWS_WindField,Time_WindField]  	= CalculateREWSfromWindField(TurbSimResultFile,R,2);
-    REWS_WindField_Fs                   = interp1(Time_WindField,REWS_WindField,R_FBFF.Time(R_FBFF.Time>t_start));
-    [S_LL_est(iSeed,:) ,~]            	= pwelch(detrend(R_FBFF.REWS(R_FBFF.Time>t_start),'constant'),vWindow,nOverlap,nFFT,Fs);     
-    [S_RR_est(iSeed,:) ,~]            	= pwelch(detrend(REWS_WindField_Fs,'constant'),vWindow,nOverlap,nFFT,Fs);     
-    [S_RL_est(iSeed,:) ,~]             	= cpsd(detrend(REWS_WindField_Fs,'constant'),detrend(R_FBFF.REWS(R_FBFF.Time>t_start),'constant'),vWindow,nOverlap,nFFT,Fs);     
+    REWS_WindField_Fs                   = interp1(Time_WindField,REWS_WindField,R_FBFF.Time);
+    [S_LL_est(iSeed,:) ,~]            	= pwelch(detrend(R_FBFF.REWS(R_FBFF.Time>=t_start),'constant'),vWindow,nOverlap,nFFT,Fs);     
+    [S_RR_est(iSeed,:) ,~]            	= pwelch(detrend(REWS_WindField_Fs(R_FBFF.Time>=t_start),'constant'),vWindow,nOverlap,nFFT,Fs);     
+    [S_RL_est(iSeed,:) ,~]             	= cpsd(detrend(REWS_WindField_Fs(R_FBFF.Time>=t_start),'constant'),detrend(R_FBFF.REWS(R_FBFF.Time>=t_start),'constant'),vWindow,nOverlap,nFFT,Fs);     
     
+    % Plot REWS
+    figure('Name',['REWS seed ',num2str(Seed)])
+    hold on; grid on; box on
+    plot(R_FBFF.Time,   REWS_WindField_Fs);
+    plot(R_FBFF.Time,   R_FBFF.REWS);
+    ylabel('REWS [m/s]');
+    legend('wind field','lidar estimate')
+    xlabel('time [s]')
+
 end
 
 % calculate mean coherence
-gamma2_RL_mean_est      = abs(mean(S_RL_est,1)).^2./mean(S_LL_est,1)./mean(S_RR_est,1);
+gamma2_RL_mean_est          = abs(mean(S_RL_est,1)).^2./mean(S_LL_est,1)./mean(S_RR_est,1);
 
-%% Calculate rotor speed spectra by analytical model
-
-% steady state operating point for 
-theta_OP                 = 0.2714;
-Omega_OP                 = 0.7920;
-v_0_OP                   = 18;
-f_delay                  = 0.025;
-ROSCOInFileName          = 'ROSCO_v2d6.IN';
-RotorPerformanceFile     = 'Cp_Ct_Cq.IEA15MW.txt';
-LidarInputFileName       = 'MolasNL400_1G_LidarFile.dat';
-LDPInputFileName         = 'LDP_v1.IN';
-SpectralModelFileName    = 'LidarRotorSpectra_IEA15MW_MolasNL400.mat';
-AnalyticalModel          = AnalyticalRotorSpeedSpectrum(v_0_OP,theta_OP,Omega_OP,f_delay,...
-    ROSCOInFileName,RotorPerformanceFile,LidarInputFileName,LDPInputFileName,SpectralModelFileName);
+% Get analytical correlation model
+SpectralModelFileName       = 'LidarRotorSpectra_IEA15MW_MolasNL400.mat'; % model for 18 m/s
+AnalyticalModel             = load(SpectralModelFileName, 'S_LL', 'S_RL', 'S_RR', 'f'); 
+AnalyticalModel.gamma2_RL   = abs(AnalyticalModel.S_RL).^2./AnalyticalModel.S_RR./AnalyticalModel.S_LL;
 
 %% Plot spectra
-Color1 = [0 0.4470 0.7410];
-Color2 = [0.8500 0.3250 0.0980];
 figure('Name','Simulation results')
-
 hold on; grid on; box on
-p1 = plot(AnalyticalModel.f,AnalyticalModel.S_Omega_r_FB.*(radPs2rpm(1))^2,'--','Color',Color1);
-p2 = plot(AnalyticalModel.f,AnalyticalModel.S_Omega_r_FF.*(radPs2rpm(1))^2,'--','Color',Color2);
-p3 = plot(f_est ,mean(S_RotSpeed_FB_est,1),'-','Color',Color1);
-p4 = plot(f_est ,mean(S_RotSpeed_FBFF_est,1),'-','Color',Color2);
-
+plot(f_est ,mean(S_RotSpeed_FB_est,1));
+plot(f_est ,mean(S_RotSpeed_FBFF_est,1));
 set(gca,'Xscale','log')
 set(gca,'Yscale','log')
 xlabel('frequency [Hz] ')
 ylabel('Spectra RotSpeed [(rpm)^2Hz^{-1}]')
-legend([p1 p2 p3 p4],'FB-only Analytical','FBFF Analytical','FB-only Estimated','FBFF Estimated')
+legend('FB-only Estimated','FBFF Estimated')
 
 % display results
 fprintf('Change in rotor speed standard deviation:  %4.1f %%\n',...
@@ -193,26 +186,22 @@ fprintf('Change in rotor speed standard deviation:  %4.1f %%\n',...
 
 %% Plot REWS spectra
 figure('Name','REWS spectra')
-
 hold on; grid on; box on
-p1 = plot(AnalyticalModel.f,AnalyticalModel.S_LL,'--','Color',Color1);
-p2 = plot(AnalyticalModel.f,AnalyticalModel.S_RR,'--','Color',Color2);
-p3 = plot(f_est ,mean(S_LL_est,1),'-','Color',Color1);
-p4 = plot(f_est ,mean(S_RR_est,1),'-','Color',Color2);
-
+plot(AnalyticalModel.f,AnalyticalModel.S_LL);
+plot(AnalyticalModel.f,AnalyticalModel.S_RR);
+plot(f_est ,mean(S_LL_est,1));
+plot(f_est ,mean(S_RR_est,1));
 set(gca,'Xscale','log')
 set(gca,'Yscale','log')
 xlabel('frequency [Hz] ')
 ylabel('Spectra REWS [(m/s)^2Hz^{-1}]')
-legend([p1 p2 p3 p4],'Lidar Analytical','Rotor Analytical','Lidar Estimated','Rotor Estimated')
+legend('Lidar Analytical','Rotor Analytical','Lidar Estimated','Rotor Estimated')
 
 %% Plot REWS coherence
 figure('Name','REWS coherence')
-
 hold on; grid on; box on
-p1 = plot(AnalyticalModel.f,AnalyticalModel.gamma2_RL,'-','Color',Color1);
-p2 = plot(f_est,gamma2_RL_mean_est,'-','Color',Color2);
-
+p1 = plot(AnalyticalModel.f,AnalyticalModel.gamma2_RL);
+p2 = plot(f_est,gamma2_RL_mean_est);
 set(gca,'Xscale','log')
 xlabel('frequency [Hz] ')
 ylabel('Coherence REWS [-]')
