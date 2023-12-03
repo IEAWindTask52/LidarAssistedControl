@@ -1,4 +1,4 @@
-! Lidar data processing parameters for Molas NL400. Please do not change the number of lines.
+! Lidar data processing parameters for MolasNL200. Please do not change the number of lines.
 
 !------- LIDAR TRAJECTORY -----------------------------------------------------
 4	                		! NumberOfBeams  	- Number of beams measuring at different directions [-]

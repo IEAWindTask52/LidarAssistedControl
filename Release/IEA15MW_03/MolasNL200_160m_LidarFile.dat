@@ -1,5 +1,5 @@
 ------- Lidar Simulator V2.00 INPUT FILE ---------------------------------------
-Configuration of the Molas NL400 measuring at 240 m
+Configuration of the Molas NL400 measuring at 160 m
 --------------------------------------------------------------------------------
 False	Echo           					- Echo input data to <RootName>.ech (flag)
 100		MAXDLLChainOutputs				- Number of entries in the avrSWAP array reserved for outputs of the LDP DLL
@@ -22,10 +22,10 @@ X-Tab 	Y-Tab 	Z-Tab
 ---------------------- Measuring points in spherical coordinates----------------
 4		NumberOfPoints_Spherical		- Amounts of Points
 Azimuth-Tab     Elevation-Tab	RangeGates-Tab
- +15.0 	  +12.09 	   254.10	 
- +15.0 	  -12.09 	   254.10	 
- -15.0 	  -12.09 	   254.10	 
- -15.0 	  +12.09 	   254.10  	 
+ +15.0 	  +12.09 	   169.40	 
+ +15.0 	  -12.09 	   169.40		 
+ -15.0 	  -12.09 	   169.40	 
+ -15.0 	  +12.09 	   169.40		 
 ---------------------- Weighting function (gaussian distribution)---------------
 30		FWHM							- Full width half maximum [m]
 3		PointsToEvaluate				- points evaluated to "integrate" (odd number so there is a point in the peak, >= 3) [-]

@@ -1,5 +1,5 @@
 % IEA15MW_03: IEA 15 MW monopile + realistic wind preview  from a 
-% nacelle-based lidar system, single wind speed. 
+% MolasNL200 lidar system, single wind speed. 
 % Purpose:
 % Here, we use a realistic wind preview to demonstrate that the collective
 % pitch feedforward controller together with the correct filtering provides
@@ -7,7 +7,7 @@
 % and the coherence. In this example, we assume frozen turbulence, only one 
 % 3D turbulence field (y,z,t) at rotor plane is generated.
 % Result:
-% Change in rotor speed standard deviation:  -39.6 %
+% Change in rotor speed standard deviation:  -50.3 %
 % Authors:
 % David Schlipf, Feng Guo
 
@@ -35,7 +35,7 @@ R                   = 120;                      % [m]  	rotor radius to calculat
 TurbSimExeFile      = 'TurbSim_x64.exe';
 FASTexeFile         = 'openfast_x64.exe';
 FASTmapFile         = 'MAP_x64.dll';
-SimulationName      = 'IEA-15-240-RWT-Monopile';
+SimulationName      = 'IEA-15-240-RWT-Monopile_MolasNL200';
 TurbSimTemplateFile = 'TurbSim2aInputFileTemplateIEA15MW.inp';
 if ~exist('TurbulentWind','dir')
     mkdir TurbulentWind
@@ -158,18 +158,21 @@ for iSeed = 1:nSeed
     legend('wind field','lidar estimate')
     xlabel('time [s]')
 
+    % Estimate cross correlation
+    [c_filter(iSeed,:),lags]    = xcorr(detrend(R_FBFF.REWS_f(R_FBFF.Time>=t_start),'constant'),detrend(R_FBFF.REWS(R_FBFF.Time>=t_start),'constant'),'normalized');
+
 end
 
 % calculate mean coherence
 gamma2_RL_mean_est          = abs(mean(S_RL_est,1)).^2./mean(S_LL_est,1)./mean(S_RR_est,1);
 
 % Get analytical correlation model
-SpectralModelFileName       = 'LidarRotorSpectra_IEA15MW_MolasNL400.mat'; % model for 18 m/s
+SpectralModelFileName       = 'LidarRotorSpectra_IEA15MW_MolasNL200_160m.mat'; % model for 18 m/s
 AnalyticalModel             = load(SpectralModelFileName, 'S_LL', 'S_RL', 'S_RR', 'f'); 
 AnalyticalModel.gamma2_RL   = abs(AnalyticalModel.S_RL).^2./AnalyticalModel.S_RR./AnalyticalModel.S_LL;
 
-%% Plot spectra
-figure('Name','Simulation results')
+%% Plot rotor speed spectra
+figure('Name','Rotor speed spectra')
 hold on; grid on; box on
 plot(f_est ,mean(S_RotSpeed_FB_est,1));
 plot(f_est ,mean(S_RotSpeed_FBFF_est,1));
@@ -196,6 +199,15 @@ xlabel('frequency [Hz] ')
 ylabel('Spectra REWS [(m/s)^2Hz^{-1}]')
 legend('Lidar Analytical','Rotor Analytical','Lidar Estimated','Rotor Estimated')
 
+%% Plot filter delay
+[c_max,idx_max] = max(mean(c_filter,1));
+T_filter        = lags(idx_max)/Fs; % [s]       time delay by the filter
+figure('Name','Filter delay')
+hold on;grid on; box on
+plot(lags/Fs,mean(c_filter,1))
+plot(T_filter,c_max,'o')
+xlim([-1 1]*20)
+
 %% Plot REWS coherence
 figure('Name','REWS coherence')
 hold on; grid on; box on
@@ -205,3 +217,13 @@ set(gca,'Xscale','log')
 xlabel('frequency [Hz] ')
 ylabel('Coherence REWS [-]')
 legend([p1 p2],'Analytical','Estimated')
+
+%% get parameters for FFP_v1_MolasNL200.in
+G_RL                        = abs(AnalyticalModel.S_RL)./AnalyticalModel.S_LL;                  % [-]       transfer function
+f_cutoff                    = interp1(abs(G_RL),AnalyticalModel.f,db2mag(-3),'linear')*2*pi;    % [rad/s]   desired cutoff angular frequency
+URef                        = 18;                               % [m/s]     mean wind speed
+x_L                         = 160;                              % [m]       distance of lidar measurement 
+T_Taylor                    = x_L/URef;                         % [s]       travel time from lidar measurment to rotor
+T_scan                      = 1;                                % [s]       time of full lidar scan
+tau                         = 2;                                % [s]       time to overcome pitch actuator, from Example 1: tau = T_Taylor - T_buffer, since there T_filter = T_scan = 0
+T_buffer                    = T_Taylor-1/2*T_scan-T_filter-tau; % [s]       time needed to buffer signal such that FF signal is applied with tau, see Schlipf2015, Equation (5.40)
