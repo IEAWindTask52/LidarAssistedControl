@@ -7,7 +7,7 @@
 % and the coherence. In this example, we assume frozen turbulence, only one 
 % 3D turbulence field (y,z,t) at rotor plane is generated.
 % Result:
-% Change in rotor speed standard deviation:  -50.3 %
+% Change in rotor speed standard deviation:  -50.0 %
 % Authors:
 % David Schlipf, Feng Guo
 
@@ -37,11 +37,13 @@ FASTexeFile         = 'openfast_x64.exe';
 FASTmapFile         = 'MAP_x64.dll';
 SimulationName      = 'IEA-15-240-RWT-Monopile_MolasNL200';
 TurbSimTemplateFile = 'TurbSim2aInputFileTemplateIEA15MW.inp';
+SimulationFolder    = 'SimulationResults_MolasNL200';
+
 if ~exist('TurbulentWind','dir')
     mkdir TurbulentWind
 end
-if ~exist('SimulationResults','dir')
-    mkdir SimulationResults
+if ~exist(SimulationFolder,'dir')
+    mkdir(SimulationFolder)
 end
 
 %% Preprocessing: generate turbulent wind field
@@ -81,8 +83,8 @@ for iSeed = 1:nSeed
     ManipulateTXTFile('IEA-15-240-RWT_InflowFile.dat','MyFilenameRoot',WindFileRoot);
     
     % Run FB    
-    FASTresultFile      = ['SimulationResults\',WindFileName,'_FlagLAC_0.outb'];
-    ROSCOresultFile     = ['SimulationResults\',WindFileName,'_FlagLAC_0.dbg'];
+    FASTresultFile      = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_0.outb']);
+    ROSCOresultFile     = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_0.dbg']);
     if ~exist(FASTresultFile,'file')    
         ManipulateTXTFile('ROSCO_v2d6.IN','1 ! FlagLAC','0 ! FlagLAC'); % disable LAC
         dos([FASTexeFile,' ',SimulationName,'.fst']);
@@ -91,8 +93,8 @@ for iSeed = 1:nSeed
     end
    
     % Run FB+FF    
-    FASTresultFile      = ['SimulationResults\',WindFileName,'_FlagLAC_1.outb'];
-    ROSCOresultFile     = ['SimulationResults\',WindFileName,'_FlagLAC_1.dbg'];
+    FASTresultFile      = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_1.outb']);
+    ROSCOresultFile     = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_1.dbg']);
     if ~exist(FASTresultFile,'file')    
         ManipulateTXTFile('ROSCO_v2d6.IN','0 ! FlagLAC','1 ! FlagLAC'); % enable LAC
         dos([FASTexeFile,' ',SimulationName,'.fst']);
@@ -115,12 +117,12 @@ for iSeed = 1:nSeed
     % Load data
     Seed                = Seed_vec(iSeed);
 	WindFileName        = ['URef_18_Seed_',num2str(Seed,'%02d')];
-    FASTresultFile      = ['SimulationResults\',WindFileName,'_FlagLAC_0.outb'];
-    ROSCOresultFile     = ['SimulationResults\',WindFileName,'_FlagLAC_0.dbg'];
+    FASTresultFile      = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_0.outb']);
+    ROSCOresultFile     = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_0.dbg']);
     FB                  = ReadFASTbinaryIntoStruct(FASTresultFile);
     R_FB                = ReadROSCOtextIntoStruct(ROSCOresultFile);
-    FASTresultFile      = ['SimulationResults\',WindFileName,'_FlagLAC_1.outb'];
-    ROSCOresultFile     = ['SimulationResults\',WindFileName,'_FlagLAC_1.dbg'];
+    FASTresultFile      = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_1.outb']);
+    ROSCOresultFile     = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_1.dbg']);
     FBFF                = ReadFASTbinaryIntoStruct(FASTresultFile);
 	R_FBFF              = ReadROSCOtextIntoStruct(ROSCOresultFile);
 
