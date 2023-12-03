@@ -12,8 +12,6 @@
 # Change in platform pitch amplitude (max-min) from FB to FBFFMC:  -71.5 %
 # Authors:
 # David Schlipf, Feng Guo, Frank Lemmer, Simon Weich, Aravind Venkatachalapathy
-# Copyright (c) 2022 Flensburg University of Applied Sciences, WETI
-# and sowento GmbH
 
 # Setup
 import shutil

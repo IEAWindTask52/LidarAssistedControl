@@ -12,7 +12,6 @@
 % Change in tower base fore-aft bending moment standard deviation:  -12.3 %
 % Authors:
 % David Schlipf, Feng Guo
-% Copyright (c) 2022 Flensburg University of Applied Sciences, WETI
 
 %% Setup
 clearvars;

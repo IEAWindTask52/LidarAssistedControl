@@ -83,6 +83,6 @@ plot.show()
 # display results
 RatedRotorSpeed = 7.56 # [rpm]
 t_Start         = 100  # [s]
-change_in_rotor_speed = (max(abs(FBFF['RotSpeed'] - RatedRotorSpeed)) /
-                         max(abs(FB['RotSpeed'] - RatedRotorSpeed)) - 1) * 100
+change_in_rotor_speed = (max(abs(FBFF['RotSpeed'][FBFF['Time'] >= t_Start] - RatedRotorSpeed)) /
+                         max(abs(FB['RotSpeed'][FB['Time'] >= t_Start] - RatedRotorSpeed)) - 1) * 100
 print(f'Change in rotor over speed: {change_in_rotor_speed:.1f}%')

@@ -10,7 +10,6 @@
 % Change in rotor speed standard deviation:  -39.6 %
 % Authors:
 % David Schlipf, Feng Guo
-% Copyright (c) 2022 Flensburg University of Applied Sciences, WETI
 
 %% Setup
 clearvars;
