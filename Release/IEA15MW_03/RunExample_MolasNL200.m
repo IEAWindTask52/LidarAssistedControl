@@ -16,7 +16,6 @@ clearvars;
 close all;
 clc;
 addpath('..\MatlabFunctions')
-addpath('..\MatlabFunctions\AnalyticalModel')
 
 % Seeds (can be adjusted, but will provide different results)
 nSeed               = 6;                        % [-]	number of stochastic turbulence field samples
@@ -24,12 +23,16 @@ Seed_vec            = [1:nSeed];                % [-]  	vector of seeds
 
 % Parameters postprocessing (can be adjusted, but will provide different results)
 t_start             = 60;                       % [s] 	ignore data before for STD and spectra
-Fs                	= 80;                       % [Hz]  sampling frequenzy, same as in *.fst
-nDataPerBlock       = 600/2*Fs;                 % [-]  	data per block, here 2 blocks per 600 s (TMax-t_start)
-vWindow             = hamming(nDataPerBlock);   % [-] 	window for estimation
-nFFT                = [];                       % [-]  	number of FFT, default: 2^nextpow2(nDataPerBlock); 
-nOverlap            = [];                       % [-]  	samples of overlap, default: 50% overlap
+TMax                = 660;                      % [s]   total run time, same as in *.fst
+DT                  = 0.0125;                   % [s]   time step, same as in *.fst
 R                   = 120;                      % [m]  	rotor radius to calculate REWS
+nBlock              = 2;                        % [-]   number of blocks for spectra 
+Fs                	= 1/DT;                     % [Hz]  sampling frequenzy
+AnalysisTime        = TMax-t_start;             % [s]   time to calculate spectra etc.
+nDataPerBlock       = AnalysisTime/nBlock*Fs;   % [-]  	data per block, here 2 blocks
+vWindow             = hamming(nDataPerBlock);   % [-] 	window for estimation
+nFFT                = 2^nextpow2(nDataPerBlock);% [-]  	number of FFT, default: 2^nextpow2(nDataPerBlock); 
+nOverlap            = nDataPerBlock/2;          % [-]  	samples of overlap, default: 50% overlap
 
 % Files (should not be be changed)
 TurbSimExeFile      = 'TurbSim_x64.exe';
@@ -112,6 +115,17 @@ delete('MAP_x64.dll')
 
 %% Postprocessing: evaluate data
 
+% Allocation
+S_RotSpeed_FB_est       = NaN(nSeed,nFFT/2+1);
+S_RotSpeed_FBFF_est     = NaN(nSeed,nFFT/2+1);
+S_LL_est                = NaN(nSeed,nFFT/2+1);
+S_RR_est                = NaN(nSeed,nFFT/2+1);
+S_RL_est                = NaN(nSeed,nFFT/2+1);
+STD_RotSpeed_FB         = NaN(1,nSeed);
+STD_RotSpeed_FBFF       = NaN(1,nSeed);
+c_filter                = NaN(nSeed,AnalysisTime*Fs*2+1);
+
+% Loop over all seeds
 for iSeed = 1:nSeed    
 
     % Load data
@@ -164,12 +178,14 @@ for iSeed = 1:nSeed
     [c_filter(iSeed,:),lags]    = xcorr(detrend(R_FBFF.REWS_f(R_FBFF.Time>=t_start),'constant'),detrend(R_FBFF.REWS(R_FBFF.Time>=t_start),'constant'),'normalized');
 
 end
+    
 
-% calculate mean coherence
+
+% Calculate mean coherence
 gamma2_RL_mean_est          = abs(mean(S_RL_est,1)).^2./mean(S_LL_est,1)./mean(S_RR_est,1);
 
 % Get analytical correlation model
-SpectralModelFileName       = 'LidarRotorSpectra_IEA15MW_MolasNL200_160m.mat'; % model for 18 m/s
+SpectralModelFileName       = '..\MatlabFunctions\AnalyticalModel\LidarRotorSpectra_IEA15MW_MolasNL200_160m.mat'; % model for 18 m/s
 AnalyticalModel             = load(SpectralModelFileName, 'S_LL', 'S_RL', 'S_RR', 'f'); 
 AnalyticalModel.gamma2_RL   = abs(AnalyticalModel.S_RL).^2./AnalyticalModel.S_RR./AnalyticalModel.S_LL;
 
@@ -184,7 +200,7 @@ xlabel('frequency [Hz] ')
 ylabel('Spectra RotSpeed [(rpm)^2Hz^{-1}]')
 legend('FB-only Estimated','FBFF Estimated')
 
-% display results
+% Display results
 fprintf('Change in rotor speed standard deviation:  %4.1f %%\n',...
     (mean(STD_RotSpeed_FBFF)/mean(STD_RotSpeed_FB)-1)*100)   
 
@@ -220,7 +236,7 @@ xlabel('frequency [Hz] ')
 ylabel('Coherence REWS [-]')
 legend([p1 p2],'Analytical','Estimated')
 
-%% get parameters for FFP_v1_MolasNL200.in
+%% Get parameters for FFP_v1_MolasNL200.in
 G_RL                        = abs(AnalyticalModel.S_RL)./AnalyticalModel.S_LL;                  % [-]       transfer function
 f_cutoff                    = interp1(abs(G_RL),AnalyticalModel.f,db2mag(-3),'linear')*2*pi;    % [rad/s]   desired cutoff angular frequency
 URef                        = 18;                               % [m/s]     mean wind speed
