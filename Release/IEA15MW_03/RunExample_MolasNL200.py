@@ -214,7 +214,7 @@ plt.plot(f_est, np.mean(S_RotSpeed_FBFF_est, axis=0))
 plt.xscale('log')
 plt.yscale('log')
 plt.xlabel('frequency [Hz]')
-plt.ylabel('Spectra RotSpeed [(rpm)^2Hz^{-1}]')
+plt.ylabel('Spectra RotSpeed [(rpm)^2/Hz]')
 plt.legend(['FB-only Estimated', 'FBFF Estimated'])
 
 # display results
@@ -230,7 +230,7 @@ plt.plot(f_est, np.mean(S_RR_est, axis=0))
 plt.xscale('log')
 plt.yscale('log')
 plt.xlabel('frequency [Hz]')
-plt.ylabel('Spectra REWS [(m/s)^2Hz^{-1}]')
+plt.ylabel('Spectra REWS [(m/s)^2/Hz]')
 plt.legend(['Lidar Analytical', 'Rotor Analytical', 'Lidar Estimated', 'Rotor Estimated'])
 
 # Plot filter delay
@@ -241,15 +241,25 @@ plt.figure('Filter delay')
 plt.plot(lags / Fs, c_filter_mean)
 plt.plot(T_filter, c_max, 'o')
 plt.xlim([-20, 20])
+plt.xlabel('time [s]')
+plt.ylabel('cross correlation [-]')
 
 # Plot REWS coherence
 plt.figure('REWS coherence')
 p1, = plt.plot(AnalyticalModel['f'], AnalyticalModel['gamma2_RL'])
-p2, = plt.plot(f_est, gamma2_RL_mean_est)
+p2, = plt.plot(f_est[1:], gamma2_RL_mean_est[1:])
 plt.xscale('log')
 plt.xlabel('frequency [Hz]')
 plt.ylabel('Coherence REWS [-]')
 plt.legend([p1, p2], ['Analytical', 'Estimated'])
 plt.show()
 
-# Get parameters for FFP_v1_MolasNL200.in TODO: add based on Matlab
+# Get parameters for FFP_v1_MolasNL200.in TODO: f_cutoff by interpolation
+G_RL = AnalyticalModel['S_RL']/AnalyticalModel['S_LL']                      # [-]       transfer function
+f_cutoff = 0.1187                                                           # [rad/s]   desired cutoff angular frequency
+URef = 18                                                                   # [m/s]     mean wind speed
+x_L = 160                                                                   # [m]       distance of lidar measurement
+T_Taylor = x_L/URef                                                         # [s]       travel time from lidar measurment to rotor
+T_scan = 1                                                                  # [s]       time of full lidar scan
+tau = 2                                                                     # [s]       time to overcome pitch actuator, from Example 1: tau = T_Taylor - T_buffer, since there T_filter = T_scan = 0
+T_buffer = T_Taylor-1/2*T_scan-T_filter-tau                                 # [s]       time needed to buffer signal such that FF signal is applied with tau, see Schlipf2015, Equation (5.40)

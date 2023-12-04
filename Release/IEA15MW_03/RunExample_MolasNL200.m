@@ -197,7 +197,7 @@ plot(f_est ,mean(S_RotSpeed_FBFF_est,1));
 set(gca,'Xscale','log')
 set(gca,'Yscale','log')
 xlabel('frequency [Hz] ')
-ylabel('Spectra RotSpeed [(rpm)^2Hz^{-1}]')
+ylabel('Spectra RotSpeed [(rpm)^2/Hz]')
 legend('FB-only Estimated','FBFF Estimated')
 
 % Display results
@@ -214,7 +214,7 @@ plot(f_est ,mean(S_RR_est,1));
 set(gca,'Xscale','log')
 set(gca,'Yscale','log')
 xlabel('frequency [Hz] ')
-ylabel('Spectra REWS [(m/s)^2Hz^{-1}]')
+ylabel('Spectra REWS [(m/s)^2/Hz]')
 legend('Lidar Analytical','Rotor Analytical','Lidar Estimated','Rotor Estimated')
 
 %% Plot filter delay
@@ -225,6 +225,8 @@ hold on;grid on; box on
 plot(lags/Fs,mean(c_filter,1))
 plot(T_filter,c_max,'o')
 xlim([-1 1]*20)
+xlabel('time [s]')
+ylabel('cross correlation [-]')
 
 %% Plot REWS coherence
 figure('Name','REWS coherence')
@@ -237,7 +239,7 @@ ylabel('Coherence REWS [-]')
 legend([p1 p2],'Analytical','Estimated')
 
 %% Get parameters for FFP_v1_MolasNL200.in
-G_RL                        = abs(AnalyticalModel.S_RL)./AnalyticalModel.S_LL;                  % [-]       transfer function
+G_RL                        = AnalyticalModel.S_RL./AnalyticalModel.S_LL;                       % [-]       transfer function
 f_cutoff                    = interp1(abs(G_RL),AnalyticalModel.f,db2mag(-3),'linear')*2*pi;    % [rad/s]   desired cutoff angular frequency
 URef                        = 18;                               % [m/s]     mean wind speed
 x_L                         = 160;                              % [m]       distance of lidar measurement 
