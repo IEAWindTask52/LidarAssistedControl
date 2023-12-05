@@ -170,10 +170,7 @@ for iSeed in range(nSeed):
     # Estimate auto- and cross-spectra of REWS
     TurbSimResultFile = 'TurbulentWind/URef_18_Seed_{:02d}.wnd'.format(Seed)
     REWS_WindField, Time_WindField = CalulateREWSfromWindField(TurbSimResultFile, iSeed)
-    Time_WindField_1d = Time_WindField.ravel()
-    REWS_WindField_1d = REWS_WindField.ravel()
-    f = interp1d(Time_WindField_1d, REWS_WindField_1d) # define function for interpolation
-    REWS_WindField_Fs = f(R_FBFF.iloc[:, 0])     # Use this function to interpolate the data at the new x-coordinates
+    REWS_WindField_Fs = interp1d(Time_WindField.ravel(),REWS_WindField.ravel())(R_FBFF.iloc[:, 0]) # get REWS with the same time step as simulations
     _, S_LL_est[iSeed, :] = signal.welch(
         signal.detrend(R_FBFF.iloc[:, 26][R_FBFF.iloc[:, 0] >= t_start], type='constant'),
         fs=Fs, window=vWindow, noverlap=nOverlap, nfft=nFFT)
@@ -254,12 +251,12 @@ plt.ylabel('Coherence REWS [-]')
 plt.legend([p1, p2], ['Analytical', 'Estimated'])
 plt.show()
 
-# Get parameters for FFP_v1_ZXTM.in TODO: f_cutoff by interpolation
-G_RL = AnalyticalModel['S_RL']/AnalyticalModel['S_LL']                      # [-]       transfer function
-f_cutoff = 0.3648                                                           # [rad/s]   desired cutoff angular frequency
-URef = 18                                                                   # [m/s]     mean wind speed
-x_L = 240                                                                   # [m]       distance of lidar measurement
-T_Taylor = x_L/URef                                                         # [s]       travel time from lidar measurment to rotor
-T_scan = 1                                                                  # [s]       time of full lidar scan
-tau = 2                                                                     # [s]       time to overcome pitch actuator, from Example 1: tau = T_Taylor - T_buffer, since there T_filter = T_scan = 0
-T_buffer = T_Taylor-1/2*T_scan-T_filter-tau                                 # [s]       time needed to buffer signal such that FF signal is applied with tau, see Schlipf2015, Equation (5.40)
+# Get parameters for FFP_v1_ZXTM.in
+G_RL = AnalyticalModel['S_RL']/AnalyticalModel['S_LL']                                          # [-]       transfer function
+f_cutoff = interp1d(np.abs(G_RL.ravel()),AnalyticalModel['f'].ravel())(10**(-3/20))*2*np.pi     # [rad/s]   desired cutoff (-3dB) angular frequency
+URef = 18                                                                                       # [m/s]     mean wind speed
+x_L = 240                                                                                       # [m]       distance of lidar measurement
+T_Taylor = x_L/URef                                                                             # [s]       travel time from lidar measurment to rotor
+T_scan = 1                                                                                      # [s]       time of full lidar scan
+tau = 2                                                                                         # [s]       time to overcome pitch actuator, from Example 1: tau = T_Taylor - T_buffer, since there T_filter = T_scan = 0
+T_buffer = T_Taylor-1/2*T_scan-T_filter-tau                                                     # [s]       time needed to buffer signal such that FF signal is applied with tau, see Schlipf2015, Equation (5.40)
