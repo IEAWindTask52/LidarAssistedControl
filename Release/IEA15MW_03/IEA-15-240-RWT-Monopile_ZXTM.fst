@@ -31,7 +31,7 @@ False                  Echo        - Echo input data to <RootName>.ech (flag)
 "none"     			   SubFile     - Name of file containing sub-structural input parameters (quoted string)
 "none"                 MooringFile - Name of file containing mooring system input parameters (quoted string)
 "none"                 IceFile     - Name of file containing ice input parameters (quoted string)
-"ZXTM_240m_LidarFile.dat"	SWELidarFile	- Name of file containing SWE Lidar input parameters (quoted string)
+"ZXTM_200m_LidarFile.dat"	SWELidarFile	- Name of file containing SWE Lidar input parameters (quoted string)
 ---------------------- OUTPUT --------------------------------------------------
 False                  SumPrint    - Print summary data to "<RootName>.sum" (flag)
 10.0                   SttsTime    - Amount of time between screen status messages (s)

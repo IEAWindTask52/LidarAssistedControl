@@ -9,20 +9,20 @@ False     WrFHHTP         - Output hub-height turbulence parameters in formatted
 False     WrADHH          - Output hub-height time-series data in AeroDyn form?  (Generates RootName.hh)
 False     WrADFF          - Output full-field time-series data in TurbSim/AeroDyn form? (Generates RootName.bts)
 True      WrBLFF          - Output full-field time-series data in BLADED/AeroDyn form?  (Generates RootName.wnd)
-False     WrADTWR         - Output tower time-series data? (Generates RootName.twr)
+True      WrADTWR         - Output tower time-series data? (Generates RootName.twr)
 False     WrFMTFF         - Output full-field time-series data in formatted (readable) form?  (Generates RootName.u, RootName.v, RootName.w)
 False     WrACT           - Output coherent turbulence time steps in AeroDyn form? (Generates RootName.cts)
 True      Clockwise       - Clockwise rotation looking downwind? (used only for full-field binary files - not necessary for AeroDyn)
-0         ScaleIEC        - Scale IEC turbulence models to exact target standard deviation? [0=no additional scaling; 1=use hub scale uniformly; 2=use individual scales]
+2         ScaleIEC        - Scale IEC turbulence models to exact target standard deviation? [0=no additional scaling; 1=use hub scale uniformly; 2=use individual scales]
 
 --------Turbine/Model Specifications-----------------------
-35        NumGrid_Z       - Vertical grid-point matrix dimension
+33        NumGrid_Z       - Vertical grid-point matrix dimension
 33        NumGrid_Y       - Horizontal grid-point matrix dimension
 0.25      TimeStep        - Time step [seconds]
 600       AnalysisTime    - Length of analysis time series [seconds] (program will add time if necessary: AnalysisTime = MAX(AnalysisTime, UsableTime+GridWidth/MeanHHWS) )
 "ALL"     UsableTime      - Usable length of output time series [seconds] (program will add GridWidth/MeanHHWS seconds unless UsableTime is "ALL")
 150       HubHt           - Hub height [m] (should be > 0.5*GridHeight)
-272       GridHeight      - Grid height [m]
+256       GridHeight      - Grid height [m]
 256       GridWidth       - Grid width [m] (should be >= 2*(RotorRadius+ShaftLength))
 0         VFlowAng        - Vertical mean flow (uptilt) angle [degrees]
 0         HFlowAng        - Horizontal mean flow (skew) angle [degrees]
@@ -39,7 +39,7 @@ default   WindProfileType - Velocity profile type ("LOG";"PL"=power law;"JET";"H
 150       RefHt           - Height of the reference velocity (URef) [m]
 18        URef            - Mean (total) velocity at the reference height [m/s] (or "default" for JET velocity profile) [must be 1-hr mean for API model; otherwise is the mean over AnalysisTime seconds]
 default   ZJetMax         - Jet height [m] (used only for JET velocity profile, valid 70-490 m)
-0.14   PLExp           - Power law exponent [-] (or "default")
+default   PLExp           - Power law exponent [-] (or "default")
 default   Z0              - Surface roughness length [m] (or "default")
 
 --------Non-IEC Meteorological Boundary Conditions------------

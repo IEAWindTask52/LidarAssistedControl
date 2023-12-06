@@ -7,7 +7,7 @@
 # and the coherence. In this example, we assume frozen turbulence, only one
 # 3D turbulence field (y,z,t) at rotor plane is generated.
 # Result:
-# Change in rotor speed standard deviation:  -71.8 %
+# Change in rotor speed standard deviation:  -63.9 %
 # Authors:
 # Wei Fu, David Schlipf, Feng Guo, Simon Weich, Aravind Venkatachalapathy
 
@@ -31,7 +31,7 @@ from CalculateREWSfromWindField import CalulateREWSfromWindField
 
 # Seeds (can be adjusted, but will provide different results)
 nSeed = 6                                           # [-] number of stochastic turbulence field samples
-Seed_vec = list(range(1, nSeed + 1))                # [-] vector of seeds
+Seed_vec = list(range(1, nSeed + 1))+18*100         # [-] vector of seeds
 
 # Parameters postprocessing (can be adjusted, but will provide different results)
 t_start = 60                                        # [s] 	ignore data before for STD and spectra
@@ -39,7 +39,7 @@ TMax = 660                                          # [s]   total run time, same
 DT = 0.0125                                         # [s]   time step, same as in *.fst
 R = 120                                             # [m]  	rotor radius to calculate REWS
 nBlock = 2                                          # [-]   number of blocks for spectra
-Fs = 1 / DT                                         # [Hz]  sampling frequenzy
+Fs = 1 / DT                                         # [Hz]  sampling frequency
 AnalysisTime = TMax - t_start                       # [s]   time to calculate spectra etc.
 nDataPerBlock = int(AnalysisTime / nBlock * Fs)     # [-]  	data per block, here 2 blocks
 vWindow = hamming(nDataPerBlock)                    # [-] 	window for estimation
@@ -199,7 +199,7 @@ for iSeed in range(nSeed):
 gamma2_RL_mean_est = np.abs(np.mean(S_RL_est, axis=0)) ** 2 / np.mean(S_LL_est, axis=0) / np.mean(S_RR_est, axis=0)
 
 # Get analytical correlation model
-SpectralModelFileName = '..\MatlabFunctions\AnalyticalModel\LidarRotorSpectra_IEA15MW_ZXTM_240m.mat'  # model for 18 m/s
+SpectralModelFileName = '..\MatlabFunctions\AnalyticalModel\LidarRotorSpectra_IEA15MW_ZXTM_200m.mat'  # model for 18 m/s
 AnalyticalModel = loadmat(SpectralModelFileName)
 AnalyticalModel['gamma2_RL'] = np.abs(AnalyticalModel['S_RL']) ** 2 / AnalyticalModel['S_RR'] / AnalyticalModel[
     'S_LL']
@@ -243,12 +243,12 @@ plt.ylabel('cross correlation [-]')
 
 # Plot REWS coherence
 plt.figure('REWS coherence')
-p1, = plt.plot(AnalyticalModel['f'], AnalyticalModel['gamma2_RL'])
-p2, = plt.plot(f_est[1:], gamma2_RL_mean_est[1:])
+plt.plot(AnalyticalModel['f'], AnalyticalModel['gamma2_RL'])
+plt.plot(f_est[1:], gamma2_RL_mean_est[1:])
 plt.xscale('log')
 plt.xlabel('frequency [Hz]')
 plt.ylabel('Coherence REWS [-]')
-plt.legend([p1, p2], ['Analytical', 'Estimated'])
+plt.legend(['Analytical', 'Estimated'])
 plt.show()
 
 # Get parameters for FFP_v1_ZXTM.in

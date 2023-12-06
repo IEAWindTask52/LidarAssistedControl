@@ -1,5 +1,5 @@
 # IEA15MW_03: IEA 15 MW monopile + realistic wind preview  from a
-# MolasNL200 lidar system, single wind speed.
+# MolasNL200 or Vaisala Windcube TC lidar system, single wind speed.
 # Purpose:
 # Here, we use a realistic wind preview to demonstrate that the collective
 # pitch feedforward controller together with the correct filtering provides
@@ -7,7 +7,7 @@
 # and the coherence. In this example, we assume frozen turbulence, only one
 # 3D turbulence field (y,z,t) at rotor plane is generated.
 # Result:
-# Change in rotor speed standard deviation:  -50.0 %
+# Change in rotor speed standard deviation:  -49.5 %
 # Authors:
 # David Schlipf, Feng Guo, Simon Weich, Aravind Venkatachalapathy
 
@@ -31,7 +31,7 @@ from CalculateREWSfromWindField import CalulateREWSfromWindField
 
 # Seeds (can be adjusted, but will provide different results)
 nSeed = 6                                           # [-] number of stochastic turbulence field samples
-Seed_vec = list(range(1, nSeed + 1))                # [-] vector of seeds
+Seed_vec = list(range(1, nSeed + 1))+18*100         # [-] vector of seeds
 
 # Parameters postprocessing (can be adjusted, but will provide different results)
 t_start = 60                                        # [s] 	ignore data before for STD and spectra
@@ -39,7 +39,7 @@ TMax = 660                                          # [s]   total run time, same
 DT = 0.0125                                         # [s]   time step, same as in *.fst
 R = 120                                             # [m]  	rotor radius to calculate REWS
 nBlock = 2                                          # [-]   number of blocks for spectra
-Fs = 1 / DT                                         # [Hz]  sampling frequenzy
+Fs = 1 / DT                                         # [Hz]  sampling frequency
 AnalysisTime = TMax - t_start                       # [s]   time to calculate spectra etc.
 nDataPerBlock = int(AnalysisTime / nBlock * Fs)     # [-]  	data per block, here 2 blocks
 vWindow = hamming(nDataPerBlock)                    # [-] 	window for estimation
@@ -243,12 +243,12 @@ plt.ylabel('cross correlation [-]')
 
 # Plot REWS coherence
 plt.figure('REWS coherence')
-p1, = plt.plot(AnalyticalModel['f'], AnalyticalModel['gamma2_RL'])
-p2, = plt.plot(f_est[1:], gamma2_RL_mean_est[1:])
+plt.plot(AnalyticalModel['f'], AnalyticalModel['gamma2_RL'])
+plt.plot(f_est[1:], gamma2_RL_mean_est[1:])
 plt.xscale('log')
 plt.xlabel('frequency [Hz]')
 plt.ylabel('Coherence REWS [-]')
-plt.legend([p1, p2], ['Analytical', 'Estimated'])
+plt.legend(['Analytical', 'Estimated'])
 plt.show()
 
 # Get parameters for FFP_v1_MolasNL200.in

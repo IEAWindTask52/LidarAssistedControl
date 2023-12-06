@@ -1,5 +1,5 @@
 % IEA15MW_03: IEA 15 MW monopile + realistic wind preview  from a 
-% MolasNL200 lidar system, single wind speed. 
+% MolasNL200 or Vaisala Windcube TC lidar system, single wind speed. 
 % Purpose:
 % Here, we use a realistic wind preview to demonstrate that the collective
 % pitch feedforward controller together with the correct filtering provides
@@ -7,7 +7,7 @@
 % and the coherence. In this example, we assume frozen turbulence, only one 
 % 3D turbulence field (y,z,t) at rotor plane is generated.
 % Result:
-% Change in rotor speed standard deviation:  -50.0 %
+% Change in rotor speed standard deviation:  -49.5 %
 % Authors:
 % David Schlipf, Feng Guo
 
@@ -19,7 +19,7 @@ addpath('..\MatlabFunctions')
 
 % Seeds (can be adjusted, but will provide different results)
 nSeed               = 6;                        % [-]	number of stochastic turbulence field samples
-Seed_vec            = [1:nSeed];                % [-]  	vector of seeds
+Seed_vec            = [1:nSeed]+18*100;         % [-]  	vector of seeds
 
 % Parameters postprocessing (can be adjusted, but will provide different results)
 t_start             = 60;                       % [s] 	ignore data before for STD and spectra
@@ -27,7 +27,7 @@ TMax                = 660;                      % [s]   total run time, same as 
 DT                  = 0.0125;                   % [s]   time step, same as in *.fst
 R                   = 120;                      % [m]  	rotor radius to calculate REWS
 nBlock              = 2;                        % [-]   number of blocks for spectra 
-Fs                	= 1/DT;                     % [Hz]  sampling frequenzy
+Fs                	= 1/DT;                     % [Hz]  sampling frequency
 AnalysisTime        = TMax-t_start;             % [s]   time to calculate spectra etc.
 nDataPerBlock       = AnalysisTime/nBlock*Fs;   % [-]  	data per block, here 2 blocks
 vWindow             = hamming(nDataPerBlock);   % [-] 	window for estimation
@@ -179,8 +179,6 @@ for iSeed = 1:nSeed
 
 end
     
-
-
 % Calculate mean coherence
 gamma2_RL_mean_est          = abs(mean(S_RL_est,1)).^2./mean(S_LL_est,1)./mean(S_RR_est,1);
 
@@ -231,12 +229,12 @@ ylabel('cross correlation [-]')
 %% Plot REWS coherence
 figure('Name','REWS coherence')
 hold on; grid on; box on
-p1 = plot(AnalyticalModel.f,AnalyticalModel.gamma2_RL);
-p2 = plot(f_est,gamma2_RL_mean_est);
+plot(AnalyticalModel.f,AnalyticalModel.gamma2_RL);
+plot(f_est,gamma2_RL_mean_est);
 set(gca,'Xscale','log')
 xlabel('frequency [Hz] ')
 ylabel('Coherence REWS [-]')
-legend([p1 p2],'Analytical','Estimated')
+legend('Analytical','Estimated')
 
 %% Get parameters for FFP_v1_MolasNL200.in
 G_RL                        = AnalyticalModel.S_RL./AnalyticalModel.S_LL;                       % [-]       transfer function

@@ -4,6 +4,6 @@
 *.dbg
 *.pyc
 .idea/
-TurbulentWind
-SimulationResults
+TurbulentWind*
+SimulationResults*
 

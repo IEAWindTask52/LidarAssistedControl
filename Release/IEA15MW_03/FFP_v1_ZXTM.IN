@@ -2,8 +2,8 @@
 
 !------- FILTERS AND TIMING ----------------------------------------------------------
 1    	    ! FlagLPF             	- Enable low-pass filter (flag) [0/1]
-0.3648	    ! f_cutoff	   			- Corner frequency (-3dB) of the low-pass filter [rad/s]
-8.7208   	! T_buffer        		- Buffer time for filtered REWS signal [s]
+0.3268	    ! f_cutoff	   			- Corner frequency (-3dB) of the low-pass filter [rad/s]
+6.1736   	! T_buffer        		- Buffer time for filtered REWS signal [s]
 
 !------- STATIC PITCH CURVE ---------------------
 19     	! n_StaticPitchCurve  	- Number of points in static pitch curve [-]
