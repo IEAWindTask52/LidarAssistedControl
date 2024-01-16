@@ -1,4 +1,4 @@
-! Collective pitch feedforward parameters for wind preview from MolasNL200. Please do not change the number of lines.
+! Collective pitch feedforward parameters for wind preview from a 4-beam pulsed lidar system measuring at 160 m. Please do not change the number of lines.
 
 !------- FILTERS AND TIMING ----------------------------------------------------------
 1    	    ! FlagLPF             	- Enable low-pass filter (flag) [0/1]

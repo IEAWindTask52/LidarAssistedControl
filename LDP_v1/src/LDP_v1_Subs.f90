@@ -29,6 +29,7 @@ CONTAINS
         REAL(C_FLOAT), INTENT(INOUT) 		:: avrSWAP(*)	! Swap array
         TYPE(LidarVariables), INTENT(INOUT) :: LidarVar 	! Lidar related variables
         INTEGER(4)                      	:: L           	! Index in the array where the lidar related data begins
+        INTEGER(4)                         	:: iGate        ! Index for range gates
         
         ! Load variables from calling program (See Appendix A of Bladed User's Guide):
         LidarVar%iStatus            = NINT(avrSWAP(1))      ! Status of simulation [-]
@@ -36,7 +37,13 @@ CONTAINS
         LidarVar%NewMeasurementFlag = NINT(avrSWAP(L))      ! New measurement (flag) [-]
        	LidarVar%BeamID             = NINT(avrSWAP(L+1))    ! Beam ID of current lidar data [-]
         LidarVar%GatesPerBeam    	= NINT(avrSWAP(L + 2)) 	! Number of gates in each lidar beam [-]
-        LidarVar%v_los              = avrSWAP(L + 2 + 1 )  	! Line-of-sight wind speeds measurement [m/s]
+		! Allocates v_los and read in values from swap array
+		IF (.not. allocated(LidarVar%v_los)) THEN
+			Allocate(LidarVar%v_los(LidarVar%GatesPerBeam))
+		END IF
+		DO iGate = 1,LidarVar%GatesPerBeam,1
+		   LidarVar%v_los(iGate)  	= avrSWAP(L + 2 + iGate) 							! Line-of-sight wind speeds measurements [m/s]
+		END DO
         LidarVar%AvrIndexREWS   	= L + 2 + (LidarVar%GatesPerBeam) + 7            	! Index for REWS [-]
 
     END SUBROUTINE ReadAvrSWAP    
@@ -72,9 +79,9 @@ CONTAINS
 		
 		! Allocates buffer and set it to the error code
 		IF (.not. allocated(LidarVar%u_est_Buffer)) THEN
-			Allocate(LidarVar%u_est_Buffer(LidarVar%nBuffer))
+			Allocate(LidarVar%u_est_Buffer(LidarVar%NumberOfBeams))
 		END IF		
-		DO iBuffer = 1,LidarVar%nBuffer,1
+		DO iBuffer = 1,LidarVar%NumberOfBeams,1
 		   LidarVar%u_est_Buffer(iBuffer) = LidarVar%ErrorCode
 		END DO   		
 		
@@ -119,7 +126,7 @@ CONTAINS
         !------- Lidar trajectory ------------------------------
         CALL ParseInput(UnControllerParameters,CurLine,'NumberOfBeams',  		accINFILE(1),LidarVar%NumberOfBeams,		ErrVar)
         CALL ParseInput(UnControllerParameters,CurLine,'AngleToCenterline',  	accINFILE(1),LidarVar%AngleToCenterline,	ErrVar)		
-        CALL ParseInput(UnControllerParameters,CurLine,'IndexFocusDistance',  	accINFILE(1),LidarVar%AngleToCenterline,	ErrVar)				
+        CALL ParseInput(UnControllerParameters,CurLine,'IndexGate',  			accINFILE(1),LidarVar%IndexGate,			ErrVar)				
            
         ! Close Input File
         CLOSE(UnControllerParameters)
@@ -140,15 +147,14 @@ CONTAINS
         
         TYPE(LidarVariables), INTENT(INOUT)       	:: LidarVar 			! Lidar related variables
         INTEGER(4)                               	:: iBuffer           	! Index for buffer
-        INTEGER(4)                               	:: iBeam        		! Index for beam
 		INTEGER(4)                                	:: Counter       		! Counter to determine how many LOS will be used for REWS estimation
 		REAL(8)                                   	:: u_est_sum      		! Sum of estimated u components
 
         ! Estimate u component assuming perfect alignment
-        LidarVar%u_est 		= LidarVar%v_los/COSD(LidarVar%AngleToCenterline)
+        LidarVar%u_est 		= LidarVar%v_los(LidarVar%IndexGate)/COSD(LidarVar%AngleToCenterline)
 		
         ! First-in-last-out buffer for estimated u component (we need a fixed buffer length for compilation)		
-        DO iBuffer = LidarVar%nBuffer, 2, -1
+        DO iBuffer = LidarVar%NumberOfBeams, 2, -1
            LidarVar%u_est_Buffer(iBuffer) 	= LidarVar%u_est_Buffer(iBuffer-1)
         END DO
 		LidarVar%u_est_Buffer(1) 			= LidarVar%u_est 		
@@ -156,9 +162,9 @@ CONTAINS
 		! Loop over the last full scan in u_est_buffer to sum up all values 
 		Counter 			= 0	
 		u_est_sum 			= 0		
-        DO iBeam  = 1, min(LidarVar%NumberOfBeams,LidarVar%nBuffer)
-			IF (LidarVar%u_est_Buffer(iBeam) /= LidarVar%ErrorCode) THEN
-				u_est_sum 	= u_est_sum + LidarVar%u_est_Buffer(iBeam)
+        DO iBuffer  = 1, LidarVar%NumberOfBeams, 1
+			IF (LidarVar%u_est_Buffer(iBuffer) /= LidarVar%ErrorCode) THEN
+				u_est_sum 	= u_est_sum + LidarVar%u_est_Buffer(iBuffer)
 				Counter 	= Counter+1;
 			END IF	
         END DO  

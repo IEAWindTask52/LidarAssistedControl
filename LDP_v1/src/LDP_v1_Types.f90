@@ -21,13 +21,13 @@ TYPE, PUBLIC :: LidarVariables
     INTEGER(4)                          :: iStatus 						! Status of simulation [-]
 	INTEGER(4)                          :: NewMeasurementFlag          	! New measurement (flag) [-]
     INTEGER(4)                          :: BeamID                       ! Beam ID of current lidar data [-]
-	INTEGER(4)                          :: GatesPerBeam                 ! Number of gates in each lidar beam [-]
-	REAL(8)                             :: v_los                        ! Line-of-sight wind speeds measurements [m/s]
+	INTEGER(4)                          :: GatesPerBeam                 ! Number of range gates in each lidar beam [-]
+	REAL(8), DIMENSION(:), ALLOCATABLE 	:: v_los                        ! Line-of-sight wind speeds measurements [m/s]
 
 	! ---------- variables from IN file ----------
     INTEGER(4)                          :: NumberOfBeams                ! Number of beams measuring at different directions	[-]
     REAL(8)  							:: AngleToCenterline            ! Angle to centerline [deg]
-	INTEGER(8)  						:: IndexRange           		! Index of range used in the LDP [-]
+	INTEGER(4)  						:: IndexGate           			! Index of range gates used in the LDP [-]
 
 	! ---------- internal variables ----------	
     REAL(8)                             :: REWS                         ! Rotor-effective wind speed,  estimated by lidar for feedforward control [m/s]
@@ -35,7 +35,6 @@ TYPE, PUBLIC :: LidarVariables
 	REAL(8), DIMENSION(:), ALLOCATABLE 	:: u_est_Buffer             	! Buffer of estimated u component [m/s]
      
     ! ---------- internal constants ----------
-    INTEGER(4)                          :: nBuffer = 100           		! Size of u_est_Buffer [-]
 	INTEGER(4)                          :: ErrorCode = 999        		! Error code [-]
 
 	! ---------- indices for avrSWAP ----------

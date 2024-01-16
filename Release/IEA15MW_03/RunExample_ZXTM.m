@@ -9,7 +9,7 @@
 % Result:
 % Change in rotor speed standard deviation:  -63.9 %
 % Authors:
-% David Schlipf, Feng Guo
+% Wei Fu, David Schlipf, Feng Guo
 
 %% Setup
 clearvars;

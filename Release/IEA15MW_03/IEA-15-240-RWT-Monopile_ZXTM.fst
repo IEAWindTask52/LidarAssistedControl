@@ -1,5 +1,5 @@
 ------- OpenFAST INPUT FILE -------------------------------------------
-LAC Test IEA15MW_03: IEA 15 MW offshore reference model monopile configuration with perfect wind preview from a single point lidar system
+LAC Test IEA15MW_03: IEA 15 MW offshore reference model monopile configuration with realistic wind preview from a circular-scanning continuous-wave lidar system
 ---------------------- SIMULATION CONTROL --------------------------------------
 False                  Echo        - Echo input data to <RootName>.ech (flag)
 "FATAL"                AbortLevel  - Error level when simulation should abort (string) {"WARNING", "SEVERE", "FATAL"}

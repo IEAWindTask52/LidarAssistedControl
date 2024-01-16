@@ -1,5 +1,5 @@
 # IEA15MW_03: IEA 15 MW monopile + realistic wind preview  from a
-# MolasNL200 or Vaisala Windcube TC lidar system, single wind speed.
+# 4-beam pulsed lidar system measuring at 160 m. 
 # Purpose:
 # Here, we use a realistic wind preview to demonstrate that the collective
 # pitch feedforward controller together with the correct filtering provides

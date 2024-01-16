@@ -1,5 +1,5 @@
 # IEA15MW_03: IEA 15 MW monopile + realistic wind preview  from a
-# ZXTM lidar system, single wind speed.
+# circular-scanning continuous-wave lidar system measuring at 200 m.
 # Purpose:
 # Here, we use a realistic wind preview to demonstrate that the collective
 # pitch feedforward controller together with the correct filtering provides
