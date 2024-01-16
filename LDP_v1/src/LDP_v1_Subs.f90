@@ -77,17 +77,13 @@ CONTAINS
 
 		! Description:
 		print *, '--------------------------------------------------------------------'
-		print *, 'A baseline lidar data processing algorithm - v1.2'
+		print *, 'A baseline lidar data processing algorithm - v1.3'
 		print *, 'Developed by Flensburg University of Applied Sciences, Germany'
 		print *, '--------------------------------------------------------------------'
 
 		! Read all constant parameters from *.IN parameter file			
 		CALL ReadLidarParameterFileSub(LidarVar, accINFILE, NINT(avrSWAP(50)), ErrVar)
 		
-		! Calculate the laser beam vector(s) in the lidar coordinate system
-		! They are fix and will not change during simulation!
-		CALL CalculateLaserBeamVectorLidarCS(LidarVar)
-
 		! Allocates buffer and set it to the error code
 		IF (.not. allocated(LidarVar%u_est_Buffer)) THEN
 			Allocate(LidarVar%u_est_Buffer(LidarVar%nBuffer))
@@ -135,10 +131,9 @@ CONTAINS
         CALL ReadEmptyLine(UnControllerParameters,CurLine)
 
         !------- Lidar trajectory ------------------------------
-        CALL ParseInput(UnControllerParameters,CurLine,'NumberOfBeams',  	accINFILE(1),LidarVar%NumberOfBeams,	ErrVar)
-        CALL ParseAry  (UnControllerParameters,CurLine,'Lidar_Azimuth',   	LidarVar%Lidar_Azimuth,LidarVar%NumberOfBeams, 	accINFILE(1),ErrVar)
-        CALL ParseAry  (UnControllerParameters,CurLine,'Lidar_Elevation', 	LidarVar%Lidar_Elevation,LidarVar%NumberOfBeams,accINFILE(1),ErrVar)
-              
+        CALL ParseInput(UnControllerParameters,CurLine,'NumberOfBeams',  		accINFILE(1),LidarVar%NumberOfBeams,		ErrVar)
+        CALL ParseInput(UnControllerParameters,CurLine,'AngleToCenterline',  	accINFILE(1),LidarVar%AngleToCenterline,	ErrVar)		
+           
         ! Close Input File
         CLOSE(UnControllerParameters)
         
@@ -149,37 +144,7 @@ CONTAINS
 
     END SUBROUTINE ReadLidarParameterFileSub
     ! -----------------------------------------------------------------------------------
-	
-	! -----------------------------------------------------------------------------------
-	! Calculate the laser beam vector(s) in the lidar coordinate system
-    SUBROUTINE CalculateLaserBeamVectorLidarCS(LidarVar)
-	
-		USE LDP_Types, ONLY : LidarVariables
-			
-		TYPE(LidarVariables),       INTENT(INOUT)   	:: LidarVar
-		INTEGER(4)                                      :: iBeam        ! counter for looping through the coordinate data
 		
-		! Allocation of vectors 
-		IF (.not. allocated(LidarVar%X_n_L)) THEN
-			Allocate(LidarVar%X_n_L(LidarVar%NumberOfBeams))
-		END IF
-		IF (.not. allocated(LidarVar%Y_n_L)) THEN
-			Allocate(LidarVar%Y_n_L(LidarVar%NumberOfBeams))
-		END IF
-		IF (.not. allocated(LidarVar%Z_n_L)) THEN
-			Allocate(LidarVar%Z_n_L(LidarVar%NumberOfBeams))
-		END IF
-		 
-		!  Loop over all beams to calculate unit vectors  
-		DO iBeam=1,LidarVar%NumberOfBeams
-			LidarVar%X_n_L(iBeam) = COSD(LidarVar%Lidar_Elevation(iBeam))*COSD(LidarVar%Lidar_Azimuth(iBeam))
-			LidarVar%Y_n_L(iBeam) = COSD(LidarVar%Lidar_Elevation(iBeam))*SIND(LidarVar%Lidar_Azimuth(iBeam))
-			LidarVar%Z_n_L(iBeam) = SIND(LidarVar%Lidar_Elevation(iBeam))			
-		END DO
-
-    END SUBROUTINE CalculateLaserBeamVectorLidarCS
-   	! -----------------------------------------------------------------------------------
-	
 	!------------------------------------------------------------------------------------
 	! Reconstruct rotor-effective wind speed based on lidar line-of-sight measurements
     SUBROUTINE WindFieldReconstruction(LidarVar)
@@ -193,9 +158,9 @@ CONTAINS
 		REAL(8)                                   	:: u_est_sum      		! sum of u_est
 
         ! calculate the estimated u component
-        LidarVar%u_est 		= LidarVar%v_los/LidarVar%X_n_L(LidarVar%BeamID+1)
+        LidarVar%u_est 		= LidarVar%v_los/COSD(LidarVar%AngleToCenterline)
 		
-        ! first-in-last-out buffer for estimated u component		
+        ! first-in-last-out buffer for estimated u component (we need a fixed buffer length for compilation)		
         DO iBuffer = LidarVar%nBuffer, 2, -1
            LidarVar%u_est_Buffer(iBuffer) 	= LidarVar%u_est_Buffer(iBuffer-1)
         END DO
@@ -204,7 +169,7 @@ CONTAINS
 		! loop over the last full scan in u_est_buffer to sum up all values 
 		Counter 			= 0	
 		u_est_sum 			= 0		
-        DO iBeam  = 1, LidarVar%NumberOfBeams
+        DO iBeam  = 1, min(LidarVar%NumberOfBeams,LidarVar%nBuffer)
 			IF (LidarVar%u_est_Buffer(iBeam) /= LidarVar%ErrorCode) THEN
 				u_est_sum 	= u_est_sum + LidarVar%u_est_Buffer(iBeam)
 				Counter 	= Counter+1;

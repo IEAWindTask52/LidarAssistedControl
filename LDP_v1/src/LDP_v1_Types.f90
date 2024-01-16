@@ -28,19 +28,15 @@ TYPE, PUBLIC :: LidarVariables
 
 	! ---------- variables from IN file ----------
     INTEGER(4)                          :: NumberOfBeams                ! Number of beams measuring at different directions	[-]
-    REAL(8), DIMENSION(:), ALLOCATABLE  :: Lidar_Azimuth                ! Lidar beam azimuth angles [rad]
-    REAL(8), DIMENSION(:), ALLOCATABLE  :: Lidar_Elevation              ! Lidar beam elevation angles [rad]
+    REAL(8)  							:: AngleToCenterline            ! Angle to centerline [deg]
 
 	! ---------- internal variables ----------	
-    REAL(8), DIMENSION(:), ALLOCATABLE 	:: X_n_L                		! Normalized lidar beam vector in lidar coordinate system, x-component [-]
-    REAL(8), DIMENSION(:), ALLOCATABLE 	:: Y_n_L                		! Normalized lidar beam vector in lidar coordinate system, y-component [-]
-    REAL(8), DIMENSION(:), ALLOCATABLE 	:: Z_n_L                		! Normalized lidar beam vector in lidar coordinate system, z-component [-]	
     REAL(8)                             :: REWS                         ! Rotor-effective wind speed,  estimated by lidar for feedforward control [m/s]
     REAL(8)                             :: u_est                        ! Estimated u component [m/s]
 	REAL(8), DIMENSION(:), ALLOCATABLE 	:: u_est_Buffer             	! Buffer of estimated u component [m/s]
      
     ! ---------- internal constants ----------
-    INTEGER(4)                          :: nBuffer = 50           		! Size of u_est_Buffer [-]
+    INTEGER(4)                          :: nBuffer = 100           		! Size of u_est_Buffer [-]
 	INTEGER(4)                          :: ErrorCode = 999        		! Error code [-]
 
 	! ---------- indices for avrSWAP ----------

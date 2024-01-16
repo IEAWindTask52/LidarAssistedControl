@@ -1,6 +1,5 @@
-! Lidar data processing parameters for ZXTM. Please do not change the number of lines.
+! Lidar data processing parameters for ZXTM (LDP_v1.dll, v1.3). Please do not change the number of lines.
 
 !------- LIDAR TRAJECTORY -----------------------------------------------------
-40	                		! NumberOfBeams  	- Number of beams measuring at different directions [-]
-14.8235      14.2967      13.4277      12.2311      10.7286      8.95037      6.93575      4.73334      2.40023            0     -2.40023     -4.73334     -6.93575     -8.95037     -10.7286     -12.2311     -13.4277     -14.2967     -14.8235          -15     -14.8235     -14.2967     -13.4277     -12.2311     -10.7286     -8.95037     -6.93575     -4.73334     -2.40023            0      2.40023      4.73334      6.93575      8.95037      10.7286      12.2311      13.4277      14.2967      14.8235           15            	! Lidar_Azimuth    	- The beam azimuth angles(relative to xz plane)in the lidar local coordinate system  [deg]
-2.32044      4.58739      6.74792      8.75038      10.5453      12.0865       13.333      14.2499      14.8111           15      14.8111      14.2499       13.333      12.0865      10.5453      8.75038      6.74792      4.58739      2.32044            0     -2.32044     -4.58739     -6.74792     -8.75038     -10.5453     -12.0865      -13.333     -14.2499     -14.8111          -15     -14.8111     -14.2499      -13.333     -12.0865     -10.5453     -8.75038     -6.74792     -4.58739     -2.32044            0  	! Lidar_Elevation  	- The beam elevation angles (relative to the (xy) horizontal plane) in the lidar local coordinate system [deg]
+40	    	! NumberOfBeams  	- Number of beams measuring at different directions [-]
+15        	! AngleToCenterline - Angle around centerline [deg]
