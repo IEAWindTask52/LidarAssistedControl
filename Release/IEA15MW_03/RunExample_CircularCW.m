@@ -1,5 +1,5 @@
 % IEA15MW_03: IEA 15 MW monopile + realistic wind preview  from a 
-% 4-beam pulsed lidar system measuring at 160 m. 
+% circular-scanning continuous-wave lidar system measuring at 200 m.
 % Purpose:
 % Here, we use a realistic wind preview to demonstrate that the collective
 % pitch feedforward controller together with the correct filtering provides
@@ -7,9 +7,9 @@
 % and the coherence. In this example, we assume frozen turbulence, only one 
 % 3D turbulence field (y,z,t) at rotor plane is generated.
 % Result:
-% Change in rotor speed standard deviation:  -49.5 %
+% Change in rotor speed standard deviation:  -63.9 %
 % Authors:
-% David Schlipf, Feng Guo
+% Wei Fu, David Schlipf, Feng Guo
 
 %% Setup
 clearvars;
@@ -38,9 +38,9 @@ nOverlap            = nDataPerBlock/2;          % [-]  	samples of overlap, defa
 TurbSimExeFile      = 'TurbSim_x64.exe';
 FASTexeFile         = 'openfast_x64.exe';
 FASTmapFile         = 'MAP_x64.dll';
-SimulationName      = 'IEA-15-240-RWT-Monopile_MolasNL200';
+SimulationName      = 'IEA-15-240-RWT-Monopile_CircularCW';
 TurbSimTemplateFile = 'TurbSim2aInputFileTemplateIEA15MW.inp';
-SimulationFolder    = 'SimulationResults_MolasNL200';
+SimulationFolder    = 'SimulationResults_CircularCW';
 
 if ~exist('TurbulentWind','dir')
     mkdir TurbulentWind
@@ -57,7 +57,7 @@ copyfile(['..\TurbSim\',TurbSimExeFile],['TurbulentWind\',TurbSimExeFile])
 % Generate all wind fields
 for iSeed = 1:nSeed        
     Seed                = Seed_vec(iSeed);
-    WindFileName        = ['URef_18_Seed_',num2str(Seed,'%02d')];
+    WindFileName        = ['URef_18_Seed_',num2str(Seed,'%04d')];
     TurbSimInputFile  	= ['TurbulentWind\',WindFileName,'.ipt'];
     TurbSimResultFile  	= ['TurbulentWind\',WindFileName,'.wnd'];
     if ~exist(TurbSimResultFile,'file')
@@ -81,7 +81,7 @@ for iSeed = 1:nSeed
     
     % Adjust the InflowWind file
     Seed                = Seed_vec(iSeed);
-	WindFileName        = ['URef_18_Seed_',num2str(Seed,'%02d')];
+	WindFileName        = ['URef_18_Seed_',num2str(Seed,'%04d')];
 	WindFileRoot        = ['TurbulentWind\',WindFileName];
     ManipulateTXTFile('IEA-15-240-RWT_InflowFile.dat','MyFilenameRoot',WindFileRoot);
     
@@ -130,7 +130,7 @@ for iSeed = 1:nSeed
 
     % Load data
     Seed                = Seed_vec(iSeed);
-	WindFileName        = ['URef_18_Seed_',num2str(Seed,'%02d')];
+	WindFileName        = ['URef_18_Seed_',num2str(Seed,'%04d')];
     FASTresultFile      = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_0.outb']);
     ROSCOresultFile     = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_0.dbg']);
     FB                  = ReadFASTbinaryIntoStruct(FASTresultFile);
@@ -158,7 +158,7 @@ for iSeed = 1:nSeed
     STD_RotSpeed_FBFF(iSeed)          	= std(FBFF.RotSpeed(FBFF.Time>t_start));
     
     % Estimate auto- and cross-spectra of REWS
-    TurbSimResultFile                 	= ['TurbulentWind\URef_18_Seed_',num2str(Seed,'%02d'),'.wnd'];   
+    TurbSimResultFile                 	= ['TurbulentWind\',WindFileName,'.wnd'];   
     [REWS_WindField,Time_WindField]  	= CalculateREWSfromWindField(TurbSimResultFile,R,2);
     REWS_WindField_Fs                   = interp1(Time_WindField,REWS_WindField,R_FBFF.Time);
     [S_LL_est(iSeed,:) ,~]            	= pwelch(detrend(R_FBFF.REWS(R_FBFF.Time>=t_start),'constant'),vWindow,nOverlap,nFFT,Fs);     
@@ -183,7 +183,7 @@ end
 gamma2_RL_mean_est          = abs(mean(S_RL_est,1)).^2./mean(S_LL_est,1)./mean(S_RR_est,1);
 
 % Get analytical correlation model
-SpectralModelFileName       = '..\MatlabFunctions\AnalyticalModel\LidarRotorSpectra_IEA15MW_MolasNL200_160m.mat'; % model for 18 m/s
+SpectralModelFileName       = '..\MatlabFunctions\AnalyticalModel\LidarRotorSpectra_IEA15MW_CircularCW.mat'; % model for 18 m/s
 AnalyticalModel             = load(SpectralModelFileName, 'S_LL', 'S_RL', 'S_RR', 'f'); 
 AnalyticalModel.gamma2_RL   = abs(AnalyticalModel.S_RL).^2./AnalyticalModel.S_RR./AnalyticalModel.S_LL;
 
@@ -236,11 +236,11 @@ xlabel('frequency [Hz] ')
 ylabel('Coherence REWS [-]')
 legend('Analytical','Estimated')
 
-%% Get parameters for FFP_v1_MolasNL200.in
+%% Get parameters for FFP_v1_CircularCW.in
 G_RL                        = AnalyticalModel.S_RL./AnalyticalModel.S_LL;                       % [-]       transfer function
 f_cutoff                    = interp1(abs(G_RL),AnalyticalModel.f,db2mag(-3),'linear')*2*pi;    % [rad/s]   desired cutoff angular frequency
 URef                        = 18;                               % [m/s]     mean wind speed
-x_L                         = 160;                              % [m]       distance of lidar measurement 
+x_L                         = 200;                              % [m]       distance of lidar measurement 
 T_Taylor                    = x_L/URef;                         % [s]       travel time from lidar measurment to rotor
 T_scan                      = 1;                                % [s]       time of full lidar scan
 tau                         = 2;                                % [s]       time to overcome pitch actuator, from Example 1: tau = T_Taylor - T_buffer, since there T_filter = T_scan = 0

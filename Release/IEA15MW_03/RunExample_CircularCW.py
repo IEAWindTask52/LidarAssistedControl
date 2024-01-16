@@ -31,7 +31,7 @@ from CalculateREWSfromWindField import CalulateREWSfromWindField
 
 # Seeds (can be adjusted, but will provide different results)
 nSeed = 6                                           # [-] number of stochastic turbulence field samples
-Seed_vec = list(range(1, nSeed + 1))+18*100         # [-] vector of seeds
+Seed_vec = [i+18*100 for i in range(1, nSeed + 1)]  # [-] vector of seeds
 
 # Parameters postprocessing (can be adjusted, but will provide different results)
 t_start = 60                                        # [s] 	ignore data before for STD and spectra
@@ -50,9 +50,9 @@ nOverlap = nDataPerBlock / 2                        # [-]  	samples of overlap, 
 TurbSimExeFile = 'TurbSim_x64.exe'
 FASTexeFile = 'openfast_x64.exe'
 FASTmapFile = 'MAP_x64.dll'
-SimulationName = 'IEA-15-240-RWT-Monopile_ZXTM'
+SimulationName = 'IEA-15-240-RWT-Monopile_CircularCW'
 TurbSimTemplateFile = 'TurbSim2aInputFileTemplateIEA15MW.inp'
-SimulationFolder = 'SimulationResults_ZXTM'
+SimulationFolder = 'SimulationResults_CircularCW'
 
 if not os.path.exists('TurbulentWind'):
     os.makedirs('TurbulentWind')
@@ -199,7 +199,7 @@ for iSeed in range(nSeed):
 gamma2_RL_mean_est = np.abs(np.mean(S_RL_est, axis=0)) ** 2 / np.mean(S_LL_est, axis=0) / np.mean(S_RR_est, axis=0)
 
 # Get analytical correlation model
-SpectralModelFileName = '..\MatlabFunctions\AnalyticalModel\LidarRotorSpectra_IEA15MW_ZXTM_200m.mat'  # model for 18 m/s
+SpectralModelFileName = '..\MatlabFunctions\AnalyticalModel\LidarRotorSpectra_IEA15MW_CircularCW.mat'  # model for 18 m/s
 AnalyticalModel = loadmat(SpectralModelFileName)
 AnalyticalModel['gamma2_RL'] = np.abs(AnalyticalModel['S_RL']) ** 2 / AnalyticalModel['S_RR'] / AnalyticalModel[
     'S_LL']
@@ -251,7 +251,7 @@ plt.ylabel('Coherence REWS [-]')
 plt.legend(['Analytical', 'Estimated'])
 plt.show()
 
-# Get parameters for FFP_v1_ZXTM.in
+# Get parameters for FFP_v1_CircularCW.in
 G_RL = AnalyticalModel['S_RL']/AnalyticalModel['S_LL']                                          # [-]       transfer function
 f_cutoff = interp1d(np.abs(G_RL.ravel()),AnalyticalModel['f'].ravel())(10**(-3/20))*2*np.pi     # [rad/s]   desired cutoff (-3dB) angular frequency
 URef = 18                                                                                       # [m/s]     mean wind speed
