@@ -1,10 +1,8 @@
 ! Name:   		Baseline lidar data processing (LDP) DLL for lidar-assisted feedforward pitch control.
 ! Authors: 		Feng Guo, David Schlipf from Flensburg University of Applied Sciences, funded by LIKE -- Lidar Knowledge Europe, grant agreement No. 858358.   
 ! Target: 		This code aims to provide a reference Lidar-assisted control package for the community. Please cite the following paper if this code is helpful for your research:
-! 				Guo, F., Schlipf, D., and Cheng, P. W.: Evaluation of lidar-assisted wind turbine control under various turbulence characteristics, Wind Energ. Sci. Discuss.
-! 				[preprint], https://doi.org/10.5194/wes-2022-62, in review, 2022.    
-! Function: 	The LDP module read in LOS measurements from lidar and estimate the rotor effective wind speed which will eventually be written to the avrSWAP array.
-! 				See https://doi.org/10.5194/wes-2022-62 for the definition of "rotor effective wind speed".   
+! 				Guo, F., Schlipf, D., and Cheng, P. W.: Evaluation of lidar-assisted wind turbine control under various turbulence characteristics, Wind Energ. Sci., 8, 149–171, https://doi.org/10.5194/wes-8-149-2023, 2023.   
+! Function: 	The LDP module reads in LOS measurements from a lidar and estimates the rotor-effective wind speed which will eventually be written to the avrSWAP array.
 ! Reference:	The subroutines rely on the legacy Bladed style data interface. See the Bladed manual for more detail.    
 ! 				The code is written based on the source code of ROSCO. Version 2.4.1, https://github.com/NREL/ROSCO, 2021. by NREL.
 ! License: 		MIT License
@@ -37,10 +35,10 @@ INTEGER(C_INT),                 INTENT(INOUT)   :: aviFAIL                      
 CHARACTER(KIND=C_CHAR),         INTENT(IN   )   :: accINFILE(NINT(avrSWAP(50)))     ! The name of the parameter input file
 CHARACTER(KIND=C_CHAR),         INTENT(IN   )   :: avcOUTNAME(NINT(avrSWAP(51)))    ! OUTNAME (Simulation RootName)
 CHARACTER(KIND=C_CHAR),         INTENT(INOUT)   :: avcMSG(NINT(avrSWAP(49)))        ! MESSAGE (Message from DLL to simulation code [ErrMsg])  The message which will be displayed by the calling program if aviFAIL <> 0.
-CHARACTER(SIZE(avcMSG)-1)                       :: ErrMsg                           ! a FORTRAN version of the C string argument (not considered an array here) [subtract 1 for the C null-character]
+CHARACTER(SIZE(avcMSG)-1)                       :: ErrMsg                           ! A FORTRAN version of the C string argument (not considered an array here) [subtract 1 for the C null-character]
 
-TYPE(LidarVariables),           SAVE            :: LidarVar                         ! lidar related variable type
-TYPE(LidarErrorVariables),      SAVE            :: ErrVar                           ! lidar related error type
+TYPE(LidarVariables),           SAVE            :: LidarVar                         ! Lidar related variables
+TYPE(LidarErrorVariables),      SAVE            :: ErrVar                           ! Lidar related error variables
 
 CHARACTER(*),                   PARAMETER       :: RoutineName = 'LDP'
 
@@ -63,7 +61,7 @@ IF (LidarVar%NewMeasurementFlag == 1) THEN
 END IF
 
 ! Assign the current REWS to the avrSWAP array
-avrSWAP(LIDARVAR%AvrIndex_REWS) = LidarVar%REWS 
+avrSWAP(LIDARVAR%AvrIndexREWS) = LidarVar%REWS 
 
 ! Add RoutineName to error message
 IF (ErrVar%aviFAIL < 0) THEN
