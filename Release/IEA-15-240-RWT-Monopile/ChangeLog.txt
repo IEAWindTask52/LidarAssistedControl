@@ -1,0 +1,28 @@
+The OpenFAST files have been downloaded from
+https://github.com/IEAWindTask37/IEA-15-240-RWT
+using the last commit in OpenFAST folder before changing to v3.1 on March 3, 2022:
+gbarter: reducing test time and aligning all input files to v3, ed7e726, on Feb 25
+https://github.com/IEAWindTask37/IEA-15-240-RWT/tree/ed7e726062a1355fd0355cdb4fba739fb682ff9e
+
+Modifications:
+--------------
+Following files/folders are copied from the IEA-15-240-RWT into the IEA-15-240-RWT-Monopile folder to have a single template folder:
+Cp_Ct_Cq.IEA15MW.txt
+IEA-15-240-RWT_AeroDyn15.dat
+IEA-15-240-RWT_AeroDyn15_blade.dat
+IEA-15-240-RWT_ElastoDyn_blade.dat
+IEA-15-240-RWT_InflowFile.dat
+Airfoils
+
+From the OpenFAST folder from Release\OpenFAST folder:
+openfast_x64.exe
+MAP_x64.dll
+
+From the LidarAssistedControl repository into the ServoData Folder
+ROSCO_v2d6.dll
+ROSCO_v2d6.IN
+
+Removed files:
+ServoData\IEA15MW-Monopile.yaml
+DISCON-Monopile.IN
+
