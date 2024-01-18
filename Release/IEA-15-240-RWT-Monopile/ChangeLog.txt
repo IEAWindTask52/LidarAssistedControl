@@ -21,8 +21,35 @@ MAP_x64.dll
 From the LidarAssistedControl repository into the ServoData Folder
 ROSCO_v2d6.dll
 ROSCO_v2d6.IN
+Cp_Ct_Cq.IEA15MW.txt
 
 Removed files:
 ServoData\IEA15MW-Monopile.yaml
 DISCON-Monopile.IN
+Cp_Ct_Cq.IEA15MW.txt (does not fit to new ROSCO_v2d6)
+IEA-15-240-RWT-Monopile_HydroDyn.dat (for simplification)
+IEA-15-240-RWT-Monopile_SubDyn.dat (for simplification)
 
+File Modifications (details see github):
+----------------------------------------
+IEA-15-240-RWT-Monopile.fst: 
+* remove "../IEA-15-240-RWT/", since alle files are in one folder
+* set OutFileFmt to 2, since only binary files are needed
+* add CompLidar and SWELidarFile to use lidar simulator
+* change dt to 0.0125 s (80 Hz) to be consistent with the other cases
+* change TMax to 30 s to have shorter test run
+* set CompHydro and CompSub to 0 for simplification 
+IEA-15-240-RWT_InflowFile.dat:
+* change to 18 m/s to be consistent with the other cases
+IEA-15-240-RWT-Monopile_ServoDyn.dat:
+* set DLL_FileName and DLL_InFile to use the modified ROSCO_v2d6
+* add InitGenTrq to be able to initialize generator torque 
+* set SumPrint to false to limit number of files generated
+IEA-15-240-RWT-Monopile_ElastoDyn.dat
+* set Platform DOFs to False for simplification 
+* set initial conditions for blade pitch to meat 18 m/s
+* remove "../IEA-15-240-RWT/", since alle files are in one folder
+* set SumPrint to false to limit number of files generated
+* simplify outlist
+IEA-15-240-RWT_AeroDyn15.dat:
+* simplify outlist

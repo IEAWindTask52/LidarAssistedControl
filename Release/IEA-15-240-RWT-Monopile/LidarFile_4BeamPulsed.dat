@@ -1,0 +1,65 @@
+------- Lidar Simulator V2.00 INPUT FILE ---------------------------------------
+Configuration of a 4-beam pulsed lidar system measuring at 70, 90, 110, 130, 150, 160, 170, 180, 190, 200 m at 18 m/s
+--------------------------------------------------------------------------------
+False	Echo           					- Echo input data to <RootName>.ech (flag)
+100		MAXDLLChainOutputs				- Number of entries in the avrSWAP array reserved for outputs of the LDP DLL
+---------------------- LIDAR CONFIGURATION -------------------------------------
+1		TrajectoryType					- Switch : {0 = Cartesian coordinates; 1 = spherical coordinates} [-]
+2       WeightingType					- Switch : {0 = single point; 1 = Gaussian distribution; 2 = manual distribution} [-]
+1		LidarPositionX_N				- Position of the lidar coordinate system in the Nacelle coordinate system (X coordinate) [m]
+0		LidarPositionY_N				- Position of the lidar coordinate system in the Nacelle coordinate system (Y coordinate) [m]
+3		LidarPositionZ_N				- Position of the lidar coordinate system in the Nacelle coordinate system (Z coordinate) [m]
+0		RollAngle_N						- Roll angle between the Nacelle and the lidar coordinate system [deg]
+0		PitchAngle_N					- Pitch angle between the Nacelle and the lidar coordinate system [deg]
+180		YawAngle_N						- Yaw angle between the Nacelle and the lidar coordinate system [deg]
+18    	URef							- Mean u-component wind speed at the reference height [m/s]
+10      GatesPerBeam					- Amount of range gates for each los
+0.25	t_measurement_interval			- Time between each measurement [s]
+---------------------- Measuring points in Cartesian coordinates----------------
+0		NumberOfPoints_Cartesian		- Amounts of Points
+X-Tab 	Y-Tab 	Z-Tab
+!0 		0 		0 		%%
+---------------------- Measuring points in spherical coordinates----------------
+4		NumberOfPoints_Spherical		- Amounts of Points
+Azimuth-Tab     Elevation-Tab	RangeGates-Tab
+     15.00     12.09     74.11     95.29    116.46    137.64    158.81    169.40    179.99    190.57    201.16    211.75
+     15.00    -12.09     74.11     95.29    116.46    137.64    158.81    169.40    179.99    190.57    201.16    211.75
+    -15.00    -12.09     74.11     95.29    116.46    137.64    158.81    169.40    179.99    190.57    201.16    211.75
+    -15.00     12.09     74.11     95.29    116.46    137.64    158.81    169.40    179.99    190.57    201.16    211.75
+---------------------- Weighting function (Gaussian distribution)---------------
+30		FWHM							- Full width half maximum [m]
+3		PointsToEvaluate				- points evaluated to "integrate" (odd number so there is a point in the peak, >= 3) [-]
+---------------------- Weighting function (manual weighting)--------------------
+11		ManualWeightingPoints			- Amount of weighting points
+Distance-Tab	Weighting-Tab
+  -37.5000    0.0031
+  -30.0000    0.0147
+  -22.5000    0.0494
+  -15.0000    0.1175
+   -7.5000    0.1977
+         0    0.2351
+    7.5000    0.1977
+   15.0000    0.1175
+   22.5000    0.0494
+   30.0000    0.0147
+   37.5000    0.0031
+---------------------- Wind Evolution--------------------
+False   	EvolutionFlag            	- Consider wind evolution (flag)
+"*.evo"		EvolutionFilenameRoot   	- Rootname of the up-stream full-field wind file to use (.wnd, .sum)
+---------------------- Measurement availability--------------------
+False		AvailabilityFlag            - Consider measurement availability (flag)
+"*.dat"	    AvailabilityFilenameRoot 	- Rootname of the lidar availability time series data
+---------------------- Blade Blockage--------------------
+False		BladeBlockageFlag        	- Consider blade blockage (flag)
+---------------------- Spinner Mounted--------------------
+False		SpinnerMountedFlag        	- Flag whether spinner-mounted considered 
+---------------------- Nearest Interpolation ------------------------------------
+True        NearestInterpFlag           - Flag to use nearest interpolation. By default, linear interpolation is used 
+---------------------- Output---------------------------------------------------
+OutList      							- The next line(s) contains a list of output parameters.  See OutListParameters.xlsx for a listing of available output channels, (-)
+"XLI"
+"XDTLI"
+"VLOS01LI"
+"BEAMIDLI"
+"NEWDATALI"
+END of FAST input file (the word "END" must appear in the first 3 columns of this last line).

@@ -18,18 +18,18 @@ True                   TwFADOF1    - First fore-aft tower bending-mode DOF (flag
 True                   TwFADOF2    - Second fore-aft tower bending-mode DOF (flag)
 True                   TwSSDOF1    - First side-to-side tower bending-mode DOF (flag)
 True                   TwSSDOF2    - Second side-to-side tower bending-mode DOF (flag)
-True                   PtfmSgDOF   - Platform horizontal surge translation DOF (flag)
-True                   PtfmSwDOF   - Platform horizontal sway translation DOF (flag)
-True                   PtfmHvDOF   - Platform vertical heave translation DOF (flag)
-True                   PtfmRDOF    - Platform roll tilt rotation DOF (flag)
-True                   PtfmPDOF    - Platform pitch tilt rotation DOF (flag)
-True                   PtfmYDOF    - Platform yaw rotation DOF (flag)
+False                  PtfmSgDOF   - Platform horizontal surge translation DOF (flag)
+False                  PtfmSwDOF   - Platform horizontal sway translation DOF (flag)
+False                  PtfmHvDOF   - Platform vertical heave translation DOF (flag)
+False                  PtfmRDOF    - Platform roll tilt rotation DOF (flag)
+False                  PtfmPDOF    - Platform pitch tilt rotation DOF (flag)
+False                  PtfmYDOF    - Platform yaw rotation DOF (flag)
 ---------------------- INITIAL CONDITIONS --------------------------------------
 0.0                    OoPDefl     - Initial out-of-plane blade-tip displacement (meters)
 0.0                    IPDefl      - Initial in-plane blade-tip deflection (meters)
-0.0                    BlPitch(1)  - Blade 1 initial pitch (degrees)
-0.0                    BlPitch(2)  - Blade 2 initial pitch (degrees)
-0.0                    BlPitch(3)  - Blade 3 initial pitch (degrees) [unused for 2 blades]
+15.48                  BlPitch(1)  - Blade 1 initial pitch (degrees)
+15.48                  BlPitch(2)  - Blade 2 initial pitch (degrees)
+15.48                  BlPitch(3)  - Blade 3 initial pitch (degrees) [unused for 2 blades]
 0.0                    TeetDefl    - Initial or fixed teeter angle (degrees) [unused for 3 blades]
 0.0                    Azimuth     - Initial azimuth angle for blade 1 (degrees)
 7.55                   RotSpeed    - Initial or fixed rotor speed (rpm)
@@ -85,9 +85,9 @@ True                   PtfmYDOF    - Platform yaw rotation DOF (flag)
 0.0                    PtfmYIner   - Platform inertia for yaw rotation about the platform CM (kg m^2)
 ---------------------- BLADE ---------------------------------------------------
 50                     BldNodes    - Number of blade nodes (per blade) used for analysis (-)
-"../IEA-15-240-RWT/IEA-15-240-RWT_ElastoDyn_blade.dat" BldFile1    - Name of file containing properties for blade 1 (quoted string)
-"../IEA-15-240-RWT/IEA-15-240-RWT_ElastoDyn_blade.dat" BldFile2    - Name of file containing properties for blade 2 (quoted string)
-"../IEA-15-240-RWT/IEA-15-240-RWT_ElastoDyn_blade.dat" BldFile3    - Name of file containing properties for blade 3 (quoted string) [unused for 2 blades]
+"IEA-15-240-RWT_ElastoDyn_blade.dat" BldFile1    - Name of file containing properties for blade 1 (quoted string)
+"IEA-15-240-RWT_ElastoDyn_blade.dat" BldFile2    - Name of file containing properties for blade 2 (quoted string)
+"IEA-15-240-RWT_ElastoDyn_blade.dat" BldFile3    - Name of file containing properties for blade 3 (quoted string) [unused for 2 blades]
 ---------------------- ROTOR-TEETER --------------------------------------------
 0                      TeetMod     - Rotor-teeter spring/damper model {0: none, 1: standard, 2: user-defined from routine UserTeet} (switch) [unused for 3 blades]
 0.0                    TeetDmpP    - Rotor-teeter damper position (degrees) [used only for 2 blades and when TeetMod=1]
@@ -107,9 +107,9 @@ False                  Furling     - Read in additional model properties for fur
 "unused"               FurlFile    - Name of file containing furling properties (quoted string) [unused when Furling=False]
 ---------------------- TOWER ---------------------------------------------------
 20                     TwrNodes    - Number of tower nodes used for analysis (-)
-"../IEA-15-240-RWT-Monopile/IEA-15-240-RWT-Monopile_ElastoDyn_tower.dat" TwrFile     - Name of file containing tower properties (quoted string)
+"IEA-15-240-RWT-Monopile_ElastoDyn_tower.dat" TwrFile     - Name of file containing tower properties (quoted string)
 ---------------------- OUTPUT --------------------------------------------------
-True                   SumPrint    - Print summary data to "<RootName>.sum" (flag)
+False                  SumPrint    - Print summary data to "<RootName>.sum" (flag)
 1                      OutFile     - Switch to determine where output will be placed: {1: in module output file only; 2: in glue code output file only; 3: both} (currently unused)
 True                   TabDelim    - Use tab delimiters in text tabular output file? (flag) (currently unused)
 "ES10.3E2"             OutFmt      - Format used for text tabular output (except time).  Resulting field should be 10 characters. (quoted string) (currently unused)
@@ -125,124 +125,13 @@ True                   TabDelim    - Use tab delimiters in text tabular output f
 "BldPitch2"
 "BldPitch3"
 "GenSpeed"
-"IPDefl1"
-"LSSGagMya"
-"LSSGagMza"
-"LSSTipMys"
-"LSSTipMzs"
-"LSShftFys"
-"LSShftFzs"
-"NacYaw"
-"NcIMUTAxs"
-"NcIMUTAys"
-"NcIMUTAzs"
-"OoPDefl1"
-"PtfmHeave"
-"PtfmPitch"
-"PtfmRoll"
-"PtfmSurge"
-"PtfmSway"
-"PtfmYaw"
-"RootFxb1"
-"RootFxb2"
-"RootFxb3"
-"RootFxc1"
-"RootFxc2"
-"RootFxc3"
-"RootFyb1"
-"RootFyb2"
-"RootFyb3"
-"RootFyc1"
-"RootFyc2"
-"RootFyc3"
-"RootFzb1"
-"RootFzb2"
-"RootFzb3"
-"RootFzc1"
-"RootFzc2"
-"RootFzc3"
-"RootMxb1"
-"RootMxb2"
-"RootMxb3"
-"RootMxc1"
-"RootMxc2"
-"RootMxc3"
-"RootMyb1"
-"RootMyb2"
-"RootMyb3"
-"RootMyc1"
-"RootMyc2"
-"RootMyc3"
-"RootMzb1"
-"RootMzb2"
-"RootMzb3"
-"RootMzc1"
-"RootMzc2"
-"RootMzc3"
 "RotSpeed"
-"RotThrust"
 "RotTorq"
-"Spn1MLxb1"
-"Spn1MLyb1"
-"Spn2MLxb1"
-"Spn2MLyb1"
-"Spn3MLxb1"
-"Spn3MLyb1"
-"Spn4MLxb1"
-"Spn4MLyb1"
-"Spn5MLxb1"
-"Spn5MLyb1"
-"Spn6MLxb1"
-"Spn6MLyb1"
-"Spn7MLxb1"
-"Spn7MLyb1"
-"Spn8MLxb1"
-"Spn8MLyb1"
-"Spn9MLxb1"
-"Spn9MLyb1"
-"TTDspTwst"
-"TipDxb1"
-"TipDxb2"
-"TipDxb3"
-"TipDxc1"
-"TipDxc2"
-"TipDxc3"
-"TipDyb1"
-"TipDyb2"
-"TipDyb3"
-"TipDyc1"
-"TipDyc2"
-"TipDyc3"
-"TipDzb1"
-"TipDzb2"
-"TipDzb3"
-"TipDzc1"
-"TipDzc2"
-"TipDzc3"
-"TwHt1TPxi"
-"TwHt1TPyi"
-"TwrBsFxt"
-"TwrBsFyt"
-"TwrBsFzt"
-"TwrBsMxt"
 "TwrBsMyt"
-"TwrBsMzt"
-"TwstDefl1"
-"YawBrFxp"
-"YawBrFyp"
-"YawBrFzp"
-"YawBrMxp"
-"YawBrMyp"
-"YawBrMzp"
-"YawBrTDxt"
-"YawBrTDyt"
 END of input file (the word "END" must appear in the first 3 columns of this last OutList line)
 ---------------------- NODE OUTPUTS --------------------------------------------
           1   BldNd_BladesOut  - Blades to output
          99   BldNd_BlOutNd   - Blade nodes on each blade (currently unused)
               OutList     - The next line(s) contains a list of output parameters.  See OutListParameters.xlsx, ElastoDyn_Nodes tab for a listing of available output channels, (-)
-"TDx"    - local flapwise (translational) deflection (relative to the undeflected position) of node
-"TDy"    - local edgewise (translational) deflection (relative to the undeflected position) of node
-"RDz"
 END of input file (the word "END" must appear in the first 3 columns of this last OutList line)
 ---------------------------------------------------------------------------------------

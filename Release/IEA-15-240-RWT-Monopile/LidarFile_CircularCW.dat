@@ -1,0 +1,101 @@
+------- Lidar Simulator V2.00 INPUT FILE ---------------------------------------
+Configuration of a circular-scanning continuous-wave lidar system measuring at 200 m at 18 m/s
+--------------------------------------------------------------------------------
+False	Echo           					- Echo input data to <RootName>.ech (flag)
+100		MAXDLLChainOutputs				- Number of entries in the avrSWAP array reserved for outputs of the LDP DLL
+---------------------- LIDAR CONFIGURATION -------------------------------------
+1		TrajectoryType					- Switch : {0 = Cartesian coordinates; 1 = spherical coordinates} [-]
+2       WeightingType					- Switch : {0 = single point; 1 = Gaussian distribution; 2 = manual distribution} [-]
+1		LidarPositionX_N				- Position of the lidar coordinate system in the Nacelle coordinate system (X coordinate) [m]
+0		LidarPositionY_N				- Position of the lidar coordinate system in the Nacelle coordinate system (Y coordinate) [m]
+3		LidarPositionZ_N				- Position of the lidar coordinate system in the Nacelle coordinate system (Z coordinate) [m]
+0		RollAngle_N						- Roll angle between the Nacelle and the lidar coordinate system [deg]
+0		PitchAngle_N					- Pitch angle between the Nacelle and the lidar coordinate system [deg]
+180		YawAngle_N						- Yaw angle between the Nacelle and the lidar coordinate system [deg]
+18    	URef							- Mean u-component wind speed at the reference height [m/s]
+1       GatesPerBeam					- Amount of range gates for each los
+0.025	t_measurement_interval			- Time between each measurement [s]
+---------------------- Measuring points in Cartesian coordinates----------------
+0		NumberOfPoints_Cartesian		- Amounts of Points
+X-Tab 	Y-Tab 	Z-Tab
+!0 		0 		0 		%%
+---------------------- Measuring points in spherical coordinates----------------
+40		NumberOfPoints_Spherical		- Amounts of Points
+Azimuth-Tab     Elevation-Tab	RangeGates-Tab
+   14.8235    2.3204  207.0552
+   14.2967    4.5874  207.0552
+   13.4277    6.7479  207.0552
+   12.2311    8.7504  207.0552
+   10.7286   10.5453  207.0552
+    8.9504   12.0865  207.0552
+    6.9357   13.3330  207.0552
+    4.7333   14.2499  207.0552
+    2.4002   14.8111  207.0552
+         0   15.0000  207.0552
+   -2.4002   14.8111  207.0552
+   -4.7333   14.2499  207.0552
+   -6.9357   13.3330  207.0552
+   -8.9504   12.0865  207.0552
+  -10.7286   10.5453  207.0552
+  -12.2311    8.7504  207.0552
+  -13.4277    6.7479  207.0552
+  -14.2967    4.5874  207.0552
+  -14.8235    2.3204  207.0552
+  -15.0000         0  207.0552
+  -14.8235   -2.3204  207.0552
+  -14.2967   -4.5874  207.0552
+  -13.4277   -6.7479  207.0552
+  -12.2311   -8.7504  207.0552
+  -10.7286  -10.5453  207.0552
+   -8.9504  -12.0865  207.0552
+   -6.9357  -13.3330  207.0552
+   -4.7333  -14.2499  207.0552
+   -2.4002  -14.8111  207.0552
+         0  -15.0000  207.0552
+    2.4002  -14.8111  207.0552
+    4.7333  -14.2499  207.0552
+    6.9357  -13.3330  207.0552
+    8.9504  -12.0865  207.0552
+   10.7286  -10.5453  207.0552
+   12.2311   -8.7504  207.0552
+   13.4277   -6.7479  207.0552
+   14.2967   -4.5874  207.0552
+   14.8235   -2.3204  207.0552
+   15.0000         0  207.0552
+---------------------- Weighting function (Gaussian distribution)---------------
+78.4537  		FWHM							- Full width half maximum [m]
+3		PointsToEvaluate				- points evaluated to "integrate" (odd number so there is a point in the peak, >= 3) [-]
+---------------------- Weighting function (manual weighting)--------------------
+11		ManualWeightingPoints			- Amount of weighting points
+Distance-Tab	Weighting-Tab
+ -136.2043    0.0138
+ -108.9634    0.0210
+  -81.7226    0.0358
+  -54.4817    0.0716
+  -27.2409    0.1789
+         0    0.3578
+   27.2409    0.1789
+   54.4817    0.0716
+   81.7226    0.0358
+  108.9634    0.0210
+  136.2043    0.0138
+---------------------- Wind Evolution--------------------
+False   	EvolutionFlag            	- Consider wind evolution (flag)
+"*.evo"		EvolutionFilenameRoot   	- Rootname of the up-stream full-field wind file to use (.wnd, .sum)
+---------------------- Measurement availability--------------------
+False		AvailabilityFlag            - Consider measurement availability (flag)
+"*.dat"	    AvailabilityFilenameRoot 	- Rootname of the lidar availability time series data
+---------------------- Blade Blockage--------------------
+False		BladeBlockageFlag        	- Consider blade blockage (flag)
+---------------------- Spinner Mounted--------------------
+False		SpinnerMountedFlag        	- Flag whether spinner-mounted considered 
+---------------------- Nearest Interpolation ------------------------------------
+True        NearestInterpFlag           - Flag to use nearest interpolation. By default, linear interpolation is used 
+---------------------- Output---------------------------------------------------
+OutList      							- The next line(s) contains a list of output parameters.  See OutListParameters.xlsx for a listing of available output channels, (-)
+"XLI"
+"XDTLI"
+"VLOS01LI"
+"BEAMIDLI"
+"NEWDATALI"
+END of FAST input file (the word "END" must appear in the first 3 columns of this last line).
