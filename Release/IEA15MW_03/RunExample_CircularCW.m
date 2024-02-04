@@ -12,10 +12,8 @@
 % Wei Fu, David Schlipf, Feng Guo
 
 %% Setup
-clearvars;
-close all;
-clc;
-addpath('..\MatlabFunctions')
+clearvars;close all;clc;
+addpath(genpath('..\WetiMatlabFunctions'))
 
 % Seeds (can be adjusted, but will provide different results)
 nSeed               = 6;                        % [-]	number of stochastic turbulence field samples
@@ -37,7 +35,6 @@ nOverlap            = nDataPerBlock/2;          % [-]  	samples of overlap, defa
 % Files (should not be be changed)
 TurbSimExeFile      = 'TurbSim_x64.exe';
 FASTexeFile         = 'openfast_x64.exe';
-FASTmapFile         = 'MAP_x64.dll';
 SimulationName      = 'IEA-15-240-RWT-Monopile_CircularCW';
 TurbSimTemplateFile = 'TurbSim2aInputFileTemplateIEA15MW.inp';
 SimulationFolder    = 'SimulationResults_CircularCW';
@@ -74,7 +71,6 @@ delete(['TurbulentWind\',TurbSimExeFile])
 
 % Copy the adequate OpenFAST version to the example folder
 copyfile(['..\OpenFAST\',FASTexeFile],FASTexeFile)
-copyfile(['..\OpenFAST\',FASTmapFile],'MAP_x64.dll')
 
 % Simulate with all wind fields
 for iSeed = 1:nSeed
@@ -111,7 +107,6 @@ end
 
 % Clean up
 delete(FASTexeFile)
-delete('MAP_x64.dll')
 
 %% Postprocessing: evaluate data
 
@@ -183,7 +178,7 @@ end
 gamma2_RL_mean_est          = abs(mean(S_RL_est,1)).^2./mean(S_LL_est,1)./mean(S_RR_est,1);
 
 % Get analytical correlation model
-SpectralModelFileName       = '..\MatlabFunctions\AnalyticalModel\LidarRotorSpectra_IEA15MW_CircularCW.mat'; % model for 18 m/s
+SpectralModelFileName       = '..\AnalyticalModel\LidarRotorSpectra_IEA15MW_CircularCW.mat'; % model for 18 m/s
 AnalyticalModel             = load(SpectralModelFileName, 'S_LL', 'S_RL', 'S_RR', 'f'); 
 AnalyticalModel.gamma2_RL   = abs(AnalyticalModel.S_RL).^2./AnalyticalModel.S_RR./AnalyticalModel.S_LL;
 

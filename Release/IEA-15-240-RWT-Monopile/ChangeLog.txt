@@ -14,10 +14,6 @@ IEA-15-240-RWT_ElastoDyn_blade.dat
 IEA-15-240-RWT_InflowFile.dat
 Airfoils
 
-From the OpenFAST folder from Release\OpenFAST folder:
-openfast_x64.exe
-MAP_x64.dll
-
 From the LidarAssistedControl repository into the ServoData Folder
 ROSCO_v2d6.dll
 ROSCO_v2d6.IN
@@ -38,16 +34,18 @@ IEA-15-240-RWT-Monopile.fst:
 * add CompLidar and SWELidarFile to use lidar simulator
 * change dt to 0.0125 s (80 Hz) to be consistent with the other cases
 * change TMax to 30 s to have shorter test run
-* set CompHydro and CompSub to 0 for simplification 
+* set CompHydro and CompSub to 0 for simplification
+* set all files to none, if not used 
 IEA-15-240-RWT_InflowFile.dat:
 * change to 18 m/s to be consistent with the other cases
+* change PLexp to 0.2 to be consistent with turbulent wind fields
 IEA-15-240-RWT-Monopile_ServoDyn.dat:
 * set DLL_FileName and DLL_InFile to use the modified ROSCO_v2d6
 * add InitGenTrq to be able to initialize generator torque 
 * set SumPrint to false to limit number of files generated
 IEA-15-240-RWT-Monopile_ElastoDyn.dat
 * set Platform DOFs to False for simplification 
-* set initial conditions for blade pitch to meat 18 m/s
+* set initial conditions for blade pitch and rotor speed to meet 18 m/s
 * remove "../IEA-15-240-RWT/", since alle files are in one folder
 * set SumPrint to false to limit number of files generated
 * simplify outlist

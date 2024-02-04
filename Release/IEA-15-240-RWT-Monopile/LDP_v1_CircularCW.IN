@@ -1,0 +1,6 @@
+! Baseline lidar data processing parameters for a circular-scanning continuous-wave lidar system (LDP_v1.dll, v1.4). Please do not change the number of lines.
+
+!------- LIDAR TRAJECTORY -----------------------------------------------------
+40	    	! NumberOfBeams  	- Number of beams measuring at different directions [-]
+15        	! AngleToCenterline - Angle around centerline [deg]
+1 			! IndexGate  		- Index of range gates used in the LDP [-]

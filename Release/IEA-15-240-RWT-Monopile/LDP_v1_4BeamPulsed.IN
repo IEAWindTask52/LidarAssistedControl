@@ -1,0 +1,6 @@
+! Baseline lidar data processing parameters for a 4-beam pulsed lidar system (LDP_v1.dll, v1.4). Please do not change the number of lines.
+
+!------- LIDAR TRAJECTORY -----------------------------------------------------
+4	       	! NumberOfBeams  	- Number of beams measuring at different directions [-]
+19.176 		! AngleToCenterline - Angle around centerline [deg]
+6 			! IndexGate 

@@ -12,7 +12,7 @@ False                  Echo        - Echo input data to <RootName>.ech (flag)
 ================== Parameters for Steady Wind Conditions [used only for WindType = 1] =========================
 18.0                   HWindSpeed  - Horizontal windspeed                            (m/s)
 150.0                  RefHt       - Reference height for horizontal wind speed      (m)
-0.12                   PLexp       - Power law exponent                              (-)
+0.20                   PLexp       - Power law exponent                              (-)
 ================== Parameters for Uniform wind file   [used only for WindType = 2] ============================
 "none"                 Filename_Uni - Filename of time series data for uniform wind field.      (-)
 150.0                  RefHt_Uni   - Reference height for horizontal wind speed                (m)
@@ -21,7 +21,7 @@ False                  Echo        - Echo input data to <RootName>.ech (flag)
 "none"                 FileName_BTS - Name of the Full field wind file to use (.bts)
 ================== Parameters for Binary Bladed-style Full-Field files   [used only for WindType = 4] =========
 "none"                 FilenameRoot - Rootname of the full-field wind file to use (.wnd, .sum)
-False                  TowerFile   - Have tower file (.twr) (flag)
+True                   TowerFile   - Have tower file (.twr) (flag)
 ================== Parameters for HAWC-format binary files  [Only used with WindType = 5] =====================
 "none"                 FileName_u  - name of the file containing the u-component fluctuating wind (.bin)
 "none"                 FileName_v  - name of the file containing the v-component fluctuating wind (.bin)

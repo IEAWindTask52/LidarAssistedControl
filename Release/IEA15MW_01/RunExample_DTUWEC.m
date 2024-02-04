@@ -12,17 +12,14 @@
 % Alan Wai Hou Lio, David Schlipf, Feng Guo
 
 %% Setup
-clearvars; 
-close all; 
-clc;
-addpath('..\MatlabFunctions')
+clearvars;close all;clc;
+addpath(genpath('..\WetiMatlabFunctions'))
 
 % Copy the adequate OpenFAST version to the example folder
 FASTexeFile     = 'openfast_x64.exe';
 FASTmapFile     = 'MAP_x64.dll';
 SimulationName  = 'IEA-15-240-RWT-Monopile_DTUWEC';
 copyfile(['..\OpenFAST\',FASTexeFile],FASTexeFile)
-copyfile(['..\OpenFAST\',FASTmapFile],FASTmapFile)
 
 %% Run FB
 ManipulateTXTFile('DTUWEC.IN','constant    96 1.0;','constant    96 0.0;');     % disable LAC
@@ -36,7 +33,6 @@ movefile([SimulationName,'.outb'],[SimulationName,'_FBFF.outb'])    % store resu
 
 %% Clean up
 delete(FASTexeFile)
-delete(FASTmapFile)
 
 %% Comparison
 % read in data

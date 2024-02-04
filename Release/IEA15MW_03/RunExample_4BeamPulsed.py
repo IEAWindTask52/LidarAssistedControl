@@ -49,7 +49,6 @@ nOverlap = nDataPerBlock / 2                        # [-]  	samples of overlap, 
 # Files (should not be be changed)
 TurbSimExeFile = 'TurbSim_x64.exe'
 FASTexeFile = 'openfast_x64.exe'
-FASTmapFile = 'MAP_x64.dll'
 SimulationName = 'IEA-15-240-RWT-Monopile_4BeamPulsed'
 TurbSimTemplateFile = 'TurbSim2aInputFileTemplateIEA15MW.inp'
 SimulationFolder = 'SimulationResults_4BeamPulsed'
@@ -83,7 +82,6 @@ os.remove(os.path.join('TurbulentWind', TurbSimExeFile))
 
 # Copy the adequate OpenFAST version to the example folder
 shutil.copyfile(os.path.join('..\OpenFAST', FASTexeFile), FASTexeFile)
-shutil.copyfile(os.path.join('..\OpenFAST', FASTmapFile), 'MAP_x64.dll')
 
 #  Simulate with all wind fields
 for iSeed in range(nSeed):
@@ -117,7 +115,6 @@ for iSeed in range(nSeed):
 
 # Clean up
 os.remove(FASTexeFile)
-os.remove('MAP_x64.dll')
 
 # Postprocessing: evaluate data
 
@@ -199,7 +196,7 @@ for iSeed in range(nSeed):
 gamma2_RL_mean_est = np.abs(np.mean(S_RL_est, axis=0)) ** 2 / np.mean(S_LL_est, axis=0) / np.mean(S_RR_est, axis=0)
 
 # Get analytical correlation model
-SpectralModelFileName = '..\MatlabFunctions\AnalyticalModel\LidarRotorSpectra_IEA15MW_4BeamPulsed.mat'  # model for 18 m/s
+SpectralModelFileName = '..\AnalyticalModel\LidarRotorSpectra_IEA15MW_4BeamPulsed.mat'  # model for 18 m/s
 AnalyticalModel = loadmat(SpectralModelFileName)
 AnalyticalModel['gamma2_RL'] = np.abs(AnalyticalModel['S_RL']) ** 2 / AnalyticalModel['S_RR'] / AnalyticalModel[
     'S_LL']

@@ -1,0 +1,11 @@
+! Collective pitch feedforward parameters for wind preview from a circular-scanning continuous-wave lidar system measuring at 200 m. Please do not change the number of lines.
+
+!------- FILTERS AND TIMING ----------------------------------------------------------
+1    	    ! FlagLPF             	- Enable low-pass filter (flag) [0/1]
+0.3268	    ! f_cutoff	   			- Corner frequency (-3dB) of the low-pass filter [rad/s]
+6.1111   	! T_buffer        		- Buffer time for filtered REWS signal [s]
+
+!------- STATIC PITCH CURVE ---------------------
+22     	    ! n_StaticPitchCurve  	- Number of points in static pitch curve [-]
+ 0   10.0000   11.0000   12.0000   13.0000   14.0000   15.0000   16.0000   17.0000   18.0000   19.0000   20.0000   21.0000   22.0000   23.0000   24.0000   25.0000   26.0000   27.0000   28.0000   29.0000   30.0000 ! StaticWind  	- Wind speed  values in static pitch curve [m/s]
+ 0         0    0.0552    0.1085    0.1451    0.1749    0.2011    0.2250    0.2473    0.2682    0.2882    0.3072    0.3255    0.3432    0.3603    0.3769    0.3930    0.4087    0.4240    0.4389    0.4535    0.4679 ! StaticPitch 	- Pitch angle values in static pitch curve [rad]
