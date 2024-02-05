@@ -166,7 +166,7 @@ for iSeed in range(nSeed):
 
     # Estimate auto- and cross-spectra of REWS
     TurbSimResultFile = 'TurbulentWind/URef_18_Seed_{:02d}.wnd'.format(Seed)
-    REWS_WindField, Time_WindField = CalulateREWSfromWindField(TurbSimResultFile, iSeed)
+    REWS_WindField, Time_WindField = CalulateREWSfromWindField(TurbSimResultFile, R, 2)
     REWS_WindField_Fs = interp1d(Time_WindField.ravel(),REWS_WindField.ravel())(R_FBFF.iloc[:, 0]) # get REWS with the same time step as simulations
     _, S_LL_est[iSeed, :] = signal.welch(
         signal.detrend(R_FBFF.iloc[:, 26][R_FBFF.iloc[:, 0] >= t_start], type='constant'),
