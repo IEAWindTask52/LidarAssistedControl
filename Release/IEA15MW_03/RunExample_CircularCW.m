@@ -119,6 +119,7 @@ S_RL_est                = NaN(nSeed,nFFT/2+1);
 STD_RotSpeed_FB         = NaN(1,nSeed);
 STD_RotSpeed_FBFF       = NaN(1,nSeed);
 c_filter                = NaN(nSeed,AnalysisTime*Fs*2+1);
+c_RL                    = NaN(nSeed,AnalysisTime*Fs*2+1);
 
 % Loop over all seeds
 for iSeed = 1:nSeed    
@@ -169,8 +170,11 @@ for iSeed = 1:nSeed
     legend('wind field','lidar estimate')
     xlabel('time [s]')
 
-    % Estimate cross correlation
+    % Estimate cross correlation between filtered and unfiltered REWS from lidar
     [c_filter(iSeed,:),lags]    = xcorr(detrend(R_FBFF.REWS_f(R_FBFF.Time>=t_start),'constant'),detrend(R_FBFF.REWS(R_FBFF.Time>=t_start),'constant'),'normalized');
+
+    % Estimate cross correlation between rotor and lidar
+    [c_RL(iSeed,:),lags]        = xcorr(detrend(REWS_WindField_Fs(R_FBFF.Time>=t_start),'constant'),detrend(R_FBFF.REWS_b(R_FBFF.Time>=t_start)),'normalized');  
 
 end
     
@@ -218,6 +222,18 @@ hold on;grid on; box on
 plot(lags/Fs,mean(c_filter,1))
 plot(T_filter,c_max,'o')
 xlim([-1 1]*20)
+xlabel('time [s]')
+ylabel('cross correlation [-]')
+
+%% Plot cross-correlation between rotor and lidar
+[c_max,idx_max] = max(mean(c_RL,1));
+T_RL            = lags(idx_max)/Fs; % [s]       time delay by the filter
+figure('Name','Cross-correlation between rotor and lidar')
+title('Cross-correlation between rotor and lidar')
+hold on;grid on; box on
+plot(lags/Fs,mean(c_RL,1))
+plot(T_RL,c_max,'o')
+xlim([0 3])
 xlabel('time [s]')
 ylabel('cross correlation [-]')
 
