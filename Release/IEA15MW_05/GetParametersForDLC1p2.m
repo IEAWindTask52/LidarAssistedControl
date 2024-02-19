@@ -7,13 +7,16 @@ end
 
 % Process parameters
 StartTime               = 60;       % [s]           time to start evaluation (all signals should be settled) 
+WoehlerExponentSteel    = 4;        % [-]           typical value for steel
+WoehlerExponentComposite= 10;        % [-]          typical value for composite material
+PC_RefSpd               = 0.79168;  % [rad/s]       rated generator speed from ROSCO_v2d6.IN
 
 % files
 StatisticsFile      	= 'Statistics_SteadyStates.mat';
 
 % Variation
-PreProcessingVariation  = { 'URef',[4:4:20],'%02d';
-                            'Seed',[1:2]   ,'%02d'};
+PreProcessingVariation  = { 'URef',[4:2:24],'%02d';
+                            'Seed',[1:6]   ,'%02d'};
 
 % template files
 InputFiles{1,1}         = 'IEA-15-240-RWT-Monopile.fst';            % main file
@@ -108,10 +111,12 @@ for iURef = 1:nURef
 end
 
 % CalculateStatistics
-WoehlerExponent         = 4;
 PostProcessingConfig.CalculateStatistics = { 
     'mean'          @(Data,Time)mean(Data(Time>=StartTime)) {'Wind1VelX';'GenPwr'}
-    'DEL'           @(Data,Time)CalculateDEL(Data(Time>=StartTime),Time(Time>=StartTime),WoehlerExponent) {'TwrBsMyt';}
+    'DEL_4'         @(Data,Time)CalculateDEL(Data(Time>=StartTime),Time(Time>=StartTime),WoehlerExponentSteel)      {'TwrBsMyt';'RotTorq'}
+    'DEL_10'        @(Data,Time)CalculateDEL(Data(Time>=StartTime),Time(Time>=StartTime),WoehlerExponentComposite)  {'RootMyb1'}
+    'Overshoot'     @(Data,Time)max(max(rpm2radPs(Data(Time>=StartTime))-PC_RefSpd)/PC_RefSpd,0) {'GenSpeed'}
+    'Travel'        @(Data,Time)CalculatePitchTravel(Data,Time,StartTime) {'BldPitch1'}
     }; 
 
 end

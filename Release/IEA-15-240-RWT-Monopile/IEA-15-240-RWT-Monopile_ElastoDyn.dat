@@ -128,6 +128,7 @@ True                   TabDelim    - Use tab delimiters in text tabular output f
 "RotSpeed"
 "RotTorq"
 "TwrBsMyt"
+"RootMyb1"
 END of input file (the word "END" must appear in the first 3 columns of this last OutList line)
 ---------------------- NODE OUTPUTS --------------------------------------------
           1   BldNd_BladesOut  - Blades to output
