@@ -15,7 +15,7 @@ load('Statistics_FeedbackOnly','Statistics');
 ProcessResults_FeedbackOnly     = DataFilterWindSpeedBins(Statistics,WindSpeedBins,WindSpeedChannel);
 ProcessResults_FeedbackOnly     = CalculateLifeTimeWeightedDEL(ProcessResults_FeedbackOnly,Statistics,WindSpeedBins,'DEL_TwrBsMyt');
 ProcessResults_FeedbackOnly     = CalculateLifeTimeWeightedMean(ProcessResults_FeedbackOnly,Statistics,WindSpeedBins,'mean_GenPwr');
-
+%%
 % LAC_CircularCW
 load('Statistics_LAC_CircularCW','Statistics');
 ProcessResults_LAC_CircularCW   = DataFilterWindSpeedBins(Statistics,WindSpeedBins,WindSpeedChannel);

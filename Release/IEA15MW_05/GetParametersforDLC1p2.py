@@ -112,7 +112,7 @@ def GetParametersforDLC1p2(simulation_mode):
         post_processing_config['Plots']['BasicTimePlot'][id] = {
             'Enable': 1,
             'Channels': ['Wind1VelX', 'BldPitch1', 'RotSpeed'],
-            'gca': {'xlim': [0, 600] + start_time},
+            'gca': {'xlim': [0, 600, start_time]},
             'IndicesConsideredDataFiles': list(range(1, n_seed + 1)) + [(i_u_ref - 1) * n_seed]
         }
 

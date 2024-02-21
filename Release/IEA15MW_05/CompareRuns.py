@@ -30,4 +30,5 @@ process_results_lac_4_beam_pulsed = CalculateLifeTimeWeightedDEL(process_results
 process_results_lac_4_beam_pulsed = CalculateLifeTimeWeightedMean(process_results_lac_4_beam_pulsed, statistics_lac_4_beam_pulsed, WindSpeedBins, 'mean_GenPwr')
 
 
-print(process_results_feedback_only)
+
+
