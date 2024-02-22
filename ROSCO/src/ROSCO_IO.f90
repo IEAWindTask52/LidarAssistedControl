@@ -396,7 +396,7 @@ SUBROUTINE Debug(LocalVar, CntrPar, DebugVar, ErrVar, avrSWAP, RootName, size_av
     CHARACTER(15), ALLOCATABLE      :: LocalVarOutStrings(:)
     REAL(DbKi), ALLOCATABLE         :: LocalVarOutData(:)
  
-    nDebugOuts = 32
+    nDebugOuts = 28
     Allocate(DebugOutData(nDebugOuts))
     Allocate(DebugOutStrings(nDebugOuts))
     Allocate(DebugOutUnits(nDebugOuts))
@@ -428,23 +428,20 @@ SUBROUTINE Debug(LocalVar, CntrPar, DebugVar, ErrVar, avrSWAP, RootName, size_av
     DebugOutData(26) = LocalVar%REWS
     DebugOutData(27) = LocalVar%REWS_f
     DebugOutData(28) = LocalVar%REWS_b
-    DebugOutData(29) = LocalVar%GenTq
-    DebugOutData(30) = LocalVar%VS_State
-    DebugOutData(31) = LocalVar%PltFormPtchRate
-    DebugOutData(32) = LocalVar%PltFormPtchRateF
     
     
-    DebugOutStrings = [CHARACTER(15) ::  'WE_Cp', 'WE_b', 'WE_w', 'WE_t', 'WE_Vm', & 
-                                      'WE_Vt', 'WE_Vw', 'WE_lambda', 'PC_PICommand', 'GenSpeedF', & 
-                                      'RotSpeedF', 'NacIMU_FA_AccF', 'FA_AccF', 'Fl_PitCom', 'PC_MinPit', & 
-                                      'axisTilt_1P', 'axisYaw_1P', 'axisTilt_2P', 'axisYaw_2P', 'YawRateCom', & 
-                                      'NacHeadingTarget', 'NacVaneOffset', 'Yaw_err', 'YawState','FF_PitchRate','REWS',&
-                                        'REWS_f','REWS_b','GenTq','VS_State','PltFomPtchRate','PltFomPtchRateF']
-    DebugOutUnits = [CHARACTER(15) ::  '[-]', '[-]', '[-]', '[-]', '[m/s]', & 
-                                      '[m/s]', '[m/s]', '[rad]', '[rad]', '[rad/s]', & 
-                                      '[rad/s]', '[rad/s]', '[m/s]', '[rad]', '[rad]', & 
-                                      '', '', '', '', '[rad/s]', & 
-                                      '[rad]', '[rad]', '[rad]', '','[rad/s]','[m/s]','[m/s]','[m/s]','[Nm]','','[rad/s]','[rad/s]']
+    DebugOutStrings = [CHARACTER(15) ::  'WE_Cp', 'WE_b', 'WE_w', 'WE_t', 'WE_Vm', & 								!  1- 5
+                                      'WE_Vt', 'WE_Vw', 'WE_lambda', 'PC_PICommand', 'GenSpeedF', & 				!  6-10
+                                      'RotSpeedF', 'NacIMU_FA_AccF', 'FA_AccF', 'Fl_PitCom', 'PC_MinPit', &  		! 11-15
+                                      'axisTilt_1P', 'axisYaw_1P', 'axisTilt_2P', 'axisYaw_2P', 'YawRateCom', & 	! 16-20
+                                      'NacHeadingTarget', 'NacVaneOffset', 'Yaw_err', 'YawState', 'FF_PitchRate', & ! 21-25
+									  'REWS', 'REWS_f', 'REWS_b']
+    DebugOutUnits = [CHARACTER(15) ::  '[-]', '[-]', '[-]', '[-]', '[m/s]', &  										!  1- 5
+                                      '[m/s]', '[m/s]', '[rad]', '[rad]', '[rad/s]', &  							!  6-10
+                                      '[rad/s]', '[rad/s]', '[m/s]', '[rad]', '[rad]', &  							! 11-15
+                                      '[-]', '[-]', '[-]', '[-]', '[rad/s]', & 									 	! 16-20
+									  '[rad]', '[rad]', '[rad]', '[-]', '[rad/s]', & 	 							! 21-25		
+									  '[m/s]', '[m/s]', '[m/s]']
     nLocalVars = 69
     Allocate(LocalVarOutData(nLocalVars))
     Allocate(LocalVarOutStrings(nLocalVars))

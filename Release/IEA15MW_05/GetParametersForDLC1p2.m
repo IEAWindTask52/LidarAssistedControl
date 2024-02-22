@@ -66,14 +66,14 @@ Modifications           = {
 
 
 % FFP_v1 Parameters
-URef_v                  = 10:2:24; % [m/s]
+URef_v                  = 8:2:24; % [m/s]
 switch SimulationMode
     case 'LAC_CircularCW'
-        f_cutoff_v      = [ 0.1816    0.2179    0.2542    0.2905    0.3268    0.3632    0.3995    0.4358]; % [rad/s]
-        T_buffer_v      = [13.0000   10.4167    8.5714    7.1875    6.1111    5.2500    4.5455    3.9583]; % [s]
+        f_cutoff_v      = [ 0.1453    0.1816    0.2179    0.2542    0.2905    0.3268    0.3632    0.3995    0.4358]; % [rad/s]
+        T_buffer_v      = [16.8750   13.0000   10.4167    8.5714    7.1875    6.1111    5.2500    4.5455    3.9583]; % [s]
     case 'LAC_4BeamPulsed'
-        f_cutoff_v      = [ 0.0684    0.0821    0.0958    0.1095    0.1232    0.1369    0.1505    0.1642]; % [rad/s]
-        T_buffer_v      = [ 4.5000    3.3333    2.5000    1.8750    1.3889    1.0000    0.6818    0.4167]; % [s] 
+        f_cutoff_v      = [0.0547    0.0684    0.0821    0.0958    0.1095    0.1232    0.1369    0.1505    0.1642]; % [rad/s]
+        T_buffer_v      = [6.2500    4.5000    3.3333    2.5000    1.8750    1.3889    1.0000    0.6818    0.4167]; % [s] 
 end
 
 % additional modifications for LAC modes
@@ -94,8 +94,8 @@ switch SimulationMode
                         % Rosco: enable FF
                         '7','I','! FlagLAC'             '1'
                         % FFP_v1: adjust f_cutoff and T_buffer
-                        '8','I','! f_cutoff'            @(VariationValues)num2str(interp1(URef_v,f_cutoff_v,VariationValues(1)),'%8.4f')
-                        '8','I','! T_buffer'            @(VariationValues)num2str(interp1(URef_v,T_buffer_v,VariationValues(1)),'%8.4f')
+                        '8','I','! f_cutoff'            @(VariationValues)num2str(interp1(URef_v,f_cutoff_v, min(max(VariationValues(1),URef_v(1)),URef_v(end)) ),'%8.4f') % use end values
+                        '8','I','! T_buffer'            @(VariationValues)num2str(interp1(URef_v,T_buffer_v, min(max(VariationValues(1),URef_v(1)),URef_v(end)) ),'%8.4f') % use end values
                         });
 end
 
