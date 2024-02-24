@@ -61,7 +61,7 @@ Modifications           = {
                         '2','I','RotSpeed',             @(VariationValues)num2str(GetStatistics(StatisticsFile,'mean_RotSpeed' ,VariationValues(1)),'%5.2f')                        
                         % InflowWind: change wind type and link to turbulent wind file
                         '3','I','WindType  '            '4'
-                        '3','I','FilenameRoot',	        @(VariationValues)strcat('../TurbulentWind/URef_',num2str(VariationValues(1),'%02d'),'_Seed_',num2str(VariationValues(1),'%02d'),num2str(VariationValues(2),'%02d'))                       
+                        '3','I','FilenameRoot',	        @(VariationValues)strcat('../TurbulentWind/URef_',num2str(VariationValues(1),'%02d'),'_Seed_',num2str(VariationValues(2),'%02d'))                       
                         };
 
 

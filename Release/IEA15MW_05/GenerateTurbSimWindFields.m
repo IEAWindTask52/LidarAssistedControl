@@ -34,7 +34,7 @@ for i_URef    = 1:n_URef
     URef      = URef_vector(i_URef);
     parfor i_Seed = 1:n_Seed          
         Seed                = Seed_matrix(i_URef,i_Seed);
-        WindFileName        = ['URef_',num2str(URef,'%02d'),'_Seed_',num2str(Seed,'%04d')];
+        WindFileName        = ['URef_',num2str(URef,'%02d'),'_Seed_',num2str(i_Seed,'%02d')];
         TurbSimInputFile  	= ['TurbulentWind\',WindFileName,'.ipt'];
         TurbSimResultFile  	= ['TurbulentWind\',WindFileName,'.wnd'];
         if ~exist(TurbSimResultFile,'file')
