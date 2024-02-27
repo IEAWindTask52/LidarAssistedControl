@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def CalculateStatistics(time_results, post_processing_config):
+def CalculateStatistics(time_results, post_processing_config, data_files):
     # init
     statistics = pd.DataFrame()
 
@@ -11,9 +11,9 @@ def CalculateStatistics(time_results, post_processing_config):
 
     # get dimensions
     n_statistics = len(post_processing_config['CalculateStatistics'])
-    statistics_ids = [item[0] for item in post_processing_config['CalculateStatistics']]
-    functions = [item[1] for item in post_processing_config['CalculateStatistics']]
-    channel_cells = [item[2] for item in post_processing_config['CalculateStatistics']]
+    statistics_ids = [item for item in post_processing_config['CalculateStatistics']]
+    functions = [post_processing_config['CalculateStatistics'][item][0] for item in statistics_ids]
+    channel_cells = [post_processing_config['CalculateStatistics'][item][1] for item in statistics_ids]
     n_data_files = len(time_results)
 
     # loop over Statistics
@@ -29,13 +29,14 @@ def CalculateStatistics(time_results, post_processing_config):
             this_channel = this_channel_cell[i_channel]
             variable = f'{this_statistics_id}_{this_channel}'
             value = np.full(n_data_files, np.nan)  # Allocation
-            for i_data_file in range(n_data_files):  # parfor is slower
+            for i_data_file in range(n_data_files):
                 data = time_results[i_data_file][this_channel].values
                 time = time_results[i_data_file][this_channel].index.values
                 value[i_data_file] = this_function(data, time)
             statistics[variable] = value
 
     # add RowNames
-    statistics.index = [time_results[i_data_file].name for i_data_file in range(n_data_files)]
+    row_names = [data_files[i] for i in range(len(data_files))]
+    statistics.index = row_names
 
     return statistics

@@ -24,10 +24,10 @@ from scipy.io import loadmat
 import sys
 
 sys.path.append('..\PythonFunctions')
-from ManipulateTXTFile import ManipulateTXTFile
-from ReadFASTbinaryIntoStruct import ReadFASTbinaryIntoStruct
-from ReadROSCOtextIntoStruct import ReadROSCOtextIntoDataframe
-from CalculateREWSfromWindField import CalulateREWSfromWindField
+from FileOperations.ManipulateTXTFile import ManipulateTXTFile
+from FileOperations.ReadFASTbinaryIntoStruct import ReadFASTbinaryIntoStruct
+from FileOperations.ReadROSCOtextIntoStruct import ReadROSCOtextIntoDataframe
+from PreProcessing.CalculateREWSfromWindField import CalulateREWSfromWindField
 
 # Seeds (can be adjusted, but will provide different results)
 nSeed = 6                                           # [-] number of stochastic turbulence field samples

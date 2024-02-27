@@ -1,34 +1,66 @@
 import pandas as pd
-import numpy as np
+import matplotlib.pyplot as plt
 import sys
 
 sys.path.append('..\PythonFunctions')
 
-from DataFilterWindSpeedBins import DataFilterWindSpeedBins
-from CalculateLifeTimeWeightedMean import CalculateLifeTimeWeightedMean
-from CalculateLifeTimeWeightedDEL import CalculateLifeTimeWeightedDEL
-# setup
+from DataFunctions.DataFilterWindSpeedBins import DataFilterWindSpeedBins
+from DataFunctions.CalculateLifeTimeWeightedMean import CalculateLifeTimeWeightedMean
+from DataFunctions.CalculateLifeTimeWeightedDEL import CalculateLifeTimeWeightedDEL
+
+# Config
 WindSpeedBins = list(range(4, 25, 2))
 WindSpeedChannel = 'mean_Wind1VelX'
 
 # FeedbackOnly
-statistics_feedback_only = pd.read_csv('Statistics_FeedbackOnly.csv')
-process_results_feedback_only = DataFilterWindSpeedBins(statistics_feedback_only, WindSpeedBins, WindSpeedChannel)
-process_results_feedback_only = CalculateLifeTimeWeightedDEL(process_results_feedback_only, statistics_feedback_only, WindSpeedBins, 'DEL_TwrBsMyt')
-process_results_feedback_only = CalculateLifeTimeWeightedMean(process_results_feedback_only, statistics_feedback_only, WindSpeedBins, 'mean_GenPwr')
+Statistics_FeedbackOnly = pd.read_csv('Statistics_FeedbackOnly.csv')
+ProcessResults_FeedbackOnly = DataFilterWindSpeedBins(Statistics_FeedbackOnly.copy(), WindSpeedBins, WindSpeedChannel)
+ProcessResults_FeedbackOnly = CalculateLifeTimeWeightedDEL(ProcessResults_FeedbackOnly.copy(), Statistics_FeedbackOnly, WindSpeedBins, 'DEL_TwrBsMyt')
+ProcessResults_FeedbackOnly = CalculateLifeTimeWeightedMean(ProcessResults_FeedbackOnly.copy(), Statistics_FeedbackOnly, WindSpeedBins, 'mean_GenPwr')
 
 # LAC_CircularCW
-statistics_lac_circular_cw = pd.read_csv('Statistics_LAC_CircularCW.csv')
-process_results_lac_circular_cw = DataFilterWindSpeedBins(statistics_lac_circular_cw, WindSpeedBins, WindSpeedChannel)
-process_results_lac_circular_cw = CalculateLifeTimeWeightedDEL(process_results_lac_circular_cw, statistics_lac_circular_cw, WindSpeedBins, 'DEL_TwrBsMyt')
-process_results_lac_circular_cw = CalculateLifeTimeWeightedMean(process_results_lac_circular_cw, statistics_lac_circular_cw, WindSpeedBins, 'mean_GenPwr')
+Statistics_LAC_CircularCW = pd.read_csv('Statistics_LAC_CircularCW.csv')
+ProcessResults_LAC_CircularCW = DataFilterWindSpeedBins(Statistics_LAC_CircularCW.copy(), WindSpeedBins, WindSpeedChannel)
+ProcessResults_LAC_CircularCW = CalculateLifeTimeWeightedDEL(ProcessResults_LAC_CircularCW.copy(), Statistics_LAC_CircularCW, WindSpeedBins, 'DEL_TwrBsMyt')
+ProcessResults_LAC_CircularCW = CalculateLifeTimeWeightedMean(ProcessResults_LAC_CircularCW.copy(), Statistics_LAC_CircularCW, WindSpeedBins, 'mean_GenPwr')
 
 # LAC_4BeamPulsed
-statistics_lac_4_beam_pulsed = pd.read_csv('Statistics_LAC_4BeamPulsed.csv')
-process_results_lac_4_beam_pulsed = DataFilterWindSpeedBins(statistics_lac_4_beam_pulsed, WindSpeedBins, WindSpeedChannel)
-process_results_lac_4_beam_pulsed = CalculateLifeTimeWeightedDEL(process_results_lac_4_beam_pulsed, statistics_lac_4_beam_pulsed, WindSpeedBins, 'DEL_TwrBsMyt')
-process_results_lac_4_beam_pulsed = CalculateLifeTimeWeightedMean(process_results_lac_4_beam_pulsed, statistics_lac_4_beam_pulsed, WindSpeedBins, 'mean_GenPwr')
+Statistics_LAC_4BeamPulsed = pd.read_csv('Statistics_LAC_4BeamPulsed.csv')
+ProcessResults_LAC_4BeamPulsed = DataFilterWindSpeedBins(Statistics_LAC_4BeamPulsed.copy(), WindSpeedBins, WindSpeedChannel)
+ProcessResults_LAC_4BeamPulsed = CalculateLifeTimeWeightedDEL(ProcessResults_LAC_4BeamPulsed.copy(), Statistics_LAC_4BeamPulsed, WindSpeedBins, 'DEL_TwrBsMyt')
+ProcessResults_LAC_4BeamPulsed = CalculateLifeTimeWeightedMean(ProcessResults_LAC_4BeamPulsed.copy(), Statistics_LAC_4BeamPulsed, WindSpeedBins, 'mean_GenPwr')
 
+# Plots
+# Life-time weighted tower DEL
+plt.figure(figsize=(8, 6))
+plt.title('Life-time weighted tower DEL')
+plt.plot(ProcessResults_FeedbackOnly['WindSpeedBins'], ProcessResults_FeedbackOnly['LTW_DEL_TwrBsMyt_PerBin'] / 1e3, 'o-')
+plt.plot(ProcessResults_LAC_CircularCW['WindSpeedBins'], ProcessResults_LAC_CircularCW['LTW_DEL_TwrBsMyt_PerBin'] / 1e3, '.-')
+plt.plot(ProcessResults_LAC_4BeamPulsed['WindSpeedBins'], ProcessResults_LAC_4BeamPulsed['LTW_DEL_TwrBsMyt_PerBin'] / 1e3, '.-')
+plt.legend(['FeedbackOnly', 'LAC CircularCW', 'LAC 4BeamPulsed'])
+plt.xlabel('wind speed [m/s]')
+plt.ylabel('Tower DEL [MNm]')
+plt.grid(True)
 
+# Life-time weighted electrical power
+plt.figure(figsize=(8, 6))
+plt.title('Life-time weighted electrical power')
+plt.plot(ProcessResults_FeedbackOnly['WindSpeedBins'], ProcessResults_FeedbackOnly['LTW_mean_GenPwr_PerBin'] / 1e3, 'o-')
+plt.plot(ProcessResults_LAC_CircularCW['WindSpeedBins'], ProcessResults_LAC_CircularCW['LTW_mean_GenPwr_PerBin'] / 1e3, '.-')
+plt.plot(ProcessResults_LAC_4BeamPulsed['WindSpeedBins'], ProcessResults_LAC_4BeamPulsed['LTW_mean_GenPwr_PerBin'] / 1e3, '.-')
+plt.legend(['FeedbackOnly', 'LAC CircularCW', 'LAC 4BeamPulsed'])
+plt.xlabel('wind speed [m/s]')
+plt.ylabel('Electrical power [MW]')
+plt.grid(True)
+plt.show()
 
-
+# Display results
+print('-------------------------------------------------')
+print('Improvements by LAC_CircularCW over FeedbackOnly:')
+print(f'Tower load reduction: {((ProcessResults_LAC_CircularCW["LTW_DEL_TwrBsMyt"] / ProcessResults_FeedbackOnly["LTW_DEL_TwrBsMyt"] - 1) * 100):.1f} %')
+print(f'Energy increase: {((ProcessResults_LAC_CircularCW["LTW_mean_GenPwr"] / ProcessResults_FeedbackOnly["LTW_mean_GenPwr"] - 1) * 100):.2f} %')
+print('-------------------------------------------------')
+print('Improvements by 4BeamPulsed over FeedbackOnly:')
+print(f'Tower load reduction: {((ProcessResults_LAC_4BeamPulsed["LTW_DEL_TwrBsMyt"] / ProcessResults_FeedbackOnly["LTW_DEL_TwrBsMyt"] - 1) * 100):.1f} %')
+print(f'Energy increase: {((ProcessResults_LAC_4BeamPulsed["LTW_mean_GenPwr"] / ProcessResults_FeedbackOnly["LTW_mean_GenPwr"] - 1) * 100):.2f} %')
+print('-------------------------------------------------')

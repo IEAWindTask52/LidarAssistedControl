@@ -2,8 +2,8 @@ import numpy as np
 import sys
 
 sys.path.append('..\PythonFunctions')
-from GetStatistics import GetStatistics
-from CalculateDEL import CalculateDEL
+from PreProcessing.GetStatistics import GetStatistics
+from DataFunctions.CalculateDEL import CalculateDEL
 def GetParametersforDLC1p2(simulation_mode):
     assert simulation_mode in ['FeedbackOnly', 'LAC_CircularCW', 'LAC_4BeamPulsed'], "Invalid SimulationMode"
 
@@ -14,8 +14,8 @@ def GetParametersforDLC1p2(simulation_mode):
     statistics_file = 'Statistics_SteadyStates.csv'
 
     # Variation
-    pre_processing_variation = [['URef', np.arange(4, 21, 4), '%02d'],
-                                ['Seed', np.arange(1, 3), '%02d']]
+    pre_processing_variation = [['URef', np.arange(4, 21, 4), '02d'],
+                                ['Seed', np.arange(1, 3), '02d']]
 
     # template files
     input_files = [['IEA-15-240-RWT-Monopile.fst'],  # main file
@@ -55,12 +55,14 @@ def GetParametersforDLC1p2(simulation_mode):
             ['<SimulationName>_FFP_v1.IN']
         ])
 
+    n_file = int(len(input_files) / 2)
+
     # modifications in new files (for all Modes)
     modifications = [
         # OpenFAST: change time and link to new files
         ['1', 'I', 'TMax', str(600 + start_time)],
-        ['1', 'I', 'EDFile', input_files[1]],
-        ['1', 'I', 'InflowFile', input_files[2]],
+        ['1', 'I', 'EDFile', input_files[n_file+1][0]],
+        ['1', 'I', 'InflowFile', input_files[n_file+2][0]],
         # ElastoDyn: adjust initial conditions
         ['2', 'I', 'BlPitch(1|2|3)',
          lambda variation_values: '%5.2f' % GetStatistics(statistics_file, 'mean_BldPitch1', variation_values[0])],
@@ -84,16 +86,16 @@ def GetParametersforDLC1p2(simulation_mode):
     if simulation_mode in ['LAC_CircularCW', 'LAC_4BeamPulsed']:
         modifications.extend([
             # OpenFAST: link to new files
-            ['1', 'I', 'SWELidarFile', input_files[3][1]],
-            ['1', 'I', 'ServoFile', input_files[4][1]],
+            ['1', 'I', 'SWELidarFile', input_files[11][0]],
+            ['1', 'I', 'ServoFile', input_files[12][0]],
             # LidarFile: adjust wind speed
             ['4', 'I', 'URef', lambda variation_values: str(variation_values[0])],
             # ServoDyn: link to Wrapper
             ['5', 'I', 'DLL_FileName', 'WRAPPER.dll'],
-            ['5', 'I', 'DLL_InFile', input_files[5][1]],
+            ['5', 'I', 'DLL_InFile', input_files[13][0]],
             # Wrapper: link to new ROSCO_v2d6.IN
-            ['6', 'R', input_files[6][0], input_files[6][1]],
-            ['6', 'R', input_files[7][0], input_files[7][1]],
+            ['6', 'R', input_files[6][0], input_files[14][0]],
+            ['6', 'R', input_files[7][0], input_files[15][0]],
             # Rosco: enable FF
             ['7', 'I', '! FlagLAC', '1'],
             # FFP_v1: adjust f_cutoff and T_buffer
@@ -112,8 +114,8 @@ def GetParametersforDLC1p2(simulation_mode):
         post_processing_config['Plots']['BasicTimePlot'][id] = {
             'Enable': 1,
             'Channels': ['Wind1VelX', 'BldPitch1', 'RotSpeed'],
-            'gca': {'xlim': [0, 600, start_time]},
-            'IndicesConsideredDataFiles': list(range(1, n_seed + 1)) + [(i_u_ref - 1) * n_seed]
+            'gca': {'xlim': [0+start_time, 600+start_time]},
+            'IndicesConsideredDataFiles': list(range(1 + i_u_ref*n_seed, n_seed + 1 + i_u_ref*n_seed))
         }
 
     # CalculateStatistics
@@ -124,4 +126,4 @@ def GetParametersforDLC1p2(simulation_mode):
                 ['TwrBsMyt']]
     }
 
-    return  pre_processing_variation, input_files, modifications, post_processing_config
+    return post_processing_config, pre_processing_variation, input_files, modifications,

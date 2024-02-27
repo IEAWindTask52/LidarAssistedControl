@@ -8,7 +8,7 @@ def GetSimulationName(pre_processing_variation, variation_values):
         simulation_name_temp += pre_processing_variation[i_variation][0] + "_"
         format_str = pre_processing_variation[i_variation][2]
         if format_str:
-            simulation_name_temp += format(variation_values[i_variation], format_str) + "_"
+            simulation_name_temp += f'{int(variation_values[i_variation]):{format_str}}' + "_"
         else:
             simulation_name_temp += str(variation_values[i_variation]) + "_"
 

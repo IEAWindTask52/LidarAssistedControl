@@ -3,7 +3,7 @@ import shutil
 import sys
 
 
-# Script to run DLC 1.2 for "FeedbackOnly".
+# Script to run DLC 1.2 for "LAC_4BeamPulsed".
 # setup
 sys.path.append('..\\PythonFunctions')
 from GetParametersforDLC1p2 import GetParametersforDLC1p2
@@ -14,7 +14,7 @@ from PostProcessing.PlotTimeResults import PlotTimeResults
 from PostProcessing.CalculateStatistics import CalculateStatistics
 
 # get configuration for DLC 1.2
-SimulationMode = 'FeedbackOnly'
+SimulationMode = 'LAC_4BeamPulsed'
 PostProcessingConfig, PreProcessingVariation, InputFiles, Modifications = GetParametersforDLC1p2(SimulationMode)
 
 # generate simulation folder and copy all files from OpenFAST and TemplateFolder to SimulationFolder
@@ -54,5 +54,5 @@ PlotTimeResults(TimeResults, PostProcessingConfig)
 # Statistics
 Statistics = CalculateStatistics(TimeResults, PostProcessingConfig, DataFiles)
 
-# Evaluate only, if you want to overwrite the results: 
+# Evaluate only, if you want to overwrite the results:
 #Statistics.to_csv('Statistics_' + SimulationMode + '.csv')

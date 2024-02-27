@@ -1,5 +1,5 @@
 import pandas as pd
-from ReadFASTbinary import ReadFASTbinary
+from FileOperations.ReadFASTbinary import ReadFASTbinary
 def ReadFASTbinaryIntoTSC(file_name):
     # based on LoadFAST
 
@@ -18,5 +18,7 @@ def ReadFASTbinaryIntoTSC(file_name):
         ts.name = chan_name[i_channel]
         # add to DataFrame object
         tsc[ts.name] = ts
+        for col, unit in zip(tsc.columns, chan_unit):
+            tsc[col + '_Unit'] = unit
 
     return tsc

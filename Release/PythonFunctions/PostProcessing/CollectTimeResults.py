@@ -1,7 +1,7 @@
 from joblib import Parallel, delayed
 import os
 import scipy.io as sio
-from ReadFASTbinaryIntoTSC import ReadFASTbinaryIntoTSC
+from FileOperations.ReadFASTbinaryIntoTSC import ReadFASTbinaryIntoTSC
 def CollectTimeResults(data_files, post_processing_config, n_core=None):
     if n_core is None:
         n_core = os.cpu_count()
@@ -10,10 +10,11 @@ def CollectTimeResults(data_files, post_processing_config, n_core=None):
     time_results = [None] * n_data_files
 
     # loop over data files
-    def process_file(i_data_file):
+    for i_data_file in range(n_data_files):
         this_data_file = data_files[i_data_file]
-        _, _, ext = os.path.splitext(this_data_file)
+        _, ext = os.path.splitext(this_data_file)
         tsc = None  # to avoid warning of "Uninitialized Temporaries"
+        ext = '.outb'
         if ext == '.outb':
             tsc = ReadFASTbinaryIntoTSC(this_data_file)
         elif ext == '.res':
@@ -34,7 +35,5 @@ def CollectTimeResults(data_files, post_processing_config, n_core=None):
 
         # load into cell
         time_results[i_data_file] = tsc
-
-    Parallel(n_jobs=n_core)(delayed(process_file)(i_data_file) for i_data_file in range(n_data_files))
 
     return time_results

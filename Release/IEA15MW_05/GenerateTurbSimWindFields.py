@@ -6,7 +6,7 @@ from joblib import Parallel, delayed
 
 sys.path.append('..\PythonFunctions')
 
-from ManipulateFastInputFile import ManipulateFastInputFile
+from FileOperations.ManipulateFastInputFile import ManipulateFastInputFile
 
 # Parameters (can be adjusted, but will provide different results)
 URef_vector = np.arange(4, 25, 2)  # [m/s] range of wind speeds (operation points)
