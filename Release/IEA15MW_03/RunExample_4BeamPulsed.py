@@ -127,6 +127,7 @@ S_RL_est = np.empty((nSeed, int(nFFT/2+1)), dtype=complex)
 STD_RotSpeed_FB = np.empty(nSeed)
 STD_RotSpeed_FBFF = np.empty(nSeed)
 c_filter = np.empty((nSeed, int(AnalysisTime*Fs*2+1)))
+c_RL = np.empty((nSeed, int(AnalysisTime*Fs*2+1)))
 
 # Loop over all seeds
 for iSeed in range(nSeed):
@@ -188,12 +189,19 @@ for iSeed in range(nSeed):
     plt.legend(['wind field', 'lidar estimate'])
     plt.xlabel('time [s]')
 
-    # Estimate cross correlation
+    # Estimate cross correlation between filtered and unfiltered REWS from lidar
     REWS_f_detrended = signal.detrend(R_FBFF['REWS_f'][R_FBFF['Time'] >= t_start], type='constant')
     REWS_detrended = signal.detrend(R_FBFF['REWS'][R_FBFF['Time'] >= t_start], type='constant')
-    
+
     c_filter[iSeed, :] = np.correlate(REWS_f_detrended, REWS_detrended, mode='full')\
                          / (np.linalg.norm(REWS_f_detrended) * np.linalg.norm(REWS_detrended))
+
+    # Estimate cross correlation between rotor and lidar
+    REWS_WindField_Fs_detrended = signal.detrend(REWS_WindField_Fs[R_FBFF['Time'] >= t_start], type='constant')
+    REWS_b_detrended = signal.detrend(R_FBFF['REWS_b'][R_FBFF['Time'] >= t_start])
+
+    c_RL[iSeed, :] = np.correlate(REWS_WindField_Fs_detrended, REWS_b_detrended, mode='full')\
+                     / (np.linalg.norm(REWS_WindField_Fs_detrended) * np.linalg.norm(REWS_b_detrended))
                          
     lags = np.arange(-AnalysisTime*Fs, AnalysisTime*Fs+1)
 
@@ -243,6 +251,19 @@ plt.grid(True)
 plt.plot(lags / Fs, c_filter_mean)
 plt.plot(T_filter, c_max, 'o')
 plt.xlim([-20, 20])
+plt.xlabel('time [s]')
+plt.ylabel('cross correlation [-]')
+
+# Plot cross-correlation between rotor and lidar
+c_RL_mean = np.mean(c_RL, axis=0)
+c_max, idx_max = np.max(c_RL_mean), np.argmax(c_RL_mean)
+T_RL = lags[idx_max] / Fs
+plt.figure('Cross-correlation between rotor and lidar')
+plt.grid(True)
+plt.plot(lags / Fs, c_RL_mean)
+plt.plot(T_RL, c_max, 'o')
+plt.xlim([0, 3])
+plt.ylim([0.878, 0.892])
 plt.xlabel('time [s]')
 plt.ylabel('cross correlation [-]')
 
