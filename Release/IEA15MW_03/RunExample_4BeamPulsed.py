@@ -198,7 +198,7 @@ for iSeed in range(nSeed):
 
     # Estimate cross correlation between rotor and lidar
     REWS_WindField_Fs_detrended = signal.detrend(REWS_WindField_Fs[R_FBFF['Time'] >= t_start], type='constant')
-    REWS_b_detrended = signal.detrend(R_FBFF['REWS_b'][R_FBFF['Time'] >= t_start])
+    REWS_b_detrended = signal.detrend(R_FBFF['REWS_b'][R_FBFF['Time'] >= t_start], type='constant')
 
     c_RL[iSeed, :] = np.correlate(REWS_WindField_Fs_detrended, REWS_b_detrended, mode='full')\
                      / (np.linalg.norm(REWS_WindField_Fs_detrended) * np.linalg.norm(REWS_b_detrended))
@@ -250,7 +250,8 @@ plt.figure('Filter delay')
 plt.grid(True)
 plt.plot(lags / Fs, c_filter_mean)
 plt.plot(T_filter, c_max, 'o')
-plt.xlim([-20, 20])
+plt.xlim([0, 10])
+plt.ylim([0.8, 1.0])
 plt.xlabel('time [s]')
 plt.ylabel('cross correlation [-]')
 
@@ -262,8 +263,8 @@ plt.figure('Cross-correlation between rotor and lidar')
 plt.grid(True)
 plt.plot(lags / Fs, c_RL_mean)
 plt.plot(T_RL, c_max, 'o')
-plt.xlim([0, 3])
-plt.ylim([0.878, 0.892])
+plt.xlim([-5, 5])
+plt.ylim([0.8, 1.0])
 plt.xlabel('time [s]')
 plt.ylabel('cross correlation [-]')
 
