@@ -39,24 +39,7 @@ def ReadBLgrid(FileName):
         nffc = np.fromfile(fid_wnd, dtype=np.int16, count=1)[0]                  # number of components
 
         if nffc != -99:  # AN OLD-STYLE AERODYN WIND FILE
-            dz = np.fromfile(fid_wnd, dtype=np.int16, count=1)[0]                # delta z in mm
-            dy = np.fromfile(fid_wnd, dtype=np.int16, count=1)[0]                # delta y in mm
-            dx = np.fromfile(fid_wnd, dtype=np.int16, count=1)[0]                # delta x (actually t in this case) in mm
-            nt = np.fromfile(fid_wnd, dtype=np.int16, count=1)[0]                # half number of time steps
-            MFFWS = np.fromfile(fid_wnd, dtype=np.int16, count=1)[0]             # 10 times mean FF wind speed
-            fid_wnd.read(5 * 2)  # unnecessary lines
-            nz = np.fromfile(fid_wnd, dtype=np.int16, count=1)[0]                # 1000 times number of points in vertical direction, max 32
-            ny = np.fromfile(fid_wnd, dtype=np.int16, count=1)[0]                # 1000 times the number of points in horizontal direction, max 32
-            fid_wnd.read(3 * (-nffc - 1) * 2)
-
-            # Convert the integers to real numbers
-            nffc = -nffc
-            dz = 0.001 * ConvFact * dz
-            dy = 0.001 * ConvFact * dy
-            dx = 0.001 * ConvFact * dx
-            MFFWS = 0.1 * ConvFact * MFFWS
-            nz = int(nz % 2**16 / 1000)                                          # the mod 2^16 is a work around for somewhat larger grids
-            ny = int(ny % 2**16 / 1000)                                          # the mod 2^16 is a work around for somewhat larger grids
+          raise ValueError("Please use a newer-style AERODYN wind file.")
         else:  # THE NEWER-STYLE AERODYN WIND FILE
             fc = np.fromfile(fid_wnd, dtype=np.int16, count=1)[0]                # should be 4 to allow turbulence intensity to be stored in the header
 

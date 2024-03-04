@@ -1,21 +1,17 @@
-
-
-import pandas as pd
 import numpy as np
 
-def ReadROSCOtextIntoDataframe(file_name):
-    """Reads ROSCO text data into a Python DataFrame.
+def ReadROSCOtextIntoDataframe(FileName):
+    raw_data = np.loadtxt(FileName, skiprows=3)
 
-      Args:
-        FileName: The path to the ROSCO .IN file.
+    with open(FileName, 'r') as file:
+        lines = file.readlines()
+        channel_names = lines[1].split()
 
-      Returns:
-        A Python structure containing the ROSCO data.
-      """
-    raw_data = pd.read_csv(file_name, delim_whitespace=True, skiprows=3)
+    data = {}
+    for i, channel_name in enumerate(channel_names):
+        data[channel_name] = raw_data[:, i]
+                                                                        
 
-    # Remove cells containing strings
-    raw_data = raw_data.apply(lambda series: series.map(lambda x: np.nan if isinstance(x, str) else x))
-
-    return raw_data
-
+                                     
+    return data
+    

@@ -221,7 +221,8 @@ figure('Name','Filter delay')
 hold on;grid on; box on
 plot(lags/Fs,mean(c_filter,1))
 plot(T_filter,c_max,'o')
-xlim([-1 1]*20)
+xlim([0 10])
+ylim([0.8 1])
 xlabel('time [s]')
 ylabel('cross correlation [-]')
 
@@ -233,7 +234,8 @@ title('Cross-correlation between rotor and lidar')
 hold on;grid on; box on
 plot(lags/Fs,mean(c_RL,1))
 plot(T_RL,c_max,'o')
-xlim([0 3])
+xlim([-5 5])
+ylim([0.8 1])
 xlabel('time [s]')
 ylabel('cross correlation [-]')
 
