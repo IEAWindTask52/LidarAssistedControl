@@ -5,7 +5,7 @@ import sys
 
 # Script to run DLC 1.2 for "FeedbackOnly".
 # setup
-sys.path.append('..\\PythonFunctions')
+sys.path.append('../PythonFunctions')
 from GetParametersforDLC1p2 import GetParametersforDLC1p2
 from PreProcessing.PreProcessingSimulations import PreProcessingSimulations
 from Processing.ProcessingSimulations import ProcessingSimulations

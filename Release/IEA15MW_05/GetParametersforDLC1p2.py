@@ -1,21 +1,27 @@
 import numpy as np
 import sys
 
-sys.path.append('..\PythonFunctions')
+sys.path.append('../PythonFunctions')
 from PreProcessing.GetStatistics import GetStatistics
 from DataFunctions.CalculateDEL import CalculateDEL
+from DataFunctions.CalculatePitchTravel import CalculatePitchTravel
+from Tools.rpm2radPs import rpm2radPs
+
 def GetParametersforDLC1p2(simulation_mode):
     assert simulation_mode in ['FeedbackOnly', 'LAC_CircularCW', 'LAC_4BeamPulsed'], "Invalid SimulationMode"
 
     # Process parameters
     start_time = 60  # [s] time to start evaluation (all signals should be settled)
+    woehler_exponent_steel = 4 # [-]           typical value for steel
+    woehler_exponent_composite = 10 # [-]          typical value for composite material
+    pc_ref_spd = 0.79168 # [rad/s]       rated generator speed from ROSCO_v2d6.IN
 
     # files
     statistics_file = 'Statistics_SteadyStates.csv'
 
     # Variation
-    pre_processing_variation = [['URef', np.arange(4, 21, 4), '02d'],
-                                ['Seed', np.arange(1, 3), '02d']]
+    pre_processing_variation = [['URef', np.arange(4, 25, 2), '02d'],
+                                ['Seed', np.arange(1, 7), '02d']]
 
     # template files
     input_files = [['IEA-15-240-RWT-Monopile.fst'],  # main file
@@ -70,17 +76,17 @@ def GetParametersforDLC1p2(simulation_mode):
          lambda variation_values: '%5.2f' % GetStatistics(statistics_file, 'mean_RotSpeed', variation_values[0])],
         # InflowWind: change wind type and link to turbulent wind file
         ['3', 'I', 'WindType', '4'],
-        ['3', 'I', 'FilenameRoot', lambda variation_values: '../TurbulentWind/URef_%02d_Seed_%02d%02d' % (
-        variation_values[0], variation_values[0], variation_values[1])]
+        ['3', 'I', 'FilenameRoot', lambda variation_values: '../TurbulentWind/URef_%02d_Seed_%02d' % (
+        variation_values[0], variation_values[1])]
     ]
     # FFP_v1 Parameters
     u_ref_v = np.arange(10, 25, 2)  # [m/s]
     if simulation_mode == 'LAC_CircularCW':
-        f_cutoff_v = [0.1816, 0.2179, 0.2542, 0.2905, 0.3268, 0.3632, 0.3995, 0.4358]  # [rad/s]
-        t_buffer_v = [13.0000, 10.4167, 8.5714, 7.1875, 6.1111, 5.2500, 4.5455, 3.9583]  # [s]
+        f_cutoff_v = [0.1453, 0.1816, 0.2179, 0.2542, 0.2905, 0.3268, 0.3632, 0.3995, 0.4358]  # [rad/s]
+        t_buffer_v = [16.8750, 13.0000, 10.4167, 8.5714, 7.1875, 6.1111, 5.2500, 4.5455, 3.9583]  # [s]
     elif simulation_mode == 'LAC_4BeamPulsed':
-        f_cutoff_v = [0.0684, 0.0821, 0.0958, 0.1095, 0.1232, 0.1369, 0.1505, 0.1642]  # [rad/s]
-        t_buffer_v = [4.5000, 3.3333, 2.5000, 1.8750, 1.3889, 1.0000, 0.6818, 0.4167]  # [s]
+        f_cutoff_v = [0.0547, 0.0684, 0.0821, 0.0958, 0.1095, 0.1232, 0.1369, 0.1505, 0.1642]  # [rad/s]
+        t_buffer_v = [6.2500, 4.5000, 3.3333, 2.5000, 1.8750, 1.3889, 1.0000, 0.6818, 0.4167]  # [s]
 
     # additional modifications for LAC modes
     if simulation_mode in ['LAC_CircularCW', 'LAC_4BeamPulsed']:
@@ -100,9 +106,9 @@ def GetParametersforDLC1p2(simulation_mode):
             ['7', 'I', '! FlagLAC', '1'],
             # FFP_v1: adjust f_cutoff and T_buffer
             ['8', 'I', '! f_cutoff',
-             lambda variation_values: '%8.4f' % np.interp(variation_values[0], u_ref_v, f_cutoff_v)],
+             lambda variation_values: '%8.4f' % np.interp(u_ref_v, f_cutoff_v, min(max(variation_values[0], u_ref_v[0]), u_ref_v[-1]))],
             ['8', 'I', '! T_buffer',
-             lambda variation_values: '%8.4f' % np.interp(variation_values[0], u_ref_v, t_buffer_v)]
+             lambda variation_values: '%8.4f' % np.interp(u_ref_v, t_buffer_v, min(max(variation_values[0], u_ref_v[0]), u_ref_v[-1]))]
         ])
 
     # PlotTimeResults
@@ -119,11 +125,14 @@ def GetParametersforDLC1p2(simulation_mode):
         }
 
     # CalculateStatistics
-    woehler_exponent = 4
     post_processing_config['CalculateStatistics'] = {
         'mean': [lambda data, time: np.mean(data[time >= start_time]), ['Wind1VelX', 'GenPwr']],
-        'DEL': [lambda data, time: CalculateDEL(data[time >= start_time], time[time >= start_time], woehler_exponent),
-                ['TwrBsMyt']]
+        'DEL_4': [lambda data, time: CalculateDEL(data[time >= start_time], time[time >= start_time],
+                                                  woehler_exponent_steel), ['TwrBsMyt']],
+        'DEL_10': [lambda data, time: CalculateDEL(data[time >= start_time], time[time >= start_time],
+                                                  woehler_exponent_composite), ['RootMyb1']],
+        'Overshoot': [lambda data, time: max(max(rpm2radPs(data[time >= start_time])-pc_ref_spd)/pc_ref_spd, 0), ['GenSpeed']],
+        'Travel': [lambda data, time: CalculatePitchTravel(data,time,start_time), ['BldPitch1']]
     }
 
     return post_processing_config, pre_processing_variation, input_files, modifications,
