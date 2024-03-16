@@ -23,11 +23,11 @@ from scipy.interpolate import interp1d
 from scipy.io import loadmat
 import sys
 
-sys.path.append('..\PythonFunctions')
-from ManipulateTXTFile import ManipulateTXTFile
-from ReadFASTbinaryIntoStruct import ReadFASTbinaryIntoStruct
-from ReadROSCOtextIntoStruct import ReadROSCOtextIntoDataframe
-from CalculateREWSfromWindField import CalulateREWSfromWindField
+sys.path.append('../PythonFunctions')
+from FileOperations.ManipulateTXTFile import ManipulateTXTFile
+from FileOperations.ReadFASTbinaryIntoStruct import ReadFASTbinaryIntoStruct
+from FileOperations.ReadROSCOtextIntoStruct import ReadROSCOtextIntoDataframe
+from PreProcessing.CalculateREWSfromWindField import CalulateREWSfromWindField
 
 # Seeds (can be adjusted, but will provide different results)
 nSeed = 6                                           # [-] number of stochastic turbulence field samples
@@ -62,7 +62,7 @@ if not os.path.exists(SimulationFolder):
 # Preprocessing: generate turbulent wind field
 
 # Copy the adequate TurbSim version to the example folder
-shutil.copyfile(os.path.join('..\TurbSim', TurbSimExeFile), os.path.join('TurbulentWind', TurbSimExeFile))
+shutil.copyfile(os.path.join('../TurbSim', TurbSimExeFile), os.path.join('TurbulentWind', TurbSimExeFile))
 
 # Generate all wind fields
 for iSeed in range(nSeed):
@@ -81,7 +81,7 @@ os.remove(os.path.join('TurbulentWind', TurbSimExeFile))
 # Processing: run simulations
 
 # Copy the adequate OpenFAST version to the example folder
-shutil.copyfile(os.path.join('..\OpenFAST', FASTexeFile), FASTexeFile)
+shutil.copyfile(os.path.join('../OpenFAST', FASTexeFile), FASTexeFile)
 
 #  Simulate with all wind fields
 for iSeed in range(nSeed):
@@ -127,6 +127,7 @@ S_RL_est = np.empty((nSeed, int(nFFT/2+1)), dtype=complex)
 STD_RotSpeed_FB = np.empty(nSeed)
 STD_RotSpeed_FBFF = np.empty(nSeed)
 c_filter = np.empty((nSeed, int(AnalysisTime*Fs*2+1)))
+c_RL = np.empty((nSeed, int(AnalysisTime*Fs*2+1)))
 
 # Loop over all seeds
 for iSeed in range(nSeed):
@@ -167,42 +168,55 @@ for iSeed in range(nSeed):
     # Estimate auto- and cross-spectra of REWS
     TurbSimResultFile = 'TurbulentWind/URef_18_Seed_{:02d}.wnd'.format(Seed)
     REWS_WindField, Time_WindField = CalulateREWSfromWindField(TurbSimResultFile, R, 2)
-    REWS_WindField_Fs = interp1d(Time_WindField.ravel(),REWS_WindField.ravel())(R_FBFF.iloc[:, 0]) # get REWS with the same time step as simulations
+    REWS_WindField_Fs = interp1d(Time_WindField.ravel(),REWS_WindField.ravel())(R_FBFF['Time']) # get REWS with the same time step as simulations
     _, S_LL_est[iSeed, :] = signal.welch(
-        signal.detrend(R_FBFF.iloc[:, 26][R_FBFF.iloc[:, 0] >= t_start], type='constant'),
+        signal.detrend(R_FBFF['REWS'][R_FBFF['Time'] >= t_start], type='constant'),
         fs=Fs, window=vWindow, noverlap=nOverlap, nfft=nFFT)
     _, S_RR_est[iSeed, :] = signal.welch(
-        signal.detrend(REWS_WindField_Fs[R_FBFF.iloc[:, 0] >= t_start], type='constant'),
+        signal.detrend(REWS_WindField_Fs[R_FBFF['Time'] >= t_start], type='constant'),
         fs=Fs, window=vWindow, noverlap=nOverlap, nfft=nFFT)
-    _, S_RL_est[iSeed, :] = signal.csd(signal.detrend(REWS_WindField_Fs[R_FBFF.iloc[:, 0] >= t_start], type='constant'),
-                                       signal.detrend(R_FBFF.iloc[:, 26][R_FBFF.iloc[:, 0] >= t_start],
+    _, S_RL_est[iSeed, :] = signal.csd(signal.detrend(REWS_WindField_Fs[R_FBFF['Time'] >= t_start], type='constant'),
+                                       signal.detrend(R_FBFF['REWS'][R_FBFF['Time'] >= t_start],
                                                       type='constant'),
                                        fs=Fs, window=vWindow, noverlap=nOverlap, nfft=nFFT)
 
     # Plot REWS
     plt.figure('REWS seed {}'.format(Seed))
-    plt.plot(R_FBFF.iloc[:, 0], REWS_WindField_Fs)
-    plt.plot(R_FBFF.iloc[:, 0], R_FBFF.iloc[:, 26])
+    plt.grid(True)
+    plt.plot(R_FBFF['Time'], REWS_WindField_Fs)
+    plt.plot(R_FBFF['Time'], R_FBFF['REWS'])
     plt.ylabel('REWS [m/s]')
     plt.legend(['wind field', 'lidar estimate'])
     plt.xlabel('time [s]')
 
-    # Estimate cross correlation TODO: get normalized cross correlation
-    c_filter[iSeed, :] = np.correlate(signal.detrend(R_FBFF.iloc[:, 27][R_FBFF.iloc[:, 0] >= t_start], type='constant'),
-                                      signal.detrend(R_FBFF.iloc[:, 26][R_FBFF.iloc[:, 0] >= t_start], type='constant'), mode='full')
+    # Estimate cross correlation between filtered and unfiltered REWS from lidar
+    REWS_f_detrended = signal.detrend(R_FBFF['REWS_f'][R_FBFF['Time'] >= t_start], type='constant')
+    REWS_detrended = signal.detrend(R_FBFF['REWS'][R_FBFF['Time'] >= t_start], type='constant')
+
+    c_filter[iSeed, :] = np.correlate(REWS_f_detrended, REWS_detrended, mode='full')\
+                         / (np.linalg.norm(REWS_f_detrended) * np.linalg.norm(REWS_detrended))
+
+    # Estimate cross correlation between rotor and lidar
+    REWS_WindField_Fs_detrended = signal.detrend(REWS_WindField_Fs[R_FBFF['Time'] >= t_start], type='constant')
+    REWS_b_detrended = signal.detrend(R_FBFF['REWS_b'][R_FBFF['Time'] >= t_start])
+
+    c_RL[iSeed, :] = np.correlate(REWS_WindField_Fs_detrended, REWS_b_detrended, mode='full')\
+                     / (np.linalg.norm(REWS_WindField_Fs_detrended) * np.linalg.norm(REWS_b_detrended))
+                         
     lags = np.arange(-AnalysisTime*Fs, AnalysisTime*Fs+1)
 
 # Calculate mean coherence
 gamma2_RL_mean_est = np.abs(np.mean(S_RL_est, axis=0)) ** 2 / np.mean(S_LL_est, axis=0) / np.mean(S_RR_est, axis=0)
 
 # Get analytical correlation model
-SpectralModelFileName = '..\AnalyticalModel\LidarRotorSpectra_IEA15MW_CircularCW.mat'  # model for 18 m/s
+SpectralModelFileName = '../AnalyticalModel/LidarRotorSpectra_IEA15MW_4BeamPulsed.mat'  # model for 18 m/s
 AnalyticalModel = loadmat(SpectralModelFileName)
 AnalyticalModel['gamma2_RL'] = np.abs(AnalyticalModel['S_RL']) ** 2 / AnalyticalModel['S_RR'] / AnalyticalModel[
     'S_LL']
 
 # Plot rotor speed spectra
 plt.figure('Rotor speed spectra')
+plt.grid(True)
 plt.plot(f_est, np.mean(S_RotSpeed_FB_est, axis=0))
 plt.plot(f_est, np.mean(S_RotSpeed_FBFF_est, axis=0))
 plt.xscale('log')
@@ -217,6 +231,7 @@ print('Change in rotor speed standard deviation:  %4.1f %%\n' % (
 
 # Plot REWS spectra
 plt.figure('REWS spectra')
+plt.grid(True)
 plt.plot(AnalyticalModel['f'], AnalyticalModel['S_LL'])
 plt.plot(AnalyticalModel['f'], AnalyticalModel['S_RR'])
 plt.plot(f_est, np.mean(S_LL_est, axis=0))
@@ -232,14 +247,30 @@ c_filter_mean = np.mean(c_filter, axis=0)
 c_max, idx_max = np.max(c_filter_mean), np.argmax(c_filter_mean)
 T_filter = lags[idx_max] / Fs  # [s]       time delay by the filter
 plt.figure('Filter delay')
+plt.grid(True)
 plt.plot(lags / Fs, c_filter_mean)
 plt.plot(T_filter, c_max, 'o')
-plt.xlim([-20, 20])
+plt.xlim([0, 10])
+plt.ylim([0.8, 1.0])
+plt.xlabel('time [s]')
+plt.ylabel('cross correlation [-]')
+
+# Plot cross-correlation between rotor and lidar
+c_RL_mean = np.mean(c_RL, axis=0)
+c_max, idx_max = np.max(c_RL_mean), np.argmax(c_RL_mean)
+T_RL = lags[idx_max] / Fs
+plt.figure('Cross-correlation between rotor and lidar')
+plt.grid(True)
+plt.plot(lags / Fs, c_RL_mean)
+plt.plot(T_RL, c_max, 'o')
+plt.xlim([-5, 5])
+plt.ylim([0.8, 1.0])
 plt.xlabel('time [s]')
 plt.ylabel('cross correlation [-]')
 
 # Plot REWS coherence
 plt.figure('REWS coherence')
+plt.grid(True)
 plt.plot(AnalyticalModel['f'], AnalyticalModel['gamma2_RL'])
 plt.plot(f_est[1:], gamma2_RL_mean_est[1:])
 plt.xscale('log')

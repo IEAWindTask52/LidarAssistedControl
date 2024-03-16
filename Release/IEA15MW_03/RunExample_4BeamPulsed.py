@@ -23,7 +23,7 @@ from scipy.interpolate import interp1d
 from scipy.io import loadmat
 import sys
 
-sys.path.append('..\PythonFunctions')
+sys.path.append('../PythonFunctions')
 from FileOperations.ManipulateTXTFile import ManipulateTXTFile
 from FileOperations.ReadFASTbinaryIntoStruct import ReadFASTbinaryIntoStruct
 from FileOperations.ReadROSCOtextIntoStruct import ReadROSCOtextIntoDataframe
@@ -62,7 +62,7 @@ if not os.path.exists(SimulationFolder):
 # Preprocessing: generate turbulent wind field
 
 # Copy the adequate TurbSim version to the example folder
-shutil.copyfile(os.path.join('..\TurbSim', TurbSimExeFile), os.path.join('TurbulentWind', TurbSimExeFile))
+shutil.copyfile(os.path.join('../TurbSim', TurbSimExeFile), os.path.join('TurbulentWind', TurbSimExeFile))
 
 # Generate all wind fields
 for iSeed in range(nSeed):
@@ -81,7 +81,7 @@ os.remove(os.path.join('TurbulentWind', TurbSimExeFile))
 # Processing: run simulations
 
 # Copy the adequate OpenFAST version to the example folder
-shutil.copyfile(os.path.join('..\OpenFAST', FASTexeFile), FASTexeFile)
+shutil.copyfile(os.path.join('../OpenFAST', FASTexeFile), FASTexeFile)
 
 #  Simulate with all wind fields
 for iSeed in range(nSeed):
@@ -198,7 +198,7 @@ for iSeed in range(nSeed):
 
     # Estimate cross correlation between rotor and lidar
     REWS_WindField_Fs_detrended = signal.detrend(REWS_WindField_Fs[R_FBFF['Time'] >= t_start], type='constant')
-    REWS_b_detrended = signal.detrend(R_FBFF['REWS_b'][R_FBFF['Time'] >= t_start], type='constant')
+    REWS_b_detrended = signal.detrend(R_FBFF['REWS_b'][R_FBFF['Time'] >= t_start])
 
     c_RL[iSeed, :] = np.correlate(REWS_WindField_Fs_detrended, REWS_b_detrended, mode='full')\
                      / (np.linalg.norm(REWS_WindField_Fs_detrended) * np.linalg.norm(REWS_b_detrended))
@@ -209,7 +209,7 @@ for iSeed in range(nSeed):
 gamma2_RL_mean_est = np.abs(np.mean(S_RL_est, axis=0)) ** 2 / np.mean(S_LL_est, axis=0) / np.mean(S_RR_est, axis=0)
 
 # Get analytical correlation model
-SpectralModelFileName = '..\AnalyticalModel\LidarRotorSpectra_IEA15MW_4BeamPulsed.mat'  # model for 18 m/s
+SpectralModelFileName = '../AnalyticalModel/LidarRotorSpectra_IEA15MW_4BeamPulsed.mat'  # model for 18 m/s
 AnalyticalModel = loadmat(SpectralModelFileName)
 AnalyticalModel['gamma2_RL'] = np.abs(AnalyticalModel['S_RL']) ** 2 / AnalyticalModel['S_RR'] / AnalyticalModel[
     'S_LL']
