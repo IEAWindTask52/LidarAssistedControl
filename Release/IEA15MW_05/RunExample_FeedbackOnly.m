@@ -20,13 +20,13 @@ copyfile(['..\OpenFAST\',ExeFile],fullfile(SimulationFolder,ExeFile))
 
 % get SimulationNames and DataFiles
 [SimulationNames,DataFiles] = PreProcessingSimulations(SimulationFolder,PreProcessingVariation,InputFiles,Modifications);
-
+%%
 % run simulations
 [status,result]             = ProcessingSimulations(SimulationFolder,SimulationNames,ExeFile);
-
+%%
 % TimeResults
 TimeResults                 = CollectTimeResults(DataFiles,PostProcessingConfig);
-PlotTimeResults(TimeResults,PostProcessingConfig);
+%PlotTimeResults(TimeResults,PostProcessingConfig);
 
 % Statistics
 Statistics                  = CalculateStatistics(TimeResults,PostProcessingConfig);

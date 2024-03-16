@@ -1,5 +1,5 @@
 import pandas as pd
-from FileOperations.ReadFASTbinary import ReadFASTbinary
+from FileOperations.ReadFASTbinary_05 import ReadFASTbinary
 def ReadFASTbinaryIntoTSC(file_name):
     # based on LoadFAST
 

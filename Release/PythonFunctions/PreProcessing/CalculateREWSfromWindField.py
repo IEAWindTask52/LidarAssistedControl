@@ -1,5 +1,5 @@
 import numpy as np
-from ReadBLgrid import ReadBLgrid
+from FileOperations.ReadBLgrid import ReadBLgrid
 
 
 

@@ -43,10 +43,10 @@ if not os.path.exists(exe_destination):
 
 # get SimulationNames and DataFiles
 SimulationNames, DataFiles = PreProcessingSimulations(SimulationFolder, PreProcessingVariation, InputFiles, Modifications)
-
+r'''
 # run simulations
 status, result = ProcessingSimulations(SimulationFolder, SimulationNames, ExeFile)
-
+'''
 # TimeResults
 TimeResults = CollectTimeResults(DataFiles, PostProcessingConfig)
 PlotTimeResults(TimeResults, PostProcessingConfig)
