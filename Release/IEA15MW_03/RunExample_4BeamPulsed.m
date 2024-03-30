@@ -3,13 +3,12 @@
 % Purpose:
 % Here, we use a realistic wind preview to demonstrate that the collective
 % pitch feedforward controller together with the correct filtering provides
-% the reduction in rotor speed variation as predicted by the linear model
-% and the coherence. In this example, we assume frozen turbulence, only one 
-% 3D turbulence field (y,z,t) at rotor plane is generated.
+% a reduction in rotor speed variation and the coherence is as expected. 
+% In this example, we assume frozen turbulence, only one 3D turbulent
+% wind field (y,z,t) at rotor plane is generated.
 % Result:
 % Change in rotor speed standard deviation:  -49.5 %
-% Authors:
-% David Schlipf, Feng Guo
+% Cost for Summer Games 2024 ("18 m/s hurdles"):  0.444660 m/s 
 
 %% Setup
 clearvars;close all;clc;
@@ -31,6 +30,9 @@ nDataPerBlock       = AnalysisTime/nBlock*Fs;   % [-]  	data per block, here 2 b
 vWindow             = hamming(nDataPerBlock);   % [-] 	window for estimation
 nFFT                = 2^nextpow2(nDataPerBlock);% [-]  	number of FFT, default: 2^nextpow2(nDataPerBlock); 
 nOverlap            = nDataPerBlock/2;          % [-]  	samples of overlap, default: 50% overlap
+
+% Parameter for Cost (Summer Games 2024)
+tau                 = 2;                        % [s]   time to overcome pitch actuator, from Example 1: tau = T_Taylor - T_buffer, since there T_filter = T_scan = 0
 
 % Files (should not be be changed)
 TurbSimExeFile      = 'TurbSim_x64.exe';
@@ -120,6 +122,7 @@ STD_RotSpeed_FB         = NaN(1,nSeed);
 STD_RotSpeed_FBFF       = NaN(1,nSeed);
 c_filter                = NaN(nSeed,AnalysisTime*Fs*2+1);
 c_RL                    = NaN(nSeed,AnalysisTime*Fs*2+1);
+MAE                     = NaN(1,nSeed); % mean absolute error [m/s]
 
 % Loop over all seeds
 for iSeed = 1:nSeed    
@@ -161,20 +164,36 @@ for iSeed = 1:nSeed
     [S_RR_est(iSeed,:) ,~]            	= pwelch(detrend(REWS_WindField_Fs(R_FBFF.Time>=t_start),'constant'),vWindow,nOverlap,nFFT,Fs);     
     [S_RL_est(iSeed,:) ,~]             	= cpsd(detrend(REWS_WindField_Fs(R_FBFF.Time>=t_start),'constant'),detrend(R_FBFF.REWS(R_FBFF.Time>=t_start),'constant'),vWindow,nOverlap,nFFT,Fs);     
     
-    % Plot REWS
+    % Estimate cross correlation between filtered and unfiltered REWS from lidar
+    [c_filter(iSeed,:),lags]    = xcorr(detrend(R_FBFF.REWS_f(R_FBFF.Time>=t_start),'constant'),detrend(R_FBFF.REWS(R_FBFF.Time>=t_start),'constant'),'normalized');
+
+    % Estimate cross correlation between rotor and lidar
+    [c_RL(iSeed,:),lags]        = xcorr(detrend(REWS_WindField_Fs(R_FBFF.Time>=t_start),'constant'),detrend(R_FBFF.REWS_b(R_FBFF.Time>=t_start)),'normalized'); 
+
+    % Calculate mean absolute error
+    REWS_WindField_Fs_shifted   = interp1(Time_WindField-tau,REWS_WindField,R_FBFF.Time); % shift the REWS from wind field by tau (intented prediction time) into the future (lower times)
+    Error                       = REWS_WindField_Fs_shifted-R_FBFF.REWS_b; % error is  REWS from wind field shifted minus REWS from lidar filtered and buffered.
+    MAE(iSeed)                  = mean(abs(Error(R_FBFF.Time>=t_start)));  % only consider error after t_start
+
+    % Plot REWS for absolute error
     figure('Name',['REWS seed ',num2str(Seed)])
+    subplot(311)
     hold on; grid on; box on
     plot(R_FBFF.Time,   REWS_WindField_Fs);
     plot(R_FBFF.Time,   R_FBFF.REWS);
     ylabel('REWS [m/s]');
     legend('wind field','lidar estimate')
-    xlabel('time [s]')
-
-    % Estimate cross correlation between filtered and unfiltered REWS from lidar
-    [c_filter(iSeed,:),lags]    = xcorr(detrend(R_FBFF.REWS_f(R_FBFF.Time>=t_start),'constant'),detrend(R_FBFF.REWS(R_FBFF.Time>=t_start),'constant'),'normalized');
-
-    % Estimate cross correlation between rotor and lidar
-    [c_RL(iSeed,:),lags]        = xcorr(detrend(REWS_WindField_Fs(R_FBFF.Time>=t_start),'constant'),detrend(R_FBFF.REWS_b(R_FBFF.Time>=t_start)),'normalized');  
+    subplot(312)
+    hold on; grid on; box on
+    plot(R_FBFF.Time,   REWS_WindField_Fs_shifted);
+    plot(R_FBFF.Time,   R_FBFF.REWS_b);
+    ylabel('REWS [m/s]');
+    legend('wind field shifted','lidar estimate filtered and buffered')
+    subplot(313)
+    hold on; grid on; box on
+    plot(R_FBFF.Time,   Error);
+    ylabel('error [m/s]');
+    xlabel('time [s]')    
 
 end
     
@@ -256,5 +275,8 @@ URef                        = 18;                               % [m/s]     mean
 x_L                         = 160;                              % [m]       distance of lidar measurement 
 T_Taylor                    = x_L/URef;                         % [s]       travel time from lidar measurment to rotor
 T_scan                      = 1;                                % [s]       time of full lidar scan
-tau                         = 2;                                % [s]       time to overcome pitch actuator, from Example 1: tau = T_Taylor - T_buffer, since there T_filter = T_scan = 0
 T_buffer                    = T_Taylor-1/2*T_scan-T_filter-tau; % [s]       time needed to buffer signal such that FF signal is applied with tau, see Schlipf2015, Equation (5.40)
+
+%% Calculation of Cost for Summer Games 2024
+Cost                        = mean(MAE);
+fprintf('Cost for Summer Games 2024 ("18 m/s hurdles"):  %f \n',Cost);
