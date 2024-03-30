@@ -117,6 +117,7 @@ PostProcessingConfig.CalculateStatistics = {
     'DEL_10'        @(Data,Time)CalculateDEL(Data(Time>=StartTime),Time(Time>=StartTime),WoehlerExponentComposite)  {'RootMyb1'}
     'Overshoot'     @(Data,Time)max(max(rpm2radPs(Data(Time>=StartTime))-PC_RefSpd)/PC_RefSpd,0) {'GenSpeed'}
     'Travel'        @(Data,Time)CalculatePitchTravel(Data,Time,StartTime) {'BldPitch1'}
+    'max'           @(Data,Time)max(Data(Time>=StartTime)) {'GenTq'}    
     }; 
 
 end
