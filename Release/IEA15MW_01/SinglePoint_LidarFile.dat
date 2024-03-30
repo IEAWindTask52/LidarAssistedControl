@@ -1,5 +1,5 @@
 ------- Lidar Simulator V2.00 INPUT FILE ---------------------------------------
-Configuration of the single point lidar measuring at 90 m at 18 m/s
+Configuration of the single point lidar measuring at 60 m at 12 m/s
 --------------------------------------------------------------------------------
 False	Echo           					- Echo input data to <RootName>.ech (flag)
 100		MAXDLLChainOutputs				- Number of entries in the avrSWAP array reserved for outputs of the LDP DLL
@@ -12,7 +12,7 @@ False	Echo           					- Echo input data to <RootName>.ech (flag)
 0		RollAngle_N						- Roll angle between the Nacelle and the lidar coordinate system [deg]
 0		PitchAngle_N					- Pitch angle between the Nacelle and the lidar coordinate system [deg]
 180		YawAngle_N						- Yaw angle between the Nacelle and the lidar coordinate system [deg]
-18    	URef							- Mean u-component wind speed at the reference height [m/s]
+12    	URef							- Mean u-component wind speed at the reference height [m/s]
 1       GatesPerBeam					- Amount of range gates for each los
 0.0125	t_measurement_interval			- Time between each measurement [s]
 ---------------------- Measuring points in Cartesian coordinates----------------
@@ -22,7 +22,7 @@ X-Tab 	Y-Tab 	Z-Tab
 ---------------------- Measuring points in spherical coordinates----------------
 1		NumberOfPoints_Spherical		- Amounts of Points
 Azimuth-Tab     Elevation-Tab	RangeGates-Tab
-0 	  	0 	   90
+0 	  	0 	   60
 ---------------------- Weighting function (Gaussian distribution)---------------
 30		FWHM							- Full width half maximum [m]
 3		PointsToEvaluate				- points evaluated to "integrate" (odd number so there is a point in the peak, >= 3) [-]

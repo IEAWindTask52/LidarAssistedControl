@@ -3,7 +3,7 @@ close all;
 clc;
 
 %%
-FileName = 'EOG_URef_18';
+FileName = 'EOG_URef_12';
 
 %% Preprocessing
 % time
@@ -11,9 +11,9 @@ T           = 40;                   % [s]   simulation length
 dt          = 1/80;               	% [s]   simulation time step
 
 % wind
-V_hub       = 18;                   % [m/s] mean wind speed at hub height 
+V_hub       = 12;                   % [m/s] mean wind speed at hub height 
 T_gust      = 10.5;                 % [s]   length of EOG
-t_start     = 05;                   % [s]   time when EOG should start
+t_start     = 10;                   % [s]   time when EOG should start
 V_ref       = 50;                   % [m/s] reference wind speed average over 10 min
 I_ref       = 0.14;                 % [-]   expected value of the turbulence intensity at 15 m/s
 D           = 240;                  % [m]   rotor diameter

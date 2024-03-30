@@ -5,11 +5,10 @@
 % Here, we use a perfect wind preview to demonstrate that the collective
 % pitch feedforward controller (designed with SLOW) is able to reduce
 % significantly the rotor speed variation when OpenFAST is disturbed by an
-% Extreme Operating Gust. Here, only the rotational GenDOF is enabled.  
+% Extreme Operating Gust. Here, only the rotor motion and tower motion 
+% (GenDOF and TwFADOF1) are enabled.  
 % Result:       
-% Change in rotor over speed:  -96.9 %
-% Authors: 		
-% David Schlipf, Feng Guo
+% Cost for Summer Games 2024 ("30 s sprint"):  0.776490
 
 %% Setup
 clearvars;close all;clc;
@@ -17,7 +16,6 @@ addpath(genpath('..\WetiMatlabFunctions'))
 
 % Copy the adequate OpenFAST version to the example folder
 FASTexeFile     = 'openfast_x64.exe';
-FASTmapFile     = 'MAP_x64.dll';
 SimulationName  = 'IEA-15-240-RWT-Monopile';
 copyfile(['..\OpenFAST\',FASTexeFile],FASTexeFile)
 
@@ -74,8 +72,11 @@ linkaxes(findobj(gcf, 'Type', 'Axes'),'x');
 xlim([0 30])
 
 % display results
-RatedRotorSpeed = 7.56; % [rpm]
-t_Start         = 0;    % [s]
-fprintf('Change in rotor over speed:  %4.1f %%\n',...
-    (max(abs(FBFF.RotSpeed(FBFF.Time>=t_Start)-RatedRotorSpeed))/...
-     max(abs(FB.RotSpeed  (FB.Time  >=t_Start)-RatedRotorSpeed))-1)*100)
+RotSpeed_0  = 7.56;     % [rpm]
+TwrBsMyt_0  = 162e3;    % [kNm]
+t_Start     = 0;        % [s]
+
+Cost = (max(abs(FBFF.RotSpeed(FBFF.Time>=t_Start)-RotSpeed_0))) / RotSpeed_0 ...
+     + (max(abs(FBFF.TwrBsMyt(FBFF.Time>=t_Start)-TwrBsMyt_0))) / TwrBsMyt_0;
+
+fprintf('Cost for Summer Games 2024 ("30 s sprint"):  %f \n',Cost);

@@ -14,7 +14,7 @@ False                  TeetDOF     - Rotor-teeter DOF (flag) [unused for 3 blade
 False                  DrTrDOF     - Drivetrain rotational-flexibility DOF (flag)
 True                   GenDOF      - Generator DOF (flag)
 False                  YawDOF      - Yaw DOF (flag)
-False                  TwFADOF1    - First fore-aft tower bending-mode DOF (flag)
+True                   TwFADOF1    - First fore-aft tower bending-mode DOF (flag)
 False                  TwFADOF2    - Second fore-aft tower bending-mode DOF (flag)
 False                  TwSSDOF1    - First side-to-side tower bending-mode DOF (flag)
 False                  TwSSDOF2    - Second side-to-side tower bending-mode DOF (flag)
@@ -27,14 +27,14 @@ False                  PtfmYDOF    - Platform yaw rotation DOF (flag)
 ---------------------- INITIAL CONDITIONS --------------------------------------
 0.0                    OoPDefl     - Initial out-of-plane blade-tip displacement (meters)
 0.0                    IPDefl      - Initial in-plane blade-tip deflection (meters)
-15.48                  BlPitch(1)  - Blade 1 initial pitch (degrees)
-15.48                  BlPitch(2)  - Blade 2 initial pitch (degrees)
-15.48                  BlPitch(3)  - Blade 3 initial pitch (degrees) [unused for 2 blades]
+6.391                  BlPitch(1)  - Blade 1 initial pitch (degrees)
+6.391                  BlPitch(2)  - Blade 2 initial pitch (degrees)
+6.391                  BlPitch(3)  - Blade 3 initial pitch (degrees) [unused for 2 blades]
 0.0                    TeetDefl    - Initial or fixed teeter angle (degrees) [unused for 3 blades]
 0.0                    Azimuth     - Initial azimuth angle for blade 1 (degrees)
 7.56                   RotSpeed    - Initial or fixed rotor speed (rpm)
 0.0                    NacYaw      - Initial or fixed nacelle-yaw angle (degrees)
-0.0                    TTDspFA     - Initial fore-aft tower-top displacement (meters)
+0.2969                 TTDspFA     - Initial fore-aft tower-top displacement (meters)
 0.0                    TTDspSS     - Initial side-to-side tower-top displacement (meters)
 0.0                    PtfmSurge   - Initial or fixed horizontal surge translational displacement of platform (meters)
 0.0                    PtfmSway    - Initial or fixed horizontal sway translational displacement of platform (meters)
@@ -127,7 +127,9 @@ True                   TabDelim    - Use tab delimiters in text tabular output f
 "GenSpeed"
 "RotSpeed"
 "RotTorq"
+"RotThrust"
 "TwrBsMyt"
+"TTDspFA"
 END of input file (the word "END" must appear in the first 3 columns of this last OutList line)
 ---------------------- NODE OUTPUTS --------------------------------------------
           1   BldNd_BladesOut  - Blades to output
