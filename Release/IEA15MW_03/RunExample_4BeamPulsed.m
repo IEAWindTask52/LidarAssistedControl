@@ -39,13 +39,17 @@ TurbSimExeFile      = 'TurbSim_x64.exe';
 FASTexeFile         = 'openfast_x64.exe';
 SimulationName      = 'IEA-15-240-RWT-Monopile_4BeamPulsed';
 TurbSimTemplateFile = 'TurbSim2aInputFileTemplateIEA15MW.inp';
-SimulationFolder    = 'SimulationResults_4BeamPulsed';
+SimulationFolderFB  = 'SimulationResults_FeedbackOnly';
+SimulationFolderLAC = 'SimulationResults_4BeamPulsed';
 
 if ~exist('TurbulentWind','dir')
     mkdir TurbulentWind
 end
-if ~exist(SimulationFolder,'dir')
-    mkdir(SimulationFolder)
+if ~exist(SimulationFolderFB,'dir')
+    mkdir(SimulationFolderFB)
+end
+if ~exist(SimulationFolderLAC,'dir')
+    mkdir(SimulationFolderLAC)
 end
 
 %% Preprocessing: generate turbulent wind field
@@ -84,8 +88,8 @@ for iSeed = 1:nSeed
     ManipulateTXTFile('IEA-15-240-RWT_InflowFile.dat','MyFilenameRoot',WindFileRoot);
     
     % Run FB    
-    FASTresultFile      = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_0.outb']);
-    ROSCOresultFile     = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_0.dbg']);
+    FASTresultFile      = fullfile(SimulationFolderFB,[WindFileName,'_FlagLAC_0.outb']);
+    ROSCOresultFile     = fullfile(SimulationFolderFB,[WindFileName,'_FlagLAC_0.dbg']);
     if ~exist(FASTresultFile,'file')    
         ManipulateTXTFile('ROSCO_v2d6.IN','1 ! FlagLAC','0 ! FlagLAC'); % disable LAC
         dos([FASTexeFile,' ',SimulationName,'.fst']);
@@ -94,8 +98,8 @@ for iSeed = 1:nSeed
     end
    
     % Run FB+FF    
-    FASTresultFile      = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_1.outb']);
-    ROSCOresultFile     = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_1.dbg']);
+    FASTresultFile      = fullfile(SimulationFolderLAC,[WindFileName,'_FlagLAC_1.outb']);
+    ROSCOresultFile     = fullfile(SimulationFolderLAC,[WindFileName,'_FlagLAC_1.dbg']);
     if ~exist(FASTresultFile,'file')    
         ManipulateTXTFile('ROSCO_v2d6.IN','0 ! FlagLAC','1 ! FlagLAC'); % enable LAC
         dos([FASTexeFile,' ',SimulationName,'.fst']);
@@ -130,12 +134,12 @@ for iSeed = 1:nSeed
     % Load data
     Seed                = Seed_vec(iSeed);
 	WindFileName        = ['URef_18_Seed_',num2str(Seed,'%02d')];
-    FASTresultFile      = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_0.outb']);
-    ROSCOresultFile     = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_0.dbg']);
+    FASTresultFile      = fullfile(SimulationFolderFB,[WindFileName,'_FlagLAC_0.outb']);
+    ROSCOresultFile     = fullfile(SimulationFolderFB,[WindFileName,'_FlagLAC_0.dbg']);
     FB                  = ReadFASTbinaryIntoStruct(FASTresultFile);
     R_FB                = ReadROSCOtextIntoStruct(ROSCOresultFile);
-    FASTresultFile      = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_1.outb']);
-    ROSCOresultFile     = fullfile(SimulationFolder,[WindFileName,'_FlagLAC_1.dbg']);
+    FASTresultFile      = fullfile(SimulationFolderLAC,[WindFileName,'_FlagLAC_1.outb']);
+    ROSCOresultFile     = fullfile(SimulationFolderLAC,[WindFileName,'_FlagLAC_1.dbg']);
     FBFF                = ReadFASTbinaryIntoStruct(FASTresultFile);
 	R_FBFF              = ReadROSCOtextIntoStruct(ROSCOresultFile);
 
