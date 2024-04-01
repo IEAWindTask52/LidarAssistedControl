@@ -12,9 +12,9 @@ WindSpeedChannel    = 'mean_Wind1VelX';
 FrequencyResults    = struct();
 PostProcessingConfig.CalculateProcessResults = {
     @(ProcessResults,FrequencyResults,Statistics) DataFilterWindSpeedBins(Statistics,WindSpeedBins,WindSpeedChannel) 
-    @(ProcessResults,FrequencyResults,Statistics) CalculateLifeTimeWeightedDEL(ProcessResults,Statistics,WindSpeedBins,'DEL_4_TwrBsMyt',WoehlerExponent=4);
-    @(ProcessResults,FrequencyResults,Statistics) CalculateLifeTimeWeightedDEL(ProcessResults,Statistics,WindSpeedBins,'DEL_4_RotTorq',WoehlerExponent=4);
-    @(ProcessResults,FrequencyResults,Statistics) CalculateLifeTimeWeightedDEL(ProcessResults,Statistics,WindSpeedBins,'DEL_10_RootMyb1',WoehlerExponent=10);
+    @(ProcessResults,FrequencyResults,Statistics) CalculateLifeTimeWeightedDEL(ProcessResults,Statistics,WindSpeedBins,'DEL_4_TwrBsMyt','WoehlerExponent',4);
+    @(ProcessResults,FrequencyResults,Statistics) CalculateLifeTimeWeightedDEL(ProcessResults,Statistics,WindSpeedBins,'DEL_4_RotTorq','WoehlerExponent',4);
+    @(ProcessResults,FrequencyResults,Statistics) CalculateLifeTimeWeightedDEL(ProcessResults,Statistics,WindSpeedBins,'DEL_10_RootMyb1','WoehlerExponent',10);
     @(ProcessResults,FrequencyResults,Statistics) CalculateLifeTimeWeightedMean(ProcessResults,Statistics,WindSpeedBins,'mean_GenPwr')
     @(ProcessResults,FrequencyResults,Statistics) CalculateLifeTimeWeightedMean(ProcessResults,Statistics,WindSpeedBins,'Travel_BldPitch1')    
     @(ProcessResults,FrequencyResults,Statistics) CalculateMaxValuesPerBin(ProcessResults,Statistics,'Overshoot_GenSpeed')
