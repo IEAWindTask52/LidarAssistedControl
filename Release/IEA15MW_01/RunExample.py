@@ -1,15 +1,14 @@
-# IEA15MW_01: IEA 15 MW monopile + perfect wind preview from a single point 
+# IEA15MW_01: IEA 15 MW monopile + perfect wind preview from a single point
 # lidar system.
 # Origin and changes in files: see ChangeLog.txt.
 # Purpose:
 # Here, we use a perfect wind preview to demonstrate that the collective
 # pitch feedforward controller (designed with SLOW) is able to reduce
 # significantly the rotor speed variation when OpenFAST is disturbed by an
-# Extreme Operating Gust. Here, only the rotational GenDOF is enabled.  
-# Result:       
-# Change in rotor over speed:  -96.9 %
-# Authors: 		
-# David Schlipf, Feng Guo, Simon Weich, Aravind Venkatachalapathy
+# Extreme Operating Gust. Here, only the rotor motion and tower motion
+# % (GenDOF and TwFADOF1) are enabled.
+# % Result:
+# % Cost for Summer Games 2024 ("30 s sprint"):  0.776490
 
 # Setup
 import shutil
@@ -17,18 +16,15 @@ import os
 import sys
 import matplotlib.pyplot as plot
 sys.path.append(os.path.abspath('../PythonFunctions'))
-from ManipulateTXTFile import ManipulateTXTFile
-from ReadFASTbinaryIntoStruct import ReadFASTbinaryIntoStruct
+from FileOperations.ManipulateTXTFile import ManipulateTXTFile
+from FileOperations.ReadFASTbinaryIntoStruct import ReadFASTbinaryIntoStruct
 
 # Copy of the OpenFast Version in the current directory
 FASTexeFile = "openfast_x64.exe"
-FASTmapFile = "MAP_x64.dll"
 SimulationName = "IEA-15-240-RWT-Monopile"
 FASTexeFile_path = os.path.join(r'..\OpenFAST', FASTexeFile)
-FASTmapFile_path = os.path.join(r'..\OpenFAST', FASTmapFile)
 CurrentDirectory = os.path.dirname(os.path.abspath(__file__))
 shutil.copy(FASTexeFile_path, os.path.join(CurrentDirectory, FASTexeFile))
-shutil.copy(FASTmapFile_path, os.path.join(CurrentDirectory, FASTmapFile))
 
 # Run FB
 ManipulateTXTFile(os.path.join(os.getcwd(), "ROSCO_v2d6.IN"), '1 ! FlagLAC', '0 ! FlagLAC')
@@ -42,7 +38,6 @@ shutil.move(SimulationName + '.outb', SimulationName + '_FBFF.outb')
 
 # Clean up
 os.remove(os.path.join(os.getcwd(), FASTexeFile))
-os.remove(os.path.join(os.getcwd(), FASTmapFile))
 
 # read in data
 FB = ReadFASTbinaryIntoStruct(SimulationName + '_FB.outb')
@@ -81,8 +76,11 @@ axes[3].set_xlabel('time [s]')
 plot.show()
 
 # display results
-RatedRotorSpeed = 7.56 # [rpm]
-t_Start         = 0    # [s]
-change_in_rotor_speed = (max(abs(FBFF['RotSpeed'][FBFF['Time'] >= t_Start] - RatedRotorSpeed)) /
-                         max(abs(FB['RotSpeed'][FB['Time'] >= t_Start] - RatedRotorSpeed)) - 1) * 100
-print(f'Change in rotor over speed: {change_in_rotor_speed:.1f}%')
+Rot_Speed_0 = 7.56      # [rpm]
+TwrBsMyt_0 = 162e3      # [kNm]
+t_Start = 0             # [s]
+
+Cost = ((max(abs(FBFF['RotSpeed'][FBFF['Time'] > t_Start] - Rot_Speed_0))) / Rot_Speed_0
+        + (max(abs(FBFF['TwrBsMyt'][FBFF['Time'] > t_Start] - TwrBsMyt_0))) / TwrBsMyt_0)
+
+print('Cost for Summer Games 2024 ("30 s sprint"): {:.6f}'.format(Cost))

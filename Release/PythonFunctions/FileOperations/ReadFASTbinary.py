@@ -4,15 +4,13 @@ import numpy as np
 def ReadFASTbinary(FileName, machinefmt='native'):
     FileFmtID = {'WithTime': 1, 'WithoutTime': 2, 'NoCompressWithoutTime': 3, 'ChanLen_In': 4}
 
-    # Öffnen der Datei
     with open(FileName, 'rb') as fid:
-        # Header-Informationen lesen
         FileID = np.fromfile(fid, dtype=np.int16, count=1, sep='')[0]
 
         if FileID == FileFmtID['ChanLen_In']:
             LenName = np.fromfile(fid, dtype=np.int16, count=1, sep='')[0]
         else:
-            LenName = 10  # Standardanzahl von Zeichen pro Kanalname
+            LenName = 10
 
         NumOutChans = np.fromfile(fid, dtype=np.int32, count=1, sep='')[0]
         NT = np.fromfile(fid, dtype=np.int32, count=1, sep='')[0]
@@ -48,7 +46,6 @@ def ReadFASTbinary(FileName, machinefmt='native'):
         print(f'Reading from the file {FileName} with heading: ')
         print(f'   "{DescStr}".')
 
-        # Kanal-Zeitreihen lesen
         nPts = NT * NumOutChans
         Channels = np.zeros((NT, NumOutChans + 1))
 
@@ -65,8 +62,6 @@ def ReadFASTbinary(FileName, machinefmt='native'):
         if len(PackedData) < nPts:
             raise ValueError(f'Could not read entire {FileName} file: read {len(PackedData)} of {nPts} values.')
 
-        # Datei schließen
-        # Skalierung auf echte Daten
         for it in range(NT):
             Channels[it, 1:] = (PackedData[NumOutChans * it: NumOutChans * (it + 1)] - ColOff) / ColScl
 
