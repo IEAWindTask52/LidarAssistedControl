@@ -3,13 +3,12 @@
 # Purpose:
 # Here, we use a realistic wind preview to demonstrate that the collective
 # pitch feedforward controller together with the correct filtering provides
-# the reduction in rotor speed variation as predicted by the linear model
-# and the coherence. In this example, we assume frozen turbulence, only one
-# 3D turbulence field (y,z,t) at rotor plane is generated.
+# a reduction in rotor speed variation and the coherence is as expected.
+# In this example, we assume frozen turbulence, only one 3D turbulent
+# wind field (y,z,t) at rotor plane is generated.
 # Result:
 # Change in rotor speed standard deviation:  -49.5 %
-# Authors:
-# David Schlipf, Feng Guo, Simon Weich, Aravind Venkatachalapathy
+# Cost for Summer Games 2024 ("18 m/s hurdles"):  0.444660 m/s
 
 # Setup
 import os
@@ -23,7 +22,7 @@ from scipy.interpolate import interp1d
 from scipy.io import loadmat
 import sys
 
-sys.path.append('..\PythonFunctions')
+sys.path.append('../PythonFunctions')
 from FileOperations.ManipulateTXTFile import ManipulateTXTFile
 from FileOperations.ReadFASTbinaryIntoStruct import ReadFASTbinaryIntoStruct
 from FileOperations.ReadROSCOtextIntoStruct import ReadROSCOtextIntoDataframe
@@ -46,23 +45,30 @@ vWindow = hamming(nDataPerBlock)                    # [-] 	window for estimation
 nFFT = 2**(int(np.ceil(np.log2(nDataPerBlock))))    # [-]  	number of FFT, default: 2^nextpow2(nDataPerBlock)
 nOverlap = nDataPerBlock / 2                        # [-]  	samples of overlap, default: 50% overlap
 
-# Files (should not be be changed)
+# Parameter for Cost (Summer Games 2024)
+tau = 2                                             # [s]   time to overcome pitch actuator, from Example 1: tau = T_Taylor - T_buffer, since there T_filter = T_scan = 0
+
+# Files (should not be changed)
 TurbSimExeFile = 'TurbSim_x64.exe'
 FASTexeFile = 'openfast_x64.exe'
 SimulationName = 'IEA-15-240-RWT-Monopile_4BeamPulsed'
 TurbSimTemplateFile = 'TurbSim2aInputFileTemplateIEA15MW.inp'
-SimulationFolder = 'SimulationResults_4BeamPulsed'
+SimulationFolderFB = 'SimulationResults_FeedbackOnly'
+SimulationFolderLAC = 'SimulationResults_4BeamPulsed'
 
 if not os.path.exists('TurbulentWind'):
     os.makedirs('TurbulentWind')
 
-if not os.path.exists(SimulationFolder):
-    os.makedirs(SimulationFolder)
+if not os.path.exists(SimulationFolderFB):
+    os.makedirs(SimulationFolderFB)
+
+if not os.path.exists(SimulationFolderLAC):
+    os.makedirs(SimulationFolderLAC)
 
 # Preprocessing: generate turbulent wind field
 
 # Copy the adequate TurbSim version to the example folder
-shutil.copyfile(os.path.join('..\TurbSim', TurbSimExeFile), os.path.join('TurbulentWind', TurbSimExeFile))
+shutil.copyfile(os.path.join('../TurbSim', TurbSimExeFile), os.path.join('TurbulentWind', TurbSimExeFile))
 
 # Generate all wind fields
 for iSeed in range(nSeed):
@@ -81,7 +87,7 @@ os.remove(os.path.join('TurbulentWind', TurbSimExeFile))
 # Processing: run simulations
 
 # Copy the adequate OpenFAST version to the example folder
-shutil.copyfile(os.path.join('..\OpenFAST', FASTexeFile), FASTexeFile)
+shutil.copyfile(os.path.join('../OpenFAST', FASTexeFile), FASTexeFile)
 
 #  Simulate with all wind fields
 for iSeed in range(nSeed):
@@ -93,8 +99,8 @@ for iSeed in range(nSeed):
     ManipulateTXTFile('IEA-15-240-RWT_InflowFile.dat', 'MyFilenameRoot', WindFileRoot)
 
     # Run FB
-    FASTresultFile = os.path.join(SimulationFolder, f'{WindFileName}_FlagLAC_0.outb')
-    ROSCOresultFile = os.path.join(SimulationFolder, f'{WindFileName}_FlagLAC_0.dbg')
+    FASTresultFile = os.path.join(SimulationFolderFB, f'{WindFileName}_FlagLAC_0.outb')
+    ROSCOresultFile = os.path.join(SimulationFolderFB, f'{WindFileName}_FlagLAC_0.dbg')
     if not os.path.exists(FASTresultFile):
         ManipulateTXTFile('ROSCO_v2d6.IN', '1 ! FlagLAC', '0 ! FlagLAC')  # disable LAC
         os.system(FASTexeFile + ' ' + SimulationName + '.fst')
@@ -102,8 +108,8 @@ for iSeed in range(nSeed):
         shutil.move(SimulationName + '.RO.dbg', ROSCOresultFile)  # store rosco output file
 
     # Run FB+FF
-    FASTresultFile = os.path.join(SimulationFolder, f'{WindFileName}_FlagLAC_1.outb')
-    ROSCOresultFile = os.path.join(SimulationFolder, f'{WindFileName}_FlagLAC_1.dbg')
+    FASTresultFile = os.path.join(SimulationFolderLAC, f'{WindFileName}_FlagLAC_1.outb')
+    ROSCOresultFile = os.path.join(SimulationFolderLAC, f'{WindFileName}_FlagLAC_1.dbg')
     if not os.path.exists(FASTresultFile):
         ManipulateTXTFile('ROSCO_v2d6.IN', '0 ! FlagLAC', '1 ! FlagLAC')  # enable LAC
         os.system(FASTexeFile + ' ' + SimulationName + '.fst')
@@ -128,6 +134,7 @@ STD_RotSpeed_FB = np.empty(nSeed)
 STD_RotSpeed_FBFF = np.empty(nSeed)
 c_filter = np.empty((nSeed, int(AnalysisTime*Fs*2+1)))
 c_RL = np.empty((nSeed, int(AnalysisTime*Fs*2+1)))
+MAE = np.empty(nSeed)                                               # mean absolute error [m/s]
 
 # Loop over all seeds
 for iSeed in range(nSeed):
@@ -135,12 +142,12 @@ for iSeed in range(nSeed):
     # Load data
     Seed = Seed_vec[iSeed]
     WindFileName = f'URef_18_Seed_{Seed:02d}'
-    FASTresultFile = os.path.join(SimulationFolder, f'{WindFileName}_FlagLAC_0.outb')
-    ROSCOresultFile = os.path.join(SimulationFolder, f'{WindFileName}_FlagLAC_0.dbg')
+    FASTresultFile = os.path.join(SimulationFolderFB, f'{WindFileName}_FlagLAC_0.outb')
+    ROSCOresultFile = os.path.join(SimulationFolderFB, f'{WindFileName}_FlagLAC_0.dbg')
     FB = ReadFASTbinaryIntoStruct(FASTresultFile)
     R_FB = ReadROSCOtextIntoDataframe(ROSCOresultFile)
-    FASTresultFile = os.path.join(SimulationFolder, f'{WindFileName}_FlagLAC_1.outb')
-    ROSCOresultFile = os.path.join(SimulationFolder, f'{WindFileName}_FlagLAC_1.dbg')
+    FASTresultFile = os.path.join(SimulationFolderLAC, f'{WindFileName}_FlagLAC_1.outb')
+    ROSCOresultFile = os.path.join(SimulationFolderLAC, f'{WindFileName}_FlagLAC_1.dbg')
     FBFF = ReadFASTbinaryIntoStruct(FASTresultFile)
     R_FBFF = ReadROSCOtextIntoDataframe(ROSCOresultFile)
 
@@ -180,36 +187,52 @@ for iSeed in range(nSeed):
                                                       type='constant'),
                                        fs=Fs, window=vWindow, noverlap=nOverlap, nfft=nFFT)
 
-    # Plot REWS
-    plt.figure('REWS seed {}'.format(Seed))
-    plt.grid(True)
-    plt.plot(R_FBFF['Time'], REWS_WindField_Fs)
-    plt.plot(R_FBFF['Time'], R_FBFF['REWS'])
-    plt.ylabel('REWS [m/s]')
-    plt.legend(['wind field', 'lidar estimate'])
-    plt.xlabel('time [s]')
-
     # Estimate cross correlation between filtered and unfiltered REWS from lidar
     REWS_f_detrended = signal.detrend(R_FBFF['REWS_f'][R_FBFF['Time'] >= t_start], type='constant')
     REWS_detrended = signal.detrend(R_FBFF['REWS'][R_FBFF['Time'] >= t_start], type='constant')
 
-    c_filter[iSeed, :] = np.correlate(REWS_f_detrended, REWS_detrended, mode='full')\
-                         / (np.linalg.norm(REWS_f_detrended) * np.linalg.norm(REWS_detrended))
+    c_filter[iSeed, :] = (signal.correlate(REWS_f_detrended, REWS_detrended, mode='full', method='auto')
+                                / (np.linalg.norm(REWS_f_detrended) * np.linalg.norm(REWS_detrended)))
 
     # Estimate cross correlation between rotor and lidar
     REWS_WindField_Fs_detrended = signal.detrend(REWS_WindField_Fs[R_FBFF['Time'] >= t_start], type='constant')
-    REWS_b_detrended = signal.detrend(R_FBFF['REWS_b'][R_FBFF['Time'] >= t_start], type='constant')
+    REWS_b_detrended = signal.detrend(R_FBFF['REWS_b'][R_FBFF['Time'] >= t_start])
 
-    c_RL[iSeed, :] = np.correlate(REWS_WindField_Fs_detrended, REWS_b_detrended, mode='full')\
-                     / (np.linalg.norm(REWS_WindField_Fs_detrended) * np.linalg.norm(REWS_b_detrended))
-                         
-    lags = np.arange(-AnalysisTime*Fs, AnalysisTime*Fs+1)
+    c_RL[iSeed, :] = (signal.correlate(REWS_WindField_Fs_detrended, REWS_b_detrended, mode='full', method='auto')
+                            / (np.linalg.norm(REWS_WindField_Fs_detrended * np.linalg.norm(REWS_b_detrended))))
+
+    lags = np.arange(-AnalysisTime * Fs, AnalysisTime * Fs + 1)
+
+    # Calculate mean absolute error
+    REWS_WindField_Fs_shifted = interp1d(Time_WindField.ravel() - tau, REWS_WindField.ravel())(R_FBFF['Time']) # shift the REWS from wind field by tau (intented prediction time) into the future (lower times)
+    Error = REWS_WindField_Fs_shifted - R_FBFF['REWS_b'] # error is  REWS from wind field shifted minus REWS from lidar filtered and buffered.
+    MAE[iSeed] = np.mean(abs(Error[R_FBFF['Time'] >= t_start])) # only consider error after t_start
+
+    # Plot REWS for absolute error
+    plt.figure('REWS seed {}'.format(Seed))
+    plt.subplot(311)
+    plt.plot(R_FBFF['Time'], REWS_WindField_Fs, label='wind field')
+    plt.plot(R_FBFF['Time'], R_FBFF['REWS'], label='lidar estimate')
+    plt.ylabel('REWS [m/s]')
+    plt.legend()
+    plt.grid(True)
+    plt.subplot(312)
+    plt.plot(R_FBFF['Time'], REWS_WindField_Fs_shifted, label='wind field shifted')
+    plt.plot(R_FBFF['Time'], R_FBFF['REWS_b'], label='lidar estimate filtered and buffered')
+    plt.ylabel('REWS [m/s]')
+    plt.legend()
+    plt.grid(True)
+    plt.subplot(313)
+    plt.plot(R_FBFF['Time'], Error)
+    plt.ylabel('error [m/s]')
+    plt.xlabel('time [s]')
+    plt.grid(True)
 
 # Calculate mean coherence
 gamma2_RL_mean_est = np.abs(np.mean(S_RL_est, axis=0)) ** 2 / np.mean(S_LL_est, axis=0) / np.mean(S_RR_est, axis=0)
 
 # Get analytical correlation model
-SpectralModelFileName = '..\AnalyticalModel\LidarRotorSpectra_IEA15MW_4BeamPulsed.mat'  # model for 18 m/s
+SpectralModelFileName = '../AnalyticalModel/LidarRotorSpectra_IEA15MW_4BeamPulsed.mat'  # model for 18 m/s
 AnalyticalModel = loadmat(SpectralModelFileName)
 AnalyticalModel['gamma2_RL'] = np.abs(AnalyticalModel['S_RL']) ** 2 / AnalyticalModel['S_RR'] / AnalyticalModel[
     'S_LL']
@@ -286,5 +309,8 @@ URef = 18                                                                       
 x_L = 160                                                                                       # [m]       distance of lidar measurement
 T_Taylor = x_L/URef                                                                             # [s]       travel time from lidar measurment to rotor
 T_scan = 1                                                                                      # [s]       time of full lidar scan
-tau = 2                                                                                         # [s]       time to overcome pitch actuator, from Example 1: tau = T_Taylor - T_buffer, since there T_filter = T_scan = 0
 T_buffer = T_Taylor-1/2*T_scan-T_filter-tau                                                     # [s]       time needed to buffer signal such that FF signal is applied with tau, see Schlipf2015, Equation (5.40)
+
+# Calculation of Cost for Summer Games 2024
+Cost = np.mean(MAE)
+print('Cost for Summer Games 2024 ("18 m/s hurdles"): {:.6f}'.format(Cost))
