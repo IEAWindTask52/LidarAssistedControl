@@ -34,7 +34,6 @@ def PreProcessingSimulations(simulation_folder, pre_processing_variation, input_
             this_modifications = copy.deepcopy(modifications)
             # replace function handles with string
             n_modification = len(modifications)
-
             for i_modification in range(n_modification):
                 if callable(modifications[i_modification][3]):
                     this_function = modifications[i_modification][3]

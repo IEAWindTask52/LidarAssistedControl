@@ -1,9 +1,8 @@
+# Script to run DLC 1.2 for "FeedbackOnly".
 import os
 import shutil
 import sys
 
-
-# Script to run DLC 1.2 for "FeedbackOnly".
 # setup
 sys.path.append('..\\PythonFunctions')
 from GetParametersforDLC1p2 import GetParametersforDLC1p2
@@ -43,7 +42,7 @@ if not os.path.exists(exe_destination):
 
 # get SimulationNames and DataFiles
 SimulationNames, DataFiles = PreProcessingSimulations(SimulationFolder, PreProcessingVariation, InputFiles, Modifications)
-
+r"""
 # run simulations
 status, result = ProcessingSimulations(SimulationFolder, SimulationNames, ExeFile)
 
@@ -56,3 +55,4 @@ Statistics = CalculateStatistics(TimeResults, PostProcessingConfig, DataFiles)
 
 # Evaluate only, if you want to overwrite the results: 
 #Statistics.to_csv('Statistics_' + SimulationMode + '.csv')
+"""

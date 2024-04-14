@@ -1,35 +1,40 @@
-from joblib import Parallel, delayed
+# Setup
 import os
-import subprocess
+from joblib import Parallel, delayed
+from subprocess import getstatusoutput
+from multiprocessing import cpu_count
 
-def ProcessingSimulations(simulation_folder, simulation_names, exe_file, tool='OpenFAST', n_core=None):
-    if n_core is None:
-        n_core = os.cpu_count()
 
-    n_simulation = len(simulation_names)
-    result = [None] * n_simulation
-    status = [None] * n_simulation
+def ProcessingSimulations(SimulationFolder, SimulationNames, ExeFile, Tool='OpenFAST', nCore=None):
+    if nCore is None:
+        nCore = cpu_count()
+
+    # get dimensions and allocation
+    n_Simulation = len(SimulationNames)
+    result = [None] * n_Simulation
+    status = [float('nan')] * n_Simulation
 
     # move to SimulationFolder
-    main_folder = os.getcwd()
-    os.chdir(simulation_folder)
+    MainFolder = os.getcwd()
+    os.chdir(SimulationFolder)
+
+    def run_simulation(i_Simulation):
+        SimulationName = SimulationNames[i_Simulation]
+        print(f"Running simulation {SimulationName} ({i_Simulation + 1}/{n_Simulation})")
+        if Tool == 'Flex5':
+            command = f"{ExeFile} {SimulationName}.inf {SimulationName}.log {SimulationName}.res"
+        elif Tool == 'OpenFAST':
+            command = f"{ExeFile} {SimulationName}.fst"
+        return getstatusoutput(command)
 
     # run simulations
-    if tool == 'Flex5':
-        for i_simulation in range(n_simulation):
-            simulation_name = simulation_names[i_simulation]
-            print(f'Running simulation {simulation_name} ({i_simulation+1}/{n_simulation})')
-            status[i_simulation], result[i_simulation] = subprocess.getstatusoutput(
-                f'{exe_file} {simulation_name}.inf {simulation_name}.log {simulation_name}.res')
-    elif tool == 'OpenFAST':
-        for i_simulation in range(n_simulation):
-            simulation_name = simulation_names[i_simulation]
-            print(f'Running simulation {simulation_name} ({i_simulation+1}/{n_simulation})')
-            status[i_simulation], result[i_simulation] = subprocess.getstatusoutput(
-                f'{exe_file} {simulation_name}.fst')
+    results = Parallel(n_jobs=nCore)(delayed(run_simulation)(i) for i in range(n_Simulation))
+
+    for i, (status_code, output) in enumerate(results):
+        status[i] = status_code
+        result[i] = output
 
     # back to main folder
-    os.chdir(main_folder)
+    os.chdir(MainFolder)
 
     return status, result
-

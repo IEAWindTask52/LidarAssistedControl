@@ -2,12 +2,14 @@ from FileOperations.ReadFASTbinary import ReadFASTbinary
 
 
 def ReadFASTbinaryIntoStruct(file_name):
-    RawData, ChannelName, _, _, _ = ReadFASTbinary(file_name)
-    Data = {}
+    data, info = ReadFASTbinary(file_name)
 
-    for iChannel in range(len(ChannelName)):
-        channel_name = ChannelName[iChannel]
-        Data[ChannelName[iChannel]] = RawData[:, iChannel]
+    channel_names = info['attribute_names']
+    structured_data = {}
 
-    return Data
+    for i in range(len(channel_names)):
+        channel_name = channel_names[i]
+        structured_data[channel_name] = data[:, i]
+
+    return structured_data
 # source: Matlab-Function (ReadFASTbinaryIntoStruct.m)

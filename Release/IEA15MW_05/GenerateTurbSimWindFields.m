@@ -4,7 +4,7 @@
 clearvars;
 close all;
 clc;
-addpath(genpath('..\MatlabFunctions'))
+addpath(genpath('..\WetiMatlabFunctions'))
 
 % Parameters (can be adjusted, but will provide different results)
 URef_vector         = 4:2:24;   % [m/s]         range of wind speeds (operation points)

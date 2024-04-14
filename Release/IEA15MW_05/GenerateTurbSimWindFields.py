@@ -1,3 +1,6 @@
+# Generatates wind fields for DLC 1.2 running TurbSim.
+
+# Setup
 import os
 import numpy as np
 import shutil
@@ -32,8 +35,8 @@ shutil.copyfile(os.path.join('..', 'TurbSim', TurbSimExeFile), os.path.join('Tur
 
 # Define a function for the process
 def generate_wind_field(i_URef, i_Seed):
-    URef = URef_vector[i_URef]
-    Seed = Seed_matrix[i_URef, i_Seed]
+    URef = int(URef_vector[i_URef])
+    Seed = int(Seed_matrix[i_URef, i_Seed])
     WindFileName = f'URef_{int(URef):02d}_Seed_{int(Seed):04d}'
     TurbSimInputFile = os.path.join('TurbulentWind', f'{WindFileName}.ipt')
     TurbSimResultFile = os.path.join('TurbulentWind', f'{WindFileName}.wnd')
@@ -45,7 +48,8 @@ def generate_wind_field(i_URef, i_Seed):
         # Generate wind field
         os.system(os.path.join('TurbulentWind', TurbSimExeFile) + ' ' + TurbSimInputFile)
 
-# Generate all wind fields for different URef and RandSeed1 using parallel computing.
+
+# Generate all wind fields for different URef and RandSeed1
 Parallel(n_jobs=-1)(delayed(generate_wind_field)(i_URef, i_Seed) for i_URef in range(n_URef) for i_Seed in range(n_Seed))
 
 # Clean up

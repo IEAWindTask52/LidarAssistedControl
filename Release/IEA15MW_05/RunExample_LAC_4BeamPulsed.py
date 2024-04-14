@@ -1,9 +1,8 @@
+# Script to run DLC 1.2 for "LAC_4BeamPulsed".
 import os
 import shutil
 import sys
 
-
-# Script to run DLC 1.2 for "LAC_4BeamPulsed".
 # setup
 sys.path.append('..\\PythonFunctions')
 from GetParametersforDLC1p2 import GetParametersforDLC1p2

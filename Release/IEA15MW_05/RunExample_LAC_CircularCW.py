@@ -1,9 +1,8 @@
+# Script to run DLC 1.2 for "LAC_CircularCW".
 import os
 import shutil
 import sys
 
-
-# Script to run DLC 1.2 for "LAC_CircularCW".
 # setup
 sys.path.append('..\\PythonFunctions')
 from GetParametersforDLC1p2 import GetParametersforDLC1p2
@@ -55,4 +54,4 @@ PlotTimeResults(TimeResults, PostProcessingConfig)
 Statistics = CalculateStatistics(TimeResults, PostProcessingConfig, DataFiles)
 
 # Evaluate only, if you want to overwrite the results:
-Statistics.to_csv('Statistics_' + SimulationMode + '.csv')
+#Statistics.to_csv('Statistics_' + SimulationMode + '.csv')
