@@ -37,7 +37,7 @@ shutil.copyfile(os.path.join('..', 'TurbSim', TurbSimExeFile), os.path.join('Tur
 def generate_wind_field(i_URef, i_Seed):
     URef = int(URef_vector[i_URef])
     Seed = int(Seed_matrix[i_URef, i_Seed])
-    WindFileName = f'URef_{int(URef):02d}_Seed_{int(Seed):04d}'
+    WindFileName = f'URef_{int(URef):02d}_Seed_{int(i_Seed+1):02d}'
     TurbSimInputFile = os.path.join('TurbulentWind', f'{WindFileName}.ipt')
     TurbSimResultFile = os.path.join('TurbulentWind', f'{WindFileName}.wnd')
     if not os.path.exists(TurbSimResultFile):

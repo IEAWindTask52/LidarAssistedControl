@@ -76,8 +76,8 @@ def GetParametersforDLC1p2(simulation_mode):
          lambda variation_values: '%5.2f' % GetStatistics(statistics_file, 'mean_RotSpeed', variation_values[0])],
         # InflowWind: change wind type and link to turbulent wind file
         ['3', 'I', 'WindType', '4'],
-        ['3', 'I', 'FilenameRoot', lambda variation_values: '../TurbulentWind/URef_%02d_Seed_%02d%02d' % (
-        variation_values[0], variation_values[0], variation_values[1])]
+        ['3', 'I', 'FilenameRoot', lambda variation_values: '../TurbulentWind/URef_%02d_Seed_%02d' % (
+        variation_values[0], variation_values[1])]
     ]
     # FFP_v1 Parameters
     u_ref_v = np.arange(8, 25, 2)  # [m/s]

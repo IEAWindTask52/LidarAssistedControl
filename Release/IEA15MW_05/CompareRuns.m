@@ -1,6 +1,9 @@
 % Script to compare DLC 1.2 for "FeedbackOnly", "LAC_CircularCW", and "LAC_4BeamPulsed". 
-% Results 
-% Cost for Summer Games 2024 ("DLC 1.2 Marathon"):  1.323144 
+% Result:
+% Improvements by LAC_CircularCW over FeedbackOnly :
+% Cost for Summer Games 2024 ("DLC 1.2 Marathon"): 1.433506
+% Improvements by LAC_4BeamPulsed over FeedbackOnly :
+% Cost for Summer Games 2024 ("DLC 1.2 Marathon"): 1.323144
 
 % setup
 clearvars;close all;clc
