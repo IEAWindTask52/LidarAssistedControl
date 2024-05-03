@@ -17,8 +17,7 @@
 clearvars;
 close all;
 clc;
-addpath('..\MatlabFunctions')
-addpath('..\MatlabFunctions\AnalyticalModel')
+addpath(genpath('..\WetiMatlabFunctions'))
 
 % Seeds (can be adjusted, but will provide different results)
 nSample             = 6;                        % [-]           number of stochastic turbulence field samples
@@ -34,7 +33,6 @@ nOverlap            = [];                       % [-]           samples of overl
 % Files (should not be be changed)
 TurbSimExeFile      = 'TurbSim_x64.exe';
 FASTexeFile         = 'openfast_x64.exe';
-FASTmapFile         = 'MAP_x64.dll';
 SimulationName      = 'IEA-15-240-RWT-UMaineSemi';
 TurbSimTemplateFile = 'TurbSim2aInputFileTemplateIEA15MW.inp';
 if ~exist('TurbulentWind','dir')
@@ -67,7 +65,6 @@ delete(['TurbulentWind\',TurbSimExeFile])
 
 % Copy the adequate OpenFAST version to the example folder
 copyfile(['..\OpenFAST\',FASTexeFile],FASTexeFile)
-copyfile(['..\OpenFAST\',FASTmapFile],FASTmapFile)
 
 % Simulate with all wind fields
 for iSample = 1:nSample
@@ -103,7 +100,6 @@ end
 
 % Clean up
 delete(FASTexeFile)
-delete(FASTmapFile)
 
 %% Postprocessing: evaluate data
 
