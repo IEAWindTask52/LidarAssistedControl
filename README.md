@@ -1,3 +1,10 @@
+# LAC SummerGames 2024
+The LAC SummerGames 2024 were launched to encourage professionals and particularly students in the art of designing and deploying lidar data processing algorithms and lidar-assisted controllers. Participants will be given the opportunity to increase their knowledge in LAC and by that, the SummerGames will trigger creativity and motivate the development of new concepts.
+
+All the necessary information regarding the three different disciplines and the general timeline can be found in the official document: https://zenodo.org/records/10931629.
+
+The best way to get started would be to familiarize yourself with the code of the given examples and reproduce the results presented in the official document.
+
 # Lidar-Assisted-Control 
 A lidar-assisted wind turbine control code environment for the IEA Wind Task 52 (Lidar) community. 
 
