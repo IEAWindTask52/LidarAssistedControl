@@ -17,14 +17,12 @@
 clearvars; 
 close all; 
 clc;
-addpath('..\MatlabFunctions')
+addpath(genpath('..\WetiMatlabFunctions'))
 
 % Copy the adequate OpenFAST version to the example folder
 FASTexeFile     = 'openfast_x64.exe';
-FASTmapFile     = 'MAP_x64.dll';
 SimulationName  = 'IEA-15-240-RWT-UMaineSemi';
 copyfile(['..\OpenFAST\',FASTexeFile],FASTexeFile)
-copyfile(['..\OpenFAST\',FASTmapFile],FASTmapFile)
 
 %% Run FB
 ManipulateTXTFile('ROSCO_v2d6.IN','1 ! FlagLAC','0 ! FlagLAC');     % disable LAC
@@ -46,7 +44,6 @@ movefile([SimulationName,'.RO.dbg'],[SimulationName,'_FBFFMC.dbg']) % store rosc
 
 %% Clean up
 delete(FASTexeFile)
-delete(FASTmapFile)
 
 %% Comparison
 % read in data
