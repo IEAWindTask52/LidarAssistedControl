@@ -8,7 +8,7 @@
 % wind field (y,z,t) at rotor plane is generated.
 % Result:
 % Change in rotor speed standard deviation:  -49.5 %
-% Cost for Summer Games 2024 ("18 m/s hurdles"):  0.444660 m/s 
+% Cost for Summer Games 2024 ("18 m/s hurdles"):  0.444616 m/s 
 
 %% Setup
 clearvars;close all;clc;

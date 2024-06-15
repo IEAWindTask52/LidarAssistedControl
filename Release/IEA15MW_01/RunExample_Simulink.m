@@ -8,9 +8,9 @@
 % Extreme Operating Gust. Here, only the rotor motion and tower motion 
 % (GenDOF and TwFADOF1) are enabled.  
 % Result:       
-% Cost for Summer Games 2024 ("30 s sprint"):  0.776490
+% Cost for Summer Games 2024 ("30 s sprint"):  0.789661
 % *** Simulink version ***
-% Slightly different from RunExample: 0.789227
+% Slightly different from RunExample: 0.802193 
 
 %% Setup
 clearvars;close all;clc;
@@ -37,8 +37,8 @@ simu.dt             = P.FP.Val{contains(P.FP.Label,'DT')};
 
 % add FF Parameter from FFP_v1.IN
 R.T_buffer          = 3.0; % Buffer time for filtered REWS signal [s]
-R.StaticWind        = [2 9.3 10 11	12 13 14 15	16	17	18	19	20	21	22	23	24	25	30]; % Wind speed  values in static pitch curve [m/s]
-R.StaticPitch       = [0.0000	0.0000	0.0000	0.0614	0.1130	0.1491	0.1790	0.2055	0.2296	0.2521	0.2732	0.2932	0.3124	0.3308	0.3485	0.3657	0.3824	0.3987	0.4100]; % Pitch angle values in static pitch curve [rad]
+R.StaticWind        = [0   10.0000   11.0000   12.0000   13.0000   14.0000   15.0000   16.0000   17.0000   18.0000   19.0000   20.0000   21.0000   22.0000   23.0000   24.0000   25.0000   26.0000   27.0000   28.0000   29.0000   30.0000]; % Wind speed  values in static pitch curve [m/s]
+R.StaticPitch       = [0         0    0.0552    0.1085    0.1451    0.1749    0.2011    0.2250    0.2473    0.2682    0.2882    0.3072    0.3255    0.3432    0.3603    0.3769    0.3930    0.4087    0.4240    0.4389    0.4535    0.4679]; % Pitch angle values in static pitch curve [rad]
 
 %% Run FB
 R.FlagLAC           = 0; % Disable LAC

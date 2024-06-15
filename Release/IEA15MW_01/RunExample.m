@@ -8,7 +8,7 @@
 % Extreme Operating Gust. Here, only the rotor motion and tower motion 
 % (GenDOF and TwFADOF1) are enabled.  
 % Result:       
-% Cost for Summer Games 2024 ("30 s sprint"):  0.776490
+% Cost for Summer Games 2024 ("30 s sprint"):  0.789661
 
 %% Setup
 clearvars;close all;clc;
