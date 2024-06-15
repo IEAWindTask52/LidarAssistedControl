@@ -136,7 +136,7 @@
 0.707000000000      ! PA_Damping        - Pitch actuator damping ratio [-, unused if PA_Mode = 1]
 
 !------- Lidar-Assisted Control ------------
-0 ! FlagLAC           - Flag of lidar-assisted Pitch feedforward control: 1 on, 0 off, the feedforward pitch rate needs to be accessible from the AvrSWAP array
+1 ! FlagLAC           - Flag of lidar-assisted Pitch feedforward control: 1 on, 0 off, the feedforward pitch rate needs to be accessible from the AvrSWAP array
 
 !------- External Controller Interface -----------------------------------------------------
 "unused"            ! DLL_FileName        - Name/location of the dynamic library in the Bladed-DLL format

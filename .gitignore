@@ -6,10 +6,5 @@
 .idea/
 TurbulentWind*
 SimulationResults*
-
-/LidarAssistedControl.egg-info
-Release/IEA15MW_01/OpenLoop.slxc
-Release/IEA15MW_01/ROSCO_v2d6.IN
-Release/IEA15MW_01/slprj/sim/varcache/OpenLoop/checksumOfCache.mat
-Release/IEA15MW_01/slprj/sim/varcache/OpenLoop/tmwinternal/simulink_cache.xml
-Release/IEA15MW_01/slprj/sim/varcache/OpenLoop/varInfo.mat
+slprj
+*.slxc
