@@ -8,7 +8,7 @@
 # Extreme Operating Gust. Here, only the rotor motion and tower motion
 # % (GenDOF and TwFADOF1) are enabled.
 # % Result:
-# % Cost for Summer Games 2024 ("30 s sprint"):  0.789661
+# % Cost for Summer Games 2024 ("30 s sprint"):  0.849094
 
 # Setup
 import shutil
@@ -77,7 +77,7 @@ plot.show()
 
 # display results
 Rot_Speed_0 = 7.56      # [rpm]
-TwrBsMyt_0 = 162e3      # [kNm]
+TwrBsMyt_0 = 158.3e3    # [kNm]
 t_Start = 0             # [s]
 
 Cost = ((max(abs(FBFF['RotSpeed'][FBFF['Time'] > t_Start] - Rot_Speed_0))) / Rot_Speed_0

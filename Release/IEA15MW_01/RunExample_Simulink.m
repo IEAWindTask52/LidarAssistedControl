@@ -8,9 +8,9 @@
 % Extreme Operating Gust. Here, only the rotor motion and tower motion 
 % (GenDOF and TwFADOF1) are enabled.  
 % Result:       
-% Cost for Summer Games 2024 ("30 s sprint"):  0.789661
+% Cost for Summer Games 2024 ("30 s sprint"):  0.849094
 % *** Simulink version ***
-% Slightly different from RunExample: 0.802193 
+% Slightly different from RunExample: 0.860783  
 
 %% Setup
 clearvars;close all;clc;
@@ -42,12 +42,12 @@ R.StaticPitch       = [0         0    0.0552    0.1085    0.1451    0.1749    0.
 
 %% Run FB
 R.FlagLAC           = 0; % Disable LAC
-sim('OpenFAST_ROSCO_FFP.mdl',[0,TMax]);
+sim('OpenFAST_ROSCO_FFP.slx',[0,TMax]);
 movefile([SimulationName,'.SFunc.outb'],[SimulationName,'_FB.outb'])      % store results
 
 %% Run FBFF
 R.FlagLAC           = 1; % Enable LAC
-sim('OpenFAST_ROSCO_FFP.mdl',[0,TMax]);
+sim('OpenFAST_ROSCO_FFP.slx',[0,TMax]);
 movefile([SimulationName,'.SFunc.outb'],[SimulationName,'_FBFF.outb'])    % store results
 
 %% Clean up
@@ -95,7 +95,7 @@ xlim([0 30])
 
 % display results
 RotSpeed_0  = 7.56;     % [rpm]
-TwrBsMyt_0  = 162e3;    % [kNm]
+TwrBsMyt_0  = 158.3e3;  % [kNm]
 t_Start     = 0;        % [s]
 
 Cost = (max(abs(FBFF.RotSpeed(FBFF.Time>=t_Start)-RotSpeed_0))) / RotSpeed_0 ...
