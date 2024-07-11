@@ -57,10 +57,7 @@ False		SpinnerMountedFlag        	- Flag whether spinner-mounted considered
 True        NearestInterpFlag           - Flag to use nearest interpolation. By default, linear interpolation is used 
 ---------------------- Output---------------------------------------------------
 OutList      							- The next line(s) contains a list of output parameters.  See OutListParameters.xlsx for a listing of available output channels, (-)
-"XLI"
-"XDTLI"
-"VLOS01LI"
-"BLDBLOCKLI"
-"BEAMIDLI"
-"NEWDATALI"
+VLOS01LI;VLOS02LI;VLOS03LI;VLOS04LI;VLOS05LI;VLOS06LI;VLOS07LI;VLOS08LI;VLOS09LI;VLOS10LI
+BEAMIDLI
+NEWDATALI
 END of FAST input file (the word "END" must appear in the first 3 columns of this last line).
