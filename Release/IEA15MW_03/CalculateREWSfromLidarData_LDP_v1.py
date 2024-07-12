@@ -63,7 +63,12 @@ def WindFieldReconstruction(v_los, NumberOfBeams, AngleToCenterline):
 
 def LPFilter(InputSignal, DT, CornerFreq):
 
-    # Initialize coefficients
+    # Initialization of persistent variables
+    if not hasattr(LPFilter, 'OutputSignalLast'):
+        LPFilter.OutputSignalLast = InputSignal
+        LPFilter.InputSignalLast = InputSignal
+
+    # Define coefficients
     a1 = 2 + CornerFreq * DT
     a0 = CornerFreq * DT - 2
     b1 = CornerFreq * DT
@@ -78,8 +83,11 @@ def LPFilter(InputSignal, DT, CornerFreq):
 
     return OutputSignal
 
-
 def Buffer(REWS, DT, T_buffer):
+    if not hasattr(Buffer, 'REWS_f_Buffer'):
+        nBuffer = 2000
+        Buffer.REWS_f_Buffer = np.full(nBuffer, np.nan)
+
     # Initialize REWS_f_Buffer
     nBuffer = 2000  # Size of REWS_f_buffer, 25 seconds at 80 Hz
     Buffer.REWS_f_Buffer = np.roll(Buffer.REWS_f_Buffer, 1)
@@ -92,10 +100,3 @@ def Buffer(REWS, DT, T_buffer):
     REWS_b = Buffer.REWS_f_Buffer[Idx]
 
     return REWS_b
-
-
-# Initialize persistent variables for LPFilter and Buffer functions
-LPFilter.OutputSignalLast = 0.0
-LPFilter.InputSignalLast = 0.0
-nBuffer = 2000
-Buffer.REWS_f_Buffer = np.full(nBuffer, np.nan)

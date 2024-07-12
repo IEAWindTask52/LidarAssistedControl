@@ -1,3 +1,15 @@
+# IEA15MW_03: IEA 15 MW monopile + realistic wind preview from a
+# 4-beam pulsed lidar system measuring at 160 m.
+# This script needs to be run after RunExample_4BeamPulsed.py.
+# Purpose:
+# A postprocessing version without the need to compile DLLs for lidar data
+# processing to be used in the LAC Summer Games 2024.
+# To implement your own solution, replace line 28
+# R_FBFF = CalculateREWSfromLidarData_LDP_v1(FBFF, DT, TMax, LDP)
+# with your own function with the same inputs and outputs.
+# Result:
+# Cost for Summer Games 2024 ("18 m/s hurdles"):  0.444770 m/s
+
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
@@ -80,4 +92,3 @@ for iSeed in range(nSeed):
 Cost = np.mean(MAE)
 print(f"Cost for Summer Games 2024 (\"18 m/s hurdles\"): {Cost:.6f}")
 
-print(R_FBFF["REWS"].shape)
