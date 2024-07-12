@@ -4,11 +4,11 @@
 # Purpose:
 # A postprocessing version without the need to compile DLLs for lidar data
 # processing to be used in the LAC Summer Games 2024.
-# To implement your own solution, replace line 28
+# To implement your own solution, replace line 60
 # R_FBFF = CalculateREWSfromLidarData_LDP_v1(FBFF, DT, TMax, LDP)
 # with your own function with the same inputs and outputs.
 # Result:
-# Cost for Summer Games 2024 ("18 m/s hurdles"):  0.352662 m/s
+# Cost for Summer Games 2024 ("18 m/s hurdles"):  0.352534 m/s
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -49,6 +49,7 @@ SimulationFolderLAC = 'SimulationResults_CircularCW'
 # Postprocessing: evaluate data
 MAE = np.empty(nSeed)
 
+# Loop over all seeds
 for iSeed in range(nSeed):
     # Load data
     Seed = Seed_vec[iSeed]
@@ -88,7 +89,8 @@ for iSeed in range(nSeed):
     plt.ylabel('error [m/s]')
     plt.xlabel('time [s]')
     plt.grid(True)
-    plt.show()
+
+plt.show()
 
 # Calculation of Cost for Summer Games 2024
 Cost = np.mean(MAE)

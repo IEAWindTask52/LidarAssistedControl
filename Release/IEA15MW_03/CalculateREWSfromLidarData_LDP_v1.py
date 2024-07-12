@@ -94,7 +94,7 @@ def Buffer(REWS, DT, T_buffer):
     Buffer.REWS_f_Buffer[0] = REWS
 
     # Index for entry at T_buffer, minimum 1, maximum nBuffer
-    Idx = min(max(int(np.floor(T_buffer / DT)), 1), nBuffer)
+    Idx = min(max(int(np.floor(T_buffer / DT-1)), 0), nBuffer-1)
 
     # Get buffered and filtered REWS from buffer
     REWS_b = Buffer.REWS_f_Buffer[Idx]
