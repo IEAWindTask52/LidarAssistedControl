@@ -62,7 +62,6 @@ def WindFieldReconstruction(v_los, NumberOfBeams, AngleToCenterline):
 
 
 def LPFilter(InputSignal, DT, CornerFreq):
-    # MATLAB version of the function LPFilter in FFP_v1_Subs.f90
 
     # Initialize coefficients
     a1 = 2 + CornerFreq * DT
