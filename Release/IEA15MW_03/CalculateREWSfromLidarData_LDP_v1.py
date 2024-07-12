@@ -44,22 +44,21 @@ def CalculateREWSfromLidarData_LDP_v1(FBFF, DT, TMax, LDP):
 
 
 def WindFieldReconstruction(v_los, NumberOfBeams, AngleToCenterline):
-    # MATLAB version of the subroutine WindFieldReconstruction in LDP_v1_Subs.f90
 
-    # Initialize u_est_Buffer
-    u_est_Buffer = np.full(NumberOfBeams, np.nan)
+    # Persistent variable (use list for simplicity)
+  if not hasattr(WindFieldReconstruction, 'u_est_Buffer'):
+    WindFieldReconstruction.u_est_Buffer = [np.nan] * NumberOfBeams
 
-    # Estimate u component assuming perfect alignment
-    u_est = v_los / np.cos(np.deg2rad(AngleToCenterline))
+  # Estimate u component assuming perfect alignment
+  u_est = v_los / np.cos(np.deg2rad(AngleToCenterline))
 
-    # Update buffer for estimated u component
-    u_est_Buffer = np.roll(u_est_Buffer, 1)
-    u_est_Buffer[0] = u_est
+  # Update buffer for estimated u component
+  WindFieldReconstruction.u_est_Buffer = WindFieldReconstruction.u_est_Buffer[1:] + [u_est]
 
-    # Calculate REWS from mean over all estimated u components
-    REWS = np.nanmean(u_est_Buffer)
+  # Calculate REWS from mean over all estimated u components (handling NaNs)
+  REWS = np.nanmean(WindFieldReconstruction.u_est_Buffer)
 
-    return REWS
+  return REWS
 
 
 def LPFilter(InputSignal, DT, CornerFreq):
