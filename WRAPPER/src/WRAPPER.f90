@@ -93,7 +93,7 @@ IF (ErrVar%aviFAIL < 0) THEN  ! Check whether error occurs in the last step, DLL
                 RETURN
         ELSE      ! if the address is correctly associated, then we can run the DLL
             CALL C_F_PROCPOINTER(LidarVar%PROCADDR(iDLL), DLL_Legacy_Subroutine)
-            CALL DLL_Legacy_Subroutine (avrSWAP, aviFAIL, LidarVar%DLLINPUTFILENAME(iDLL), avcOUTNAME, avcMSG )
+            CALL DLL_Legacy_Subroutine (avrSWAP, aviFAIL, TRIM(LidarVar%DLLINPUTFILENAME(iDLL))//C_NULL_CHAR, avcOUTNAME, avcMSG )
         END IF
     END DO
 
