@@ -21,10 +21,8 @@ addpath('..\MatlabFunctions')
 
 % Copy the adequate OpenFAST version to the example folder
 FASTexeFile     = 'openfast_x64.exe';
-FASTmapFile     = 'MAP_x64.dll';
 SimulationName  = 'IEA-15-240-RWT-UMaineSemi';
 copyfile(['..\OpenFAST\',FASTexeFile],FASTexeFile)
-copyfile(['..\OpenFAST\',FASTmapFile],FASTmapFile)
 
 %% Run FB
 ManipulateTXTFile('ROSCO_v2d6.IN','1 ! FlagLAC','0 ! FlagLAC');     % disable LAC
@@ -46,7 +44,6 @@ movefile([SimulationName,'.RO.dbg'],[SimulationName,'_FBFFMC.dbg']) % store rosc
 
 %% Clean up
 delete(FASTexeFile)
-delete(FASTmapFile)
 
 %% Comparison
 % read in data
@@ -57,8 +54,7 @@ R_FBFF          = ReadROSCOtextIntoStruct([SimulationName,'_FBFF.dbg']);
 R_FBFFMC        = ReadROSCOtextIntoStruct([SimulationName,'_FBFFMC.dbg']);
 
 % Plot  
-ScreenSize = get(0,'ScreenSize');
-figure('Name','Simulation results','position',[.1 .1 .8 .8].*ScreenSize([3,4,3,4]));
+figure('Name','Simulation results');
 n = 4;
 
 MyAxes(1) = subplot(n,1,1);
