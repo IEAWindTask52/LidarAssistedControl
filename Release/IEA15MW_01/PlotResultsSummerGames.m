@@ -13,7 +13,7 @@ addpath(genpath('ResultsStudents'))
 addpath(genpath('ResultsResearchers'))
 
 SimulationName  = 'IEA-15-240-RWT-Monopile';
-PlotType        = 'researchers';                    % [str]     'default', 'researchers'
+PlotType        = 'students';                    % [str]     'students', 'researchers'
 
 %% Read/Plot/Save Data
 
@@ -23,7 +23,7 @@ switch PlotType
         FB          = ReadFASTbinaryIntoStruct([SimulationName,'_FB.outb']);
         SOW         = ReadFASTbinaryIntoStruct([SimulationName,'_Sowento.outb']);
         SJTU        = ReadFASTbinaryIntoStruct([SimulationName,'_SJTU.outb']);
-%         UPV        = ReadFASTbinaryIntoStruct([SimulationName,'_UPV.outb']);
+        UPV        = ReadFASTbinaryIntoStruct([SimulationName,'_UPV.outb']);
 
         
         % Plot Data
@@ -44,6 +44,7 @@ switch PlotType
         plot(FB.Time,   FB.BldPitch1,   LineWidth=1.5)
         plot(SOW.Time,  SOW.BldPitch1,  LineWidth=1.5)
         plot(SJTU.Time, SJTU.BldPitch1, LineWidth=1.5)
+        plot(UPV.Time,  UPV.BldPitch1,  LineWidth=1.5)
         ylabel({'BldPitch1'; '[deg]'},'Fontsize', FontSize);
         set(gca,'Fontsize', FontSize);
 
@@ -52,7 +53,8 @@ switch PlotType
         plot(FB.Time,   FB.GenTq/1e3,   LineWidth=1.5)
         plot(SOW.Time,  SOW.GenTq/1e3,  LineWidth=1.5)
         plot(SJTU.Time, SJTU.GenTq/1e3, LineWidth=1.5)
-        legend('FB', 'SOW', 'SJTU', 'NumColumns', 2)
+        plot(UPV.Time,  UPV.GenTq/1e3, LineWidth=1.5)        
+        legend('FB', 'SOW', 'SJTU', 'UPV', 'NumColumns', 2)
         ylabel({'GenTq';'[MNm]'},'Fontsize',FontSize);
         set(gca,'Fontsize',FontSize);
 
@@ -61,6 +63,7 @@ switch PlotType
         plot(FB.Time,   FB.RotSpeed,    LineWidth=1.5)
         plot(SOW.Time,  SOW.RotSpeed,   LineWidth=1.5)
         plot(SJTU.Time, SJTU.RotSpeed,  LineWidth=1.5)
+        plot(UPV.Time,  UPV.RotSpeed,   LineWidth=1.5)
         ylabel({'RotSpeed';'[rpm]'},'Fontsize',FontSize);
         set(gca,'Fontsize',FontSize);
 
@@ -69,6 +72,7 @@ switch PlotType
         plot(FB.Time,   FB.TwrBsMyt/1e3,    LineWidth=1.5)
         plot(SOW.Time,  SOW.TwrBsMyt/1e3,   LineWidth=1.5)
         plot(SJTU.Time, SJTU.TwrBsMyt/1e3,  LineWidth=1.5)
+        plot(UPV.Time,  UPV.TwrBsMyt/1e3,   LineWidth=1.5)
         ylabel({'TwrBsMyt';'[MNm]'},'Fontsize',FontSize);
         set(gca,'Fontsize',FontSize);
 
@@ -83,9 +87,9 @@ switch PlotType
     case 'students'
         % Read Data
         FB          = ReadFASTbinaryIntoStruct([SimulationName,'_FB.outb']);
-        FUAS        = ReadFASTbinaryIntoStruct([SimulationName,'_FUAS.outb']);
         UDELAR_1    = ReadFASTbinaryIntoStruct([SimulationName,'_UDELAR_1.outb']);
         UDELAR_2    = ReadFASTbinaryIntoStruct([SimulationName,'_UDELAR_2.outb']);
+        FUAS        = ReadFASTbinaryIntoStruct([SimulationName,'_FUAS.outb']);
         OUC         = ReadFASTbinaryIntoStruct([SimulationName,'_OUC.outb']);
 
         % Plot Data
