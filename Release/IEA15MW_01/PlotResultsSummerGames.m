@@ -13,16 +13,18 @@ addpath(genpath('ResultsStudents'))
 addpath(genpath('ResultsResearchers'))
 
 SimulationName  = 'IEA-15-240-RWT-Monopile';
-PlotType        = 'students';                    % [str]     'default', 'students'
+PlotType        = 'researchers';                    % [str]     'default', 'researchers'
 
 %% Read/Plot/Save Data
 
 switch PlotType
-    case 'default'
+    case 'researchers'
         % Read Data
         FB          = ReadFASTbinaryIntoStruct([SimulationName,'_FB.outb']);
         SOW         = ReadFASTbinaryIntoStruct([SimulationName,'_Sowento.outb']);
-        FUAS        = ReadFASTbinaryIntoStruct([SimulationName,'_FUAS.outb']);
+        SJTU        = ReadFASTbinaryIntoStruct([SimulationName,'_SJTU.outb']);
+%         UPV        = ReadFASTbinaryIntoStruct([SimulationName,'_UPV.outb']);
+
         
         % Plot Data
         nSubplots       = 5;
@@ -41,7 +43,7 @@ switch PlotType
         hold on; grid on; box on;
         plot(FB.Time,   FB.BldPitch1,   LineWidth=1.5)
         plot(SOW.Time,  SOW.BldPitch1,  LineWidth=1.5)
-        plot(FUAS.Time, FUAS.BldPitch1, LineWidth=1.5)
+        plot(SJTU.Time, SJTU.BldPitch1, LineWidth=1.5)
         ylabel({'BldPitch1'; '[deg]'},'Fontsize', FontSize);
         set(gca,'Fontsize', FontSize);
 
@@ -49,8 +51,8 @@ switch PlotType
         hold on; grid on; box on;
         plot(FB.Time,   FB.GenTq/1e3,   LineWidth=1.5)
         plot(SOW.Time,  SOW.GenTq/1e3,  LineWidth=1.5)
-        plot(FUAS.Time, FUAS.GenTq/1e3, LineWidth=1.5)
-        legend('FB', 'SOW', 'FUAS', 'NumColumns', 2)
+        plot(SJTU.Time, SJTU.GenTq/1e3, LineWidth=1.5)
+        legend('FB', 'SOW', 'SJTU', 'NumColumns', 2)
         ylabel({'GenTq';'[MNm]'},'Fontsize',FontSize);
         set(gca,'Fontsize',FontSize);
 
@@ -58,7 +60,7 @@ switch PlotType
         hold on; grid on; box on;
         plot(FB.Time,   FB.RotSpeed,    LineWidth=1.5)
         plot(SOW.Time,  SOW.RotSpeed,   LineWidth=1.5)
-        plot(FUAS.Time, FUAS.RotSpeed,  LineWidth=1.5)
+        plot(SJTU.Time, SJTU.RotSpeed,  LineWidth=1.5)
         ylabel({'RotSpeed';'[rpm]'},'Fontsize',FontSize);
         set(gca,'Fontsize',FontSize);
 
@@ -66,7 +68,7 @@ switch PlotType
         hold on; grid on; box on;
         plot(FB.Time,   FB.TwrBsMyt/1e3,    LineWidth=1.5)
         plot(SOW.Time,  SOW.TwrBsMyt/1e3,   LineWidth=1.5)
-        plot(FUAS.Time, FUAS.TwrBsMyt/1e3,  LineWidth=1.5)
+        plot(SJTU.Time, SJTU.TwrBsMyt/1e3,  LineWidth=1.5)
         ylabel({'TwrBsMyt';'[MNm]'},'Fontsize',FontSize);
         set(gca,'Fontsize',FontSize);
 
@@ -75,16 +77,16 @@ switch PlotType
         xlim([5 30])
 
         % Save Plot
-        ResizeAndSaveFigure(10,10,'SprintDefault.pdf')
+        ResizeAndSaveFigure(12,12,'SprintResearchers.pdf')
         
 
     case 'students'
         % Read Data
         FB          = ReadFASTbinaryIntoStruct([SimulationName,'_FB.outb']);
         FUAS        = ReadFASTbinaryIntoStruct([SimulationName,'_FUAS.outb']);
-        %UDELAR_1    = ReadFASTbinaryIntoStruct([SimulationName,'_UDELAR_1.outb']);
-        %UDELAR_2    = ReadFASTbinaryIntoStruct([SimulationName,'_UDELAR_2.outb']);
-        %OUC         = ReadFASTbinaryIntoStruct([SimulationName,'_OCU.outb']);
+        UDELAR_1    = ReadFASTbinaryIntoStruct([SimulationName,'_UDELAR_1.outb']);
+        UDELAR_2    = ReadFASTbinaryIntoStruct([SimulationName,'_UDELAR_2.outb']);
+        OUC         = ReadFASTbinaryIntoStruct([SimulationName,'_OUC.outb']);
 
         % Plot Data
         nSubplots       = 5;
@@ -103,9 +105,9 @@ switch PlotType
         hold on; grid on; box on;
         plot(FB.Time,       FB.BldPitch1,       LineWidth=1.5)
         plot(FUAS.Time,     FUAS.BldPitch1,     LineWidth=1.5)
-        %plot(UDELAR_1.Time, UDELAR_1.BldPitch1, LineWidth=1.5)
-        %plot(UDELAR_2.Time, UDELAR_2.BldPitch1, LineWidth=1.5)
-        %plot(OUC.Time,      OUC.BldPitch1,      LineWidth=1.5)
+        plot(UDELAR_1.Time, UDELAR_1.BldPitch1, LineWidth=1.5)
+        plot(UDELAR_2.Time, UDELAR_2.BldPitch1, LineWidth=1.5)
+        plot(OUC.Time,      OUC.BldPitch1,      LineWidth=1.5)
         ylabel({'BldPitch1'; '[deg]'},'Fontsize', FontSize);
         set(gca,'Fontsize', FontSize);
 
@@ -113,9 +115,9 @@ switch PlotType
         hold on; grid on; box on;
         plot(FB.Time,       FB.GenTq/1e3,       LineWidth=1.5)
         plot(FUAS.Time,     FUAS.GenTq/1e3,     LineWidth=1.5)
-        %plot(UDELAR_1.Time, UDELAR_1.GenTq/1e3, LineWidth=1.5)
-        %plot(UDELAR_2.Time, UDELAR_2.GenTq/1e3, LineWidth=1.5)
-        %plot(OUC.Time,      OUC.GenTq/1e3,      LineWidth=1.5)
+        plot(UDELAR_1.Time, UDELAR_1.GenTq/1e3, LineWidth=1.5)
+        plot(UDELAR_2.Time, UDELAR_2.GenTq/1e3, LineWidth=1.5)
+        plot(OUC.Time,      OUC.GenTq/1e3,      LineWidth=1.5)
         legend('FB', 'FUAS', 'UDELAR_1', 'UDELAR_2', 'OUC', 'NumColumns', 2)
         ylabel({'GenTq';'[MNm]'},'Fontsize',FontSize);
         set(gca,'Fontsize',FontSize);
@@ -124,9 +126,9 @@ switch PlotType
         hold on; grid on; box on;
         plot(FB.Time,       FB.RotSpeed,        LineWidth=1.5)
         plot(FUAS.Time,     FUAS.RotSpeed,      LineWidth=1.5)
-        %plot(UDELAR_1.Time, UDELAR_1.RotSpeed,  LineWidth=1.5)
-        %plot(UDELAR_2.Time, UDELAR_2.RotSpeed,  LineWidth=1.5)
-        %plot(OUC.Time,      OUC.RotSpeed,       LineWidth=1.5)
+        plot(UDELAR_1.Time, UDELAR_1.RotSpeed,  LineWidth=1.5)
+        plot(UDELAR_2.Time, UDELAR_2.RotSpeed,  LineWidth=1.5)
+        plot(OUC.Time,      OUC.RotSpeed,       LineWidth=1.5)
         ylabel({'RotSpeed';'[rpm]'},'Fontsize',FontSize);
         set(gca,'Fontsize',FontSize);
 
@@ -134,9 +136,9 @@ switch PlotType
         hold on; grid on; box on;
         plot(FB.Time,       FB.TwrBsMyt/1e3,        LineWidth=1.5)
         plot(FUAS.Time,     FUAS.TwrBsMyt/1e3,      LineWidth=1.5)
-        %plot(UDELAR_1.Time, UDELAR_1.TwrBsMyt/1e3,  LineWidth=1.5)
-        %plot(UDELAR_2.Time, UDELAR_2.TwrBsMyt/1e3,  LineWidth=1.5)
-        %plot(OUC.Time,      OUC.TwrBsMyt/1e3,       LineWidth=1.5)
+        plot(UDELAR_1.Time, UDELAR_1.TwrBsMyt/1e3,  LineWidth=1.5)
+        plot(UDELAR_2.Time, UDELAR_2.TwrBsMyt/1e3,  LineWidth=1.5)
+        plot(OUC.Time,      OUC.TwrBsMyt/1e3,       LineWidth=1.5)
         ylabel({'TwrBsMyt';'[MNm]'},'Fontsize',FontSize);
         set(gca,'Fontsize',FontSize);
 
@@ -145,5 +147,5 @@ switch PlotType
         xlim([5 30])
 
         % Save Plot
-        ResizeAndSaveFigure(10,10,'SprintStudents.pdf')
+        ResizeAndSaveFigure(12,12,'SprintStudents.pdf')
 end
