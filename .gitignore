@@ -12,3 +12,6 @@ SimulationResults*
 slprj
 *.slxc
 LidarAssistedControl.egg-info
+# add wind for sprint
+!Sprint/Wind/EOG_URef_12.wnd
+!Sprint/Wind/EOG_URef_12.sum
