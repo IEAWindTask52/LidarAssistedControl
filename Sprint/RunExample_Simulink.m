@@ -22,12 +22,6 @@ SimulationName      = 'IEA-15-240-RWT-Monopile_Simulink';
 FAST_InputFileName  = [SimulationName,'.fst'];
 TMax                = 30; % [s]
 
-% Copy the adequate OpenFAST version to the example folder
-FASTsFuncFile       = 'FAST_SFunc.mexw64';
-FASTdllFile         = 'OpenFAST-Simulink_x64.dll';
-copyfile(['..\OpenFAST\',FASTsFuncFile],FASTsFuncFile)
-copyfile(['..\OpenFAST\',FASTdllFile],  FASTdllFile)
-
 % get Rosco Parameters
 fast.FAST_InputFile = FAST_InputFileName;
 fast.FAST_directory = cd;
@@ -49,10 +43,6 @@ movefile([SimulationName,'.SFunc.outb'],[SimulationName,'_FB.outb'])      % stor
 R.FlagLAC           = 1; % Enable LAC
 sim('OpenFAST_ROSCO_FFP.slx',[0,TMax]);
 movefile([SimulationName,'.SFunc.outb'],[SimulationName,'_FBFF.outb'])    % store results
-
-%% Clean up
-delete(FASTsFuncFile)
-delete(FASTdllFile)
 
 %% Comparison
 % read in data
