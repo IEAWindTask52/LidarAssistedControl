@@ -3,7 +3,7 @@ LAC Test IEA15MW_01: IEA 15 MW offshore reference model monopile configuration w
 ---------------------- SIMULATION CONTROL --------------------------------------
 False                  Echo        - Echo input data to <RootName>.ech (flag)
 "FATAL"                AbortLevel  - Error level when simulation should abort (string) {"WARNING", "SEVERE", "FATAL"}
-30.0                   TMax        - Total run time (s)
+60.0                   TMax        - Total run time (s)
 0.0125                 DT          - Recommended module time step (s)
 2                      InterpOrder - Interpolation order for input/output time history (-) {1=linear, 2=quadratic}
 0                      NumCrctn    - Number of correction iterations (-) {0=explicit calculation, i.e., no corrections}
@@ -26,12 +26,12 @@ False                  Echo        - Echo input data to <RootName>.ech (flag)
 "none"    			   BDBldFile(3) - Name of file containing BeamDyn input parameters for blade 3 (quoted string)
 "IEA-15-240-RWT_InflowFile.dat" InflowFile  - Name of file containing inflow wind input parameters (quoted string)
 "IEA-15-240-RWT_AeroDyn15.dat"  AeroFile    - Name of file containing aerodynamic input parameters (quoted string)
-"IEA-15-240-RWT-Monopile_ServoDyn_FBFF.dat"   ServoFile   - Name of file containing control and electrical-drive input parameters (quoted string)
+"IEA-15-240-RWT-Monopile_ServoDyn_FBFF_SinglePoint.dat"   ServoFile   - Name of file containing control and electrical-drive input parameters (quoted string)
 "none"   			   HydroFile   - Name of file containing hydrodynamic input parameters (quoted string)
 "none"     			   SubFile     - Name of file containing sub-structural input parameters (quoted string)
 "none"                 MooringFile - Name of file containing mooring system input parameters (quoted string)
 "none"                 IceFile     - Name of file containing ice input parameters (quoted string)
-"SinglePoint_LidarFile.dat"	SWELidarFile	- Name of file containing SWE Lidar input parameters (quoted string)
+"LidarFile_SinglePoint.dat"	SWELidarFile	- Name of file containing SWE Lidar input parameters (quoted string)
 ---------------------- OUTPUT --------------------------------------------------
 False                  SumPrint    - Print summary data to "<RootName>.sum" (flag)
 10.0                   SttsTime    - Amount of time between screen status messages (s)

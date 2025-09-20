@@ -13,13 +13,13 @@ FileName = 'ECD_VrPlus2mps';
 
 %% Preprocessing
 % Time discretization
-T           = 60;                   % [s]   total simulation time
+T           = 90;                   % [s]   total simulation time
 dt          = 1/80;               	% [s]   simulation time step
 t           = 0:dt:T-dt;            % [s]   simulation time vector
 
 % Wind conditions at hub height
 V_hub       = 12.5;                 % [m/s] mean wind speed at hub height: v_rated + 2/m/s 
-t_start     = 10;                   % [s]   start time of gust event
+t_start     = 30;                   % [s]   start time of gust event
 
 % Rotor-plane grid definition
 % Some variables required in the Type 4 wind: Bladed style
