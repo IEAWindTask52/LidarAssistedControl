@@ -3,8 +3,6 @@
 %   Script to generate an Extreme Coherent Gust with direction change (ECD)
 %   according to IEC 61400-1.
 %
-%   [Notes]
-%   ToDo-1: Do we need to adjust to TI-calculation?
 %
 %% Setup
 clear all; close all; clc;
@@ -13,7 +11,7 @@ FileName = 'ECD_VrPlus2mps';
 
 %% Preprocessing
 % Time discretization
-T           = 90;                   % [s]   total simulation time
+T           = 70;                   % [s]   total simulation time
 dt          = 1/80;               	% [s]   simulation time step
 t           = 0:dt:T-dt;            % [s]   simulation time vector
 
@@ -22,13 +20,18 @@ V_hub       = 12.5;                 % [m/s] mean wind speed at hub height: v_rat
 t_start     = 30;                   % [s]   start time of gust event
 
 % Rotor-plane grid definition
+
+% Extreme coherent gust with direction change (ECD - IEC 6.3.2.5)
+V_cg        = 15;       % [m/s] coherent gusut amplitude
+T_gust      = 10;       % [s]   rise time of coherent gust
+
 % Some variables required in the Type 4 wind: Bladed style
 HubHeight   = 150;                  % [m]   hub height      
 dy          = 10;                   % [m]   lateral spacing
 dz          = 10;                   % [m]   vertical spacing
 Ny          = 29;                   % [-]   number of grid points in lateral direction
 Nz          = 29;                   % [-]   number of grid points in vertical direction
-URef        = V_hub;                % [m/s] reference mean wind speed
+URef        = V_hub+V_cg/2;         % [m/s] reference mean wind speed
 zOffset     = HubHeight;            % [m]   reference height of the grid
 z0          = 0.1;                  % [m]   the rougthness length, not really used
 
@@ -37,10 +40,6 @@ alpha       = 0.2;                                  % [-]   shear exponent for N
 z_hub       = HubHeight;
 z           = [-(Nz-1)/2:1:(Nz-1)/2]*dz+HubHeight;  % [m]   vertical coordinates of the grid
 V_z         = V_hub*(z/z_hub).^alpha;               % [m/s] mean wind profile at each vertical grid point
-
-% Extreme coherent gust with direction change (ECD - IEC 6.3.2.5)
-V_cg        = 15;       % [m/s] coherent gusut amplitude
-T_gust      = 10;       % [s]   rise time of coherent gust
 
 % Magnitude of ECD
 u_W         = NaN(Nz, length(t));
@@ -96,19 +95,19 @@ title('Longitudinal component')
 SummVars(1) = HubHeight;    % HubHeight
 SummVars(3) = URef;         % Mean wind speed at hub-height
 
-velocity    = zeros(max(size(t)),3,Ny,Nz);  % [time, (u,v,w), y, z]
+velocity    = NaN(max(size(t)),3,Ny,Nz);  % [time, (u,v,w), y, z]
 for iy = 1:Ny
     for iz = 1:Nz
         velocity(:,1,iy,iz) = u_I(iz,:);    % longitudinal component
         velocity(:,2,iy,iz) = v_I(iz,:);    % lateral component
-        % velocity(:,3,iy,iz) = 0 (no vertical component)
+        velocity(:,3,iy,iz) = 0;            % no vertical component
     end
 end
 
 % Get turbulence intensity for .sum-file
-% here we use std u for v and w components, to avoid dividing by zero
+% here we use std u for w component to avoid dividing by zero
 SummVars(4) = std(squeeze(velocity(:,1,1,1)))/URef*100;
-SummVars(5) = std(squeeze(velocity(:,1,1,1)))/URef*100;     % ToDo: Do we need to include the lateral component?
+SummVars(5) = std(squeeze(velocity(:,2,1,1)))/URef*100;     
 SummVars(6) = std(squeeze(velocity(:,1,1,1)))/URef*100;
 
 % Export rotor-plane wind field (.wnd + .sum) for OpenFAST

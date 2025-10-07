@@ -86,11 +86,11 @@ linkaxes(findobj(gcf, 'Type', 'Axes'),'x');
 xlim([20 50])
 
 % display results
-% RotSpeed_0  = 7.56;     % [rpm]
-% TwrBsMyt_0  = 158.3e3;  % [kNm]
-% t_Start     = 0;        % [s]
-% 
-% Cost = (max(abs(FBFF.RotSpeed(FBFF.Time>=t_Start)-RotSpeed_0))) / RotSpeed_0 ...
-%      + (max(abs(FBFF.TwrBsMyt(FBFF.Time>=t_Start)-TwrBsMyt_0))) / TwrBsMyt_0;
-% 
-% fprintf('Cost for Summer Games 2025 ("30 s sprint"):  %f \n',Cost);
+RotSpeed_0  = 7.56;     % [rpm]
+TwrBsMyt_0  = 158.3e3;  % [kNm]
+t_Start     = 0;        % [s]
+
+Cost = (max(abs(FBFF_4BeamPulsed.RotSpeed(FBFF_4BeamPulsed.Time>=t_Start)-RotSpeed_0))) / RotSpeed_0 ...
+     + (max(abs(FBFF_4BeamPulsed.TwrBsMyt(FBFF_4BeamPulsed.Time>=t_Start)-TwrBsMyt_0))) / TwrBsMyt_0;
+
+fprintf('Cost for Summer Games 2025 ("30 s sprint"):  %f \n',Cost);
