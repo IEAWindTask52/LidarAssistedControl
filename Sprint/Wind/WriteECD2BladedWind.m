@@ -19,18 +19,18 @@ t           = 0:dt:T-dt;            % [s]   simulation time vector
 V_hub       = 12.5;                 % [m/s] mean wind speed at hub height: v_rated + 2/m/s 
 t_start     = 30;                   % [s]   start time of gust event
 
-% Rotor-plane grid definition
-
 % Extreme coherent gust with direction change (ECD - IEC 6.3.2.5)
-V_cg        = 15;       % [m/s] coherent gusut amplitude
-T_gust      = 10;       % [s]   rise time of coherent gust
+V_cg        = 15;                   % [m/s] coherent gust amplitude
+T_gust      = 10;                   % [s]   rise time of coherent gust
 
-% Some variables required in the Type 4 wind: Bladed style
-HubHeight   = 150;                  % [m]   hub height      
+% Grid definition
 dy          = 10;                   % [m]   lateral spacing
 dz          = 10;                   % [m]   vertical spacing
 Ny          = 29;                   % [-]   number of grid points in lateral direction
 Nz          = 29;                   % [-]   number of grid points in vertical direction
+
+% Some variables required in the Type 4 wind: Bladed style
+HubHeight   = 150;                  % [m]   hub height      
 URef        = V_hub+V_cg/2;         % [m/s] reference mean wind speed
 zOffset     = HubHeight;            % [m]   reference height of the grid
 z0          = 0.1;                  % [m]   the rougthness length, not really used
@@ -74,22 +74,30 @@ u_I = u_W.*repmat(cos(theta),Nz,1);     % longitudinal
 v_I = u_W.*repmat(sin(theta),Nz,1);     % lateral
 
 %% Plot and validate results
+Idx = ismember(z,[50:50:250]);
+
 figure
+
 subplot(311)
-plot(t,u_W')
+hold on; grid on; box on
+plot(t,u_W(Idx,:)')
 ylabel('u_W [m/s]')
-title('Wind speed magnitude before projection')
+title('Wind speed magnitude')
 
 subplot(312)
-plot(t,v_I')
+hold on; grid on; box on
+plot(t,v_I(Idx,:)')
 ylabel('v_I [m/s]')
 title('Lateral component')
 
 subplot(313) 
-plot(t,u_I')
+hold on; grid on; box on
+plot(t,u_I(Idx,:)')
 ylabel('u_I [m/s]')
-xlabel('time [s]')
 title('Longitudinal component')
+
+xlabel('time [s]')
+legend(z(Idx)+" m")
 
 %% Prepare output arrays for .wnd-file
 SummVars(1) = HubHeight;    % HubHeight
