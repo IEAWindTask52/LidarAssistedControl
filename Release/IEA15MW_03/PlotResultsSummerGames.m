@@ -63,4 +63,4 @@ xlabel('time [s]')
 legend('Udelar','DTU','UniNorte')
 
 % Save Plot
-ResizeAndSaveFigure(12,6,'HurdlesStudents.pdf')
+ResizeAndSaveFigure(12,10,'HurdlesStudents.pdf')

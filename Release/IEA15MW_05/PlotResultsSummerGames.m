@@ -50,6 +50,7 @@ plot(WindSpeedBins,ProcessResults(2).LTW_DEL_4_TwrBsMyt_PerBin/1e3,'.-')
 plot(WindSpeedBins,ProcessResults(3).LTW_DEL_4_TwrBsMyt_PerBin/1e3,'.-')
 ylabel('Tower DEL [MNm]')
 xlim([4 24])
+ylim([0 300])
 xticks([4:2:24])
 % subplot(312)
 % hold on;grid on;box on
@@ -67,11 +68,12 @@ plot(WindSpeedBins,ProcessResults(3).LTW_DEL_10_RootMyb1_PerBin/1e3,'.-')
 legend('FB','sowento','IAV','location','best','Interpreter','none')
 ylabel('Blade DEL [MNm]')
 xlim([4 24])
+ylim([0 61])
 xticks([4:2:24])
 xlabel('wind speed [m/s]')
 
 % Save Plot
-ResizeAndSaveFigure(12,6,'MarathonResearchers.pdf')
+ResizeAndSaveFigure(12,10,'MarathonResearchers2.pdf')
 
 % 
 % figure('Name','Other values')

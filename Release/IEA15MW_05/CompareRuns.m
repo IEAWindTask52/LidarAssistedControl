@@ -114,3 +114,39 @@ for iSimulationMode = 2:nSimulationModes
     fprintf('-------------------------------------------------\n')
 end
 
+figure('Name','Life-time weighted DEL')
+subplot(211)
+hold on;grid on;box on
+% title('Life-time weighted tower DEL')
+plot(WindSpeedBins,ProcessResults(1).LTW_DEL_4_TwrBsMyt_PerBin/1e3,'o-')
+plot(WindSpeedBins,ProcessResults(2).LTW_DEL_4_TwrBsMyt_PerBin/1e3,'.-')
+plot(WindSpeedBins,ProcessResults(3).LTW_DEL_4_TwrBsMyt_PerBin/1e3,'.-')
+ylabel('Tower DEL [MNm]')
+xlim([4 24])
+ylim([0 300])
+xticks([4:2:24])
+% subplot(312)
+% hold on;grid on;box on
+% title('Life-time weighted shaft DEL')
+% plot(WindSpeedBins,ProcessResults(1).LTW_DEL_4_RotTorq_PerBin/1e3,'o-')
+% plot(WindSpeedBins,ProcessResults(2).LTW_DEL_4_RotTorq_PerBin/1e3,'.-')
+% plot(WindSpeedBins,ProcessResults(3).LTW_DEL_4_RotTorq_PerBin/1e3,'.-')
+% ylabel('Shaft DEL [MNm]')
+subplot(212)
+hold on;grid on;box on
+% title('Life-time weighted blade DEL')
+plot(WindSpeedBins,ProcessResults(1).LTW_DEL_10_RootMyb1_PerBin/1e3,'o-')
+plot(WindSpeedBins,ProcessResults(2).LTW_DEL_10_RootMyb1_PerBin/1e3,'.-')
+plot(WindSpeedBins,ProcessResults(3).LTW_DEL_10_RootMyb1_PerBin/1e3,'.-')
+legend(SimulationModes,'location','best','Interpreter','none')
+ylabel('Blade DEL [MNm]')
+xlim([4 24])
+ylim([0 61])
+xticks([4:2:24])
+xlabel('wind speed [m/s]')
+
+
+% Save Plot
+ResizeAndSaveFigure(12,10,'Marathon.pdf')
+
+
