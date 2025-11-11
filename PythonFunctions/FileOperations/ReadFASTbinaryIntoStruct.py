@@ -1,4 +1,4 @@
-from FileOperations.ReadFASTbinary import ReadFASTbinary
+from PythonFunctions.FileOperations.ReadFASTbinary import ReadFASTbinary
 
 
 def ReadFASTbinaryIntoStruct(file_name):
