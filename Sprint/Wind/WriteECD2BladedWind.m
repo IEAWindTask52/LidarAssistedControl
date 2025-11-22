@@ -12,7 +12,7 @@ FileName = 'ECD_VrPlus2mps';
 %% Preprocessing
 % Time discretization
 T           = 70;                   % [s]   total simulation time
-dt          = 1/80;               	% [s]   simulation time step
+dt          = 1/100;               	% [s]   simulation time step
 t           = 0:dt:T-dt;            % [s]   simulation time vector
 
 % Wind conditions at hub height

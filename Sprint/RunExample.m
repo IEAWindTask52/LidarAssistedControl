@@ -6,28 +6,28 @@
 % Here, only the rotor motion and tower motion (GenDOF, TwFADOF1, TwSSDOF1) 
 % are enabled for simplicity.
 % Result:       
-% Cost for Summer Games 2025 ("30 s sprint"):  0.731996 (4BeamPulsed)
-% Cost for Summer Games 2025 ("30 s sprint"):  1.217946 (CircularCW)
+% Cost for Summer Games 2025 ("30 s sprint"):  0.739948 (4BeamPulsed)
+% Cost for Summer Games 2025 ("30 s sprint"):  1.217253 (CircularCW)
 
 %% Setup
 clearvars;close all;clc;
 addpath(genpath('..\WetiMatlabFunctions'))
 
 % select simulated lidar
-LidarMode       = '4BeamPulsed'; % [4BeamPulsed/CircularCW]
+LidarType       = '4BeamPulsed'; % [4BeamPulsed/CircularCW]
 
 % define FAST input file
 SimulationName  = 'IEA-15-240-RWT-Monopile';
 
 %% Run FB and FF simulation
 dos(['openfast_x64.exe ',SimulationName,'_FB.fst']); 
-dos(['openfast_x64.exe ',SimulationName,'_FBFF_',LidarMode,'.fst']);
+dos(['openfast_x64.exe ',SimulationName,'_FBFF_',LidarType,'.fst']);
 
 %% Comparison
 % read in data
 FB                  = ReadFASTbinaryIntoStruct([SimulationName,'_FB.outb']);
-FBFF                = ReadFASTbinaryIntoStruct([SimulationName,'_FBFF_',LidarMode,'.outb']);
-FBFF_R              = ReadROSCOtextIntoStruct( [SimulationName,'_FBFF_',LidarMode,'.RO.dbg']);
+FBFF                = ReadFASTbinaryIntoStruct([SimulationName,'_FBFF_',LidarType,'.outb']);
+FBFF_R              = ReadROSCOtextIntoStruct( [SimulationName,'_FBFF_',LidarType,'.RO.dbg']);
 
 % Plot 
 figure('Name','Simulation results')
