@@ -7,7 +7,7 @@
 % are enabled for simplicity.
 % Result:       
 % Cost for Summer Games 2025 ("30 s sprint"):  0.739948 (4BeamPulsed)
-% Cost for Summer Games 2025 ("30 s sprint"):  1.217253 (CircularCW)
+% Cost for Summer Games 2025 ("30 s sprint"):  1.219835 (CircularCW)
 
 %% Setup
 clearvars;close all;clc;

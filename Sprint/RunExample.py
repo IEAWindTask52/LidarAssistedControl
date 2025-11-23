@@ -6,8 +6,8 @@
 # Here, only the rotor motion and tower motion (GenDOF, TwFADOF1, TwSSDOF1)
 # are enabled for simplicity.
 # Result:
-# Cost for Summer Games 2025 ("30 s sprint"):  0.731996 (4BeamPulsed)
-# Cost for Summer Games 2025 ("30 s sprint"):  1.217946 (CircularCW)
+# Cost for Summer Games 2025 ("30 s sprint"):  0.739948 (4BeamPulsed)
+# Cost for Summer Games 2025 ("30 s sprint"):  1.219835 (CircularCW)
 
 # Setup
 import os
