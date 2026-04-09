@@ -41,7 +41,9 @@ CHARACTER(SIZE(avcOUTNAME)-1)                   :: RootName                     
 CHARACTER(SIZE(avcMSG)-1)                       :: ErrMsg                           ! a Fortran version of the C string argument (not considered an array here) [subtract 1 for the C null-character]
 INTEGER(4)                                      :: iDLL       	! Counter
 INTEGER(HANDLE)                                 :: FileAddr    	! The address of file FileName.         (RETURN value from LoadLibrary in kernel32.f90)
-INTEGER(LPVOID)                                 :: ProcAddr    	! The address of procedure ProcName.    (RETURN value from GetProcAddress in kernel32.f90)   
+INTEGER(LPVOID)                                 :: ProcAddr    	! The address of procedure ProcName.    (RETURN value from GetProcAddress in kernel32.f90)
+CHARACTER(1024)                                 :: SubDLLInputFile  ! Name of the input file for the sub-DLL (.IN)
+INTEGER(4)                                      :: SubDLLInputLen   ! Number of characters of the name of the .IN file.
 
 TYPE(LidarVariables),           SAVE            :: LidarVar                         ! lidar related variable type
 TYPE(LidarErrorVariables),      SAVE            :: ErrVar                           ! lidar related error type
@@ -93,6 +95,13 @@ IF (ErrVar%aviFAIL < 0) THEN  ! Check whether error occurs in the last step, DLL
                 RETURN
         ELSE      ! if the address is correctly associated, then we can run the DLL
             CALL C_F_PROCPOINTER(LidarVar%PROCADDR(iDLL), DLL_Legacy_Subroutine)
+            
+            ! The following 4 lines fix the bug that no IN file names are supported that are shorter than the IN file name of the WRAPPER itself.
+            SubDLLInputFile = ''
+            SubDLLInputFile = TRIM(LidarVar%DLLINPUTFILENAME(iDLL)) // C_NULL_CHAR
+            SubDLLInputLen  = LEN_TRIM(LidarVar%DLLINPUTFILENAME(iDLL)) + 1
+            avrSWAP(50) = REAL(SubDLLInputLen, C_FLOAT)
+            
             CALL DLL_Legacy_Subroutine (avrSWAP, aviFAIL, TRIM(LidarVar%DLLINPUTFILENAME(iDLL))//C_NULL_CHAR, avcOUTNAME, avcMSG )
         END IF
     END DO
