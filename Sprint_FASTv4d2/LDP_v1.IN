@@ -1,0 +1,6 @@
+! Baseline lidar data processing parameters (LDP_v1.dll, v1.4). Please do not change the number of lines.
+
+!------- LIDAR TRAJECTORY -----------------------------------------------------
+1	     	! NumberOfBeams  	- Number of beams measuring at different directions [-]
+0         	! AngleToCenterline - Angle around centerline [deg]
+1 			! IndexGate  		- Index of range gates used in the LDP [-]
