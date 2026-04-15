@@ -33,9 +33,9 @@ figure('Name','Simulation results')
 subplot(4,1,1);
 hold on; grid on; box on
 plot(FB.Time,       FB.Wind1VelX);
-plot(FBFF_R.Time,   FBFF_R.REWS_b);
+plot(FBFF_R.Time,   FBFF_R.REWS);
 ylabel('[m/s]');
-legend('Wind1VelX','REWS_b','Interpreter','none','Location','best')
+legend('Wind1VelX','REWS preview','Interpreter','none','Location','best')
 
 subplot(4,1,2);
 hold on; grid on; box on
