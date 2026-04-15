@@ -206,25 +206,25 @@ Adjusted initial conditions, DOFs, simulation length:
 		- -0.1277                TTDspSS     - Initial side-to-side tower-top displacement (meters)
 		+ 0.0                	 TTDspSS     - Initial side-to-side tower-top displacement (meters)
 	IEA-15-240-RWT-Monopile_FB.fst
-		+ Total simulation time to 40s
+		+ Total simulation time to 30s
 
 2026/04/10:
-Added files for SinglePoint FBFF example (Copy of the FB file versions):
-+ IEA-15-240-RWT-Monopile_FBFF_SinglePoint.fst
-+ IEA-15-240-RWT-Monopile_ServoDyn_FBFF_SinglePoint.dat
+Added files for FBFF example (Copy of the FB file versions):
++ IEA-15-240-RWT-Monopile_FBFF.fst
++ IEA-15-240-RWT-Monopile_ServoDyn_FBFF.dat
 
-IEA-15-240-RWT-Monopile_FBFF_SinglePoint.fst
+IEA-15-240-RWT-Monopile_FBFF.fst
 Line 40:
 - "IEA-15-240-RWT-Monopile_ServoDyn_FB.dat"   ServoFile   - Name of file containing control and electrical-drive input parameters (quoted string)
-+ "IEA-15-240-RWT-Monopile_ServoDyn_FBFF_SinglePoint.dat"   ServoFile   - Name of file containing control and electrical-drive input parameters (quoted string)
++ "IEA-15-240-RWT-Monopile_ServoDyn_FBFF.dat"   ServoFile   - Name of file containing control and electrical-drive input parameters (quoted string)
 
-IEA-15-240-RWT-Monopile_ServoDyn_FBFF_SinglePoint.dat
+IEA-15-240-RWT-Monopile_ServoDyn_FBFF.dat
 Line 77:
 - "ROSCO.dll"  		   DLL_FileName - Name/location of the dynamic library {.dll [Windows] or .so [Linux]} in the Bladed-DLL format (-) [used only with Bladed Interface]
 + "WRAPPER.dll"  		     DLL_FileName - Name/location of the dynamic library {.dll [Windows] or .so [Linux]} in the Bladed-DLL format (-) [used only with Bladed Interface]
 Line 78:
 - "ROSCO_FB.IN"   	   DLL_InFile  - Name of input file sent to the DLL (-) [used only with Bladed Interface]
-+ "WRAPPER_SinglePoint.IN" DLL_InFile  - Name of input file sent to the DLL (-) [used only with Bladed Interface]
++ "WRAPPER.IN" DLL_InFile  - Name of input file sent to the DLL (-) [used only with Bladed Interface]
 
 
 

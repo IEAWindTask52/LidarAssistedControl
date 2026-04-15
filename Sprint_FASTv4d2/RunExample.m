@@ -14,21 +14,18 @@
 clearvars;close all;clc;
 addpath(genpath('..\WetiMatlabFunctions'))
 
-% select simulated lidar
-LidarType       = 'SinglePoint'; % [SinglePoint]
-
 % define FAST input file
 SimulationName  = 'IEA-15-240-RWT-Monopile';
 
 %% Run FB and FF simulation
 dos(['openfast_x64_v4d2.exe ',SimulationName,'_FB.fst']); 
-dos(['openfast_x64_v4d2.exe ',SimulationName,'_FBFF_',LidarType,'.fst']);
+dos(['openfast_x64_v4d2.exe ',SimulationName,'_FBFF.fst']);
 
 %% Comparison
 % read in data
 FB                  = ReadFASTbinaryIntoStruct([SimulationName,'_FB.outb']);
-FBFF                = ReadFASTbinaryIntoStruct([SimulationName,'_FBFF_',LidarType,'.outb']);
-FBFF_R              = importROdbg_withUnits([SimulationName,'_FBFF_',LidarType,'.RO.dbg']);
+FBFF                = ReadFASTbinaryIntoStruct([SimulationName,'_FBFF.outb']);
+FBFF_R              = importROdbg_withUnits([SimulationName,'_FBFF.RO.dbg']);
 
 % Plot 
 figure('Name','Simulation results')
