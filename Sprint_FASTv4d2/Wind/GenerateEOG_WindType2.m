@@ -1,7 +1,6 @@
-clear all;
-close all;
-clc;
-
+% Script to generate an Extreme Operating Gust (EOG) as uniform wind type
+% (OpenFAST WindType=2) with file ending .wnd.
+clearvars;close all;clc;
 %% Preprocessing
 % time
 T           = 40;                   % [s]   simulation length
@@ -15,6 +14,7 @@ V_ref       = 50;                   % [m/s] reference wind speed average over 10
 I_ref       = 0.14;                 % [-]   expected value of the turbulence intensity at 15 m/s
 D           = 240;                  % [m]   rotor diameter
 alpha       = 0.0;                  % [-]   Vertical power-law wind-shear exponent
+
 % calculation of wind signals
 t           = 0:dt:T-dt;
 

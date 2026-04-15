@@ -1,6 +1,6 @@
 % IEA15MW_01: IEA 15 MW monopile + perfect wind preview from a single point 
 % lidar system.
-% Origin and changes in files: see ChangeLog.txt.
+% Origin and changes in files: see ChangeLogOpenFAST.txt.
 % Purpose:
 % Here, we use a perfect wind preview to demonstrate that the collective
 % pitch feedforward controller (designed with SLOW) is able to reduce
