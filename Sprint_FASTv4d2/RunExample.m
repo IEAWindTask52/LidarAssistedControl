@@ -25,7 +25,7 @@ dos(['openfast_x64_v4d2.exe ',SimulationName,'_FBFF.fst']);
 % read in data
 FB                  = ReadFASTbinaryIntoStruct([SimulationName,'_FB.outb']);
 FBFF                = ReadFASTbinaryIntoStruct([SimulationName,'_FBFF.outb']);
-FBFF_R              = importROdbg_withUnits([SimulationName,'_FBFF.RO.dbg']);
+FBFF_R              = ReadROSCOtextIntoStruct([SimulationName,'_FBFF.RO.dbg']);
 
 % Plot 
 figure('Name','Simulation results')
