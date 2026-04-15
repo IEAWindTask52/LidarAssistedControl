@@ -3,7 +3,7 @@
 ! Target: 		This code aims to provide a reference Lidar-assisted control package for the community. Please cite the following paper if this code is helpful for your research:
 ! 				Guo, F., Schlipf, D., and Cheng, P. W.: Evaluation of lidar-assisted wind turbine control under various turbulence characteristics, Wind Energ. Sci. Discuss.
 ! 				[preprint], https://doi.org/10.5194/wes-2022-62, in review, 2022.    
-! Function: 	The FFP module reads in the rotor-effective wind speed from the avrSWAP array, then filters the signal and shifts it in time.
+! Function: 	The FFP module reads in the rotor-effective wind speed from the avrSWAP array.
 ! 				It eventually returns the feedforward pitch time derivative (rate), which is written into the avrSWAP array. 			
 ! Reference:	The subroutines rely on the legacy Bladed style data interface. See the Bladed manual for more detail.    
 ! 				The code is written based on the source code of ROSCO. Version 2.4.1, https://github.com/NREL/ROSCO, 2021. by NREL.
@@ -60,9 +60,7 @@ ENDIF
 ! Filter and timing of the signals
 CALL CalculateFeedForwardPitchRate(avrSWAP, LidarVar, ErrVar)
 
-! Assign the pitch feedforward rate and processed REWS signals to the avrSWAP array
-avrSWAP(LIDARVAR%AvrIndex_REWS_b) = LidarVar%REWS_b
-avrSWAP(LIDARVAR%AvrIndex_REWS_f) = LidarVar%REWS_f
+! Assign the pitch feedforward rate to the avrSWAP array
 avrSWAP(LIDARVAR%AvrIndex_FFrate) = LidarVar%FF_PitchRate
 
 !------------------------------------------------------------------------------------------------------------------------------	

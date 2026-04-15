@@ -38,15 +38,10 @@ CONTAINS
          
         ! --- read and set the lidar variables
         L                           = NINT(avrSWAP(63))     ! The index in the array where the lidar related data begins 
-               
-        !> Gates per beam
-        LidarVar%GatesPerBeam    	= NINT(avrSWAP(L + 2)) 	! Number of range gate, for this reference version, only one range gate is supported                                                             
-
+                                                                            
         !> Index for LDP and FFP outputs
-        LidarVar%AvrIndex_REWS     	= L + 2 + (LidarVar%GatesPerBeam) + 7            
-		LIDARVAR%AvrIndex_REWS_b  	= L + 2 + (LidarVar%GatesPerBeam) + 8
-		LIDARVAR%AvrIndex_FFrate   	= L + 2 + (LidarVar%GatesPerBeam) + 9
-		LIDARVAR%AvrIndex_REWS_f    = L + 2 + (LidarVar%GatesPerBeam) + 10
+        LidarVar%AvrIndex_REWS     	= L + 2 + 7            
+		LIDARVAR%AvrIndex_FFrate   	= L + 2 + 9
 		
 		!> load rotor-effective wind speed
 		LidarVar%REWS            	= avrSWAP(LIDARVAR%AvrIndex_REWS)
@@ -75,20 +70,12 @@ CONTAINS
 		
 		! Description:
 		print *, '--------------------------------------------------------------------'
-		print *, 'A baseline pitch forward controller - v1.1'
+		print *, 'A baseline pitch forward controller - v0.1'
 		print *, 'Developed by Flensburg University of Applied Sciences, Germany'
 		print *, '--------------------------------------------------------------------'
 		
 		! Read the DLL Parameters specified in the User Interface
-		CALL ReadLidarParameterFileSub(LidarVar, accINFILE, NINT(avrSWAP(50)), ErrVar)
-		
-		! Allocates buffer and initialize it
-        IF (.not. allocated(LidarVar%REWS_f_buffer)) THEN
-			Allocate(LidarVar%REWS_f_buffer(LidarVar%nBuffer))	
-        END IF
-		DO iBuffer = 1,LidarVar%nBuffer,1
-		   LidarVar%REWS_f_buffer(iBuffer) = LidarVar%REWS
-		END DO 		
+		CALL ReadLidarParameterFileSub(LidarVar, accINFILE, NINT(avrSWAP(50)), ErrVar)	
         
 		! Add RoutineName to error message
 		IF (ErrVar%aviFAIL < 0) THEN
@@ -128,12 +115,6 @@ CONTAINS
         CALL ReadEmptyLine(UnControllerParameters,CurLine)
         CALL ReadEmptyLine(UnControllerParameters,CurLine)
         CALL ReadEmptyLine(UnControllerParameters,CurLine)
-        
-        !------- Filter and timing -----------------------------
-        CALL ParseInput(UnControllerParameters,CurLine,'FlagLPF', accINFILE(1),LidarVar%FlagLPF, ErrVar)
-		CALL ParseInput(UnControllerParameters,CurLine,'f_cutoff',accINFILE(1),LidarVar%f_cutoff,ErrVar)
-        CALL ParseInput(UnControllerParameters,CurLine,'T_buffer',accINFILE(1),LidarVar%T_buffer,ErrVar)        
-        CALL ReadEmptyLine(UnControllerParameters,CurLine)
               
         !------- Static pitch curve ----------------------------
         CALL ReadEmptyLine(UnControllerParameters,CurLine)
@@ -160,41 +141,16 @@ CONTAINS
         
         TYPE(LidarErrorVariables),  INTENT(INOUT)       :: ErrVar
 		TYPE(LidarVariables), INTENT(INOUT)          	:: LidarVar
-        INTEGER(4)                                   	:: LPF_inst
-        INTEGER(4)                                   	:: iBuffer
-		INTEGER(4) 										:: Idx
-        REAL(C_FLOAT), INTENT(INOUT) :: avrSWAP(*)   ! The swap array, used to pass data to, and receive data from, the DLL controller.
+        REAL(C_FLOAT), INTENT(INOUT)                    :: avrSWAP(*)   ! The swap array, used to pass data to, and receive data from, the DLL controller.
 		CHARACTER(*),               PARAMETER           :: RoutineName = 'CalculateFeedForwardPitchRate'
 		    
 		! Nothing is done in case of an error
         IF (ErrVar%aviFAIL < 0) THEN
             return
         ENDIF			
-        
-        ! Low pass filter the REWS
-		IF (LidarVar%FlagLPF == 1) THEN
-			LPF_inst = 1
-			LidarVar%REWS_f      	= LPFilter(LidarVar%REWS, LidarVar%DT, LidarVar%f_cutoff, LidarVar%iStatus, .FALSE., LPF_inst)
-		ELSE
-			LidarVar%REWS_f      	= LidarVar%REWS
-		END IF
-
-        ! first-in-last-out buffer for filtered REWS (in case of Error, last values is repeated)
-        DO iBuffer = LidarVar%nBuffer, 2, -1
-			LidarVar%REWS_f_Buffer(iBuffer) 	= LidarVar%REWS_f_Buffer(iBuffer-1)
-        END DO			
-		IF (LidarVar%REWS_f /= LidarVar%ErrorCode) THEN 		
-			LidarVar%REWS_f_Buffer(1)  			= LidarVar%REWS_f 
-		END IF
-	        
-		! Index for entry at T_buffer, minimum 1, maximum nBuffer
-		Idx = min(max(INT(LidarVar%T_buffer/LidarVar%DT),1),LidarVar%nBuffer)
-		
-		! Get buffered and filtered REWS from buffer
-		LidarVar%REWS_b 			= LidarVar%REWS_f_Buffer(Idx)
 		
 		! Calculate feedforward pitch angle
-		LidarVar%FF_Pitch 			= interp1d(LidarVar%StaticWind,LidarVar%StaticPitch,LidarVar%REWS_b,ErrVar)	
+		LidarVar%FF_Pitch 			= interp1d(LidarVar%StaticWind,LidarVar%StaticPitch,LidarVar%REWS,ErrVar)	
 		
         ! Calculate feedforward pitch rate
         IF (LidarVar%iStatus == 0) THEN ! not initialized yet
@@ -212,52 +168,6 @@ CONTAINS
 				
     END SUBROUTINE CalculateFeedForwardPitchRate  
     ! -----------------------------------------------------------------------------------
-	
-    ! -----------------------------------------------------------------------------------
-    ! Low pass filter taken from ROSCO, modified with return in case of an error
-    REAL FUNCTION LPFilter(InputSignal, DT, CornerFreq, iStatus, reset, inst)
-    ! Discrete time Low-Pass Filter of the form:
-    !                               Continuous Time Form:   H(s) = CornerFreq/(1 + CornerFreq)
-    !                               Discrete Time Form:     H(z) = (b1z + b0) / (a1*z + a0)
-    !
-        REAL(8), INTENT(IN)         :: InputSignal
-        REAL(8), INTENT(IN)         :: DT                       ! time step [s]
-        REAL(8), INTENT(IN)         :: CornerFreq               ! corner frequency [rad/s]
-        INTEGER(4), INTENT(IN)      :: iStatus                  ! A status flag set by the simulation as follows: 0 if this is the first call, 1 for all subsequent time steps, -1 if this is the final call at the end of the simulation.
-        INTEGER(4), INTENT(INOUT)   :: inst                     ! Instance number. Every instance of this function needs to have an unique instance number to ensure instances don't influence each other.
-        LOGICAL(4), INTENT(IN)      :: reset                    ! Reset the filter to the input signal
-
-            ! Local
-        REAL(8), DIMENSION(99), SAVE    :: a1                   ! Denominator coefficient 1
-        REAL(8), DIMENSION(99), SAVE    :: a0                   ! Denominator coefficient 0
-        REAL(8), DIMENSION(99), SAVE    :: b1                    ! Numerator coefficient 1
-        REAL(8), DIMENSION(99), SAVE    :: b0                    ! Numerator coefficient 0 
-
-        REAL(8), DIMENSION(99), SAVE    :: InputSignalLast      ! Input signal the last time this filter was called. Supports 99 separate instances.
-        REAL(8), DIMENSION(99), SAVE    :: OutputSignalLast ! Output signal the last time this filter was called. Supports 99 separate instances.
-
-            ! Initialization
-        IF ((iStatus == 0) .OR. reset) THEN   
-            OutputSignalLast(inst) = InputSignal
-            InputSignalLast(inst) = InputSignal
-            a1(inst) = 2 + CornerFreq*DT
-            a0(inst) = CornerFreq*DT - 2
-            b1(inst) = CornerFreq*DT
-            b0(inst) = CornerFreq*DT
-        ENDIF
-
-        ! Define coefficients
-
-        ! Filter
-        LPFilter = 1.0/a1(inst) * (-a0(inst)*OutputSignalLast(inst) + b1(inst)*InputSignal + b0(inst)*InputSignalLast(inst))
-
-        ! Save signals for next time step
-        InputSignalLast(inst)  = InputSignal
-        OutputSignalLast(inst) = LPFilter
-        inst = inst + 1
-
-    END FUNCTION LPFilter    
-	! -----------------------------------------------------------------------------------
 	
     ! -----------------------------------------------------------------------------------
 	! Interpolation interp1d from ROSCO

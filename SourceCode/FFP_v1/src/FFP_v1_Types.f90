@@ -22,22 +22,15 @@ TYPE, PUBLIC :: LidarVariables
     ! ---------- variables from avrSWAP ----------
     INTEGER(4)                          :: iStatus 						! Status of simulation [-]
     REAL(8)                             :: DT 							! Time Step of simulation [s]
-    REAL(8)                             :: GatesPerBeam              	! number of gates in each lidar beam [-]
 	REAL(8)                             :: REWS                         ! Rotor effective wind speed,  estimated by lidar for feedforward control [m/s]
 
 	! ---------- variables from IN file ----------
-    REAL(8)                             :: FlagLPF                     	! Enable low-pass filter (flag) [0/1]
-    REAL(8)                             :: f_cutoff              		! Corner frequency (-3dB) of the low-pass filter [rad/s]
-    REAL(8)                             :: T_buffer                		! Buffer time for filtered REWS signal [s]
 	INTEGER(4)                          :: n_StaticPitchCurve           ! Number of points in static pitch curve [-]
     REAL(8), DIMENSION(:), ALLOCATABLE  :: StaticPitch                  ! Pitch angle values in static pitch curve [rad]
     REAL(8), DIMENSION(:), ALLOCATABLE  :: StaticWind                  	! Wind speed  values in static pitch curve [m/s]
 	
 
 	! ---------- internal variables ----------	
-    REAL(8)                             :: REWS_f                       ! Low pass filtered rotor effective wind speed,  estimated by lidar for feed-forward control, with a buffer size [m/s]
-    REAL(8), DIMENSION(:), ALLOCATABLE  :: REWS_f_buffer                ! Buffer of filtered rotor-effective wind speed [m/s]    
-    REAL(8)                             :: REWS_b                       ! Buffered and filtered rotor effective wind speed [m/s]
     REAL(8)                             :: FF_Pitch                     ! Feedforward pitch angle [rad]
     REAL(8)                             :: FF_Pitch_old                 ! Previous feedforward pitch angle [rad]
     REAL(8)                             :: FF_PitchRate                 ! Feedforward pitch rate [rad/s]
@@ -48,8 +41,6 @@ TYPE, PUBLIC :: LidarVariables
 
 	! ---------- indices for avrSWAP ----------
     INTEGER(4)                          :: AvrIndex_REWS
-    INTEGER(4)                          :: AvrIndex_REWS_b
-    INTEGER(4)                          :: AvrIndex_REWS_f
     INTEGER(4)                          :: AvrIndex_FFrate
 
 	
