@@ -1,5 +1,5 @@
 ! Name:   		Baseline feedforward pitch (FFP) DLL for lidar-assisted feedforward pitch control.
-! Authors: 		Feng Guo, David Schlipf from Flensburg University of Applied Sciences, funded by LIKE -- Lidar Knowledge Europe, grant agreement No. 858358.   
+! Authors: 		Feng Guo, David Schlipf, Julius Preuschoff from Flensburg University of Applied Sciences, funded by LIKE -- Lidar Knowledge Europe, grant agreement No. 858358.   
 ! Target: 		This code aims to provide a reference Lidar-assisted control package for the community. Please cite the following paper if this code is helpful for your research:
 ! 				Guo, F., Schlipf, D., and Cheng, P. W.: Evaluation of lidar-assisted wind turbine control under various turbulence characteristics, Wind Energ. Sci. Discuss.
 ! 				[preprint], https://doi.org/10.5194/wes-2022-62, in review, 2022.    
@@ -57,7 +57,7 @@ IF (LidarVar%iStatus == 0) THEN
 	CALL SetLidarParameters(avrSWAP, accINFILE, SIZE(avcMSG), LidarVar, ErrVar)
 ENDIF
 
-! Filter and timing of the signals
+! Calculate feed forward pitch rate
 CALL CalculateFeedForwardPitchRate(avrSWAP, LidarVar, ErrVar)
 
 ! Assign the pitch feedforward rate to the avrSWAP array

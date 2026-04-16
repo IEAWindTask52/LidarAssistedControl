@@ -53,7 +53,7 @@ CONTAINS
             
             ! Description:
             print *, '--------------------------------------------------------------------'
-            print *, 'A DLL chain for developing lidar-assisted control - v1.0'
+            print *, 'A DLL chain for developing lidar-assisted control - v1.1'
             print *, 'Developed by Flensburg University of Applied Sciences, Germany'
             print *, '--------------------------------------------------------------------'    
 

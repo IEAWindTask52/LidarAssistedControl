@@ -15,8 +15,10 @@ LidarAssistedControl.egg-info
 # add wind for sprint
 !Sprint/Wind/EOG_URef_12.wnd
 !Sprint/Wind/EOG_URef_12.sum
-!Sprint_FASTv4d2/Wind/EOG_URef_25.wnd
 
 .vs
 out
 SourceCode/FFP_v1/CMakeSettings.json
+SourceCode/SignalProvider/CMakeSettings.json
+SourceCode/WRAPPER/CMakeSettings.json
+/Sprint_FASTv4d2/results

@@ -35,7 +35,7 @@ IEA-15-240-RWT-Monopile_FB.fst
 	+ LAC Test IEA15MW_01: IEA 15 MW offshore reference model monopile configuration with perfect wind preview from a single point lidar system
 	Line 6:
 	- 300.0                  TMax        - Total run time (s)
-	+ 50.0                   TMax        - Total run time (s)
+	+ 30.0                   TMax        - Total run time (s)
 	Line 7:
 	- 0.005                  DT          - Recommended module time step (s)
 	+ 0.01                   DT          - Recommended module time step (s)
@@ -115,7 +115,8 @@ IEA-15-240-RWT-Monopile_ElastoDyn.dat
 	Line 16:
 	- True                   TwFADOF2    - Second fore-aft tower bending-mode DOF (flag)
 	+ False                  TwFADOF2    - Second fore-aft tower bending-mode DOF (flag)
-	Line 18-24:
+	Line 17-24:
+	- True                   TwSSDOF1    - First side-to-side tower bending-mode DOF (flag)
 	- True                   TwSSDOF2    - Second side-to-side tower bending-mode DOF (flag)
 	- True                   PtfmSgDOF   - Platform horizontal surge translation DOF (flag)
 	- True                   PtfmSwDOF   - Platform horizontal sway translation DOF (flag)
@@ -123,6 +124,7 @@ IEA-15-240-RWT-Monopile_ElastoDyn.dat
 	- True                   PtfmRDOF    - Platform roll tilt rotation DOF (flag)
 	- True                   PtfmPDOF    - Platform pitch tilt rotation DOF (flag)
 	- True                   PtfmYDOF    - Platform yaw rotation DOF (flag)
+	+ False                  TwSSDOF1    - First side-to-side tower bending-mode DOF (flag)
 	+ False                   TwSSDOF2    - Second side-to-side tower bending-mode DOF (flag)
 	+ False                   PtfmSgDOF   - Platform horizontal surge translation DOF (flag)
 	+ False                   PtfmSwDOF   - Platform horizontal sway translation DOF (flag)
@@ -130,6 +132,15 @@ IEA-15-240-RWT-Monopile_ElastoDyn.dat
 	+ False                   PtfmRDOF    - Platform roll tilt rotation DOF (flag)
 	+ False                   PtfmPDOF    - Platform pitch tilt rotation DOF (flag)
 	+ False                   PtfmYDOF    - Platform yaw rotation DOF (flag)
+	Line 25-36: Adjustment of initial conditions
+	- 7.3086                 BlPitch(1)  - Blade 1 initial pitch (degrees)
+	+ 22.7772                BlPitch(1)  - Blade 1 initial pitch (degrees)
+	- 7.55                   RotSpeed    - Initial or fixed rotor speed (rpm)
+	+ 7.56                   RotSpeed    - Initial or fixed rotor speed (rpm)
+	- 0.3190                 TTDspFA     - Initial fore-aft tower-top displacement (meters)
+	+ -0.0694                TTDspFA     - Initial fore-aft tower-top displacement (meters)
+	- -0.1277                TTDspSS     - Initial side-to-side tower-top displacement (meters)
+	+ 0.0                	 TTDspSS     - Initial side-to-side tower-top displacement (meters)
 	Line 28-30:
 	- 0.0                    BlPitch(1)  - Blade 1 initial pitch (degrees)
 	- 0.0                    BlPitch(2)  - Blade 2 initial pitch (degrees)
@@ -173,7 +184,7 @@ IEA-15-240-RWT_InflowFile.dat
 	- 1                      WindType    - switch for wind file type (1=steady; 2=uniform; 3=binary TurbSim FF; 4=binary Bladed-style FF; 5=HAWC format; 6=User defined; 7=native Bladed FF)
 	+ 2                      WindType    - switch for wind file type (1=steady; 2=uniform; 3=binary TurbSim FF; 4=binary Bladed-style FF; 5=HAWC format; 6=User defined; 7=native Bladed FF)
 	Line 18:
-	- "none"                 Filename_Uni - Filename of time series data for uniform wind field.      (-)
+	- "none"                  Filename_Uni - Filename of time series data for uniform wind field.      (-)
 	+ "Wind/EOG_URef_25.wnd"  Filename_Uni - Filename of time series data for uniform wind field.      (-)
 	Line 68, 69:
 	- Wind1VelY
@@ -190,23 +201,6 @@ IEA-15-240-RWT-Monopile_ServoDyn.dat
 	+ False                  SumPrint    - Print summary data to <RootName>.sum (flag) (currently unused)
 Renamning of: 
 	IEA-15-240-RWT-Monopile_ServoDyn.dat -> IEA-15-240-RWT-Monopile_ServoDyn_FB.dat
-	
-Adjusted initial conditions, DOFs, simulation length:
-	IEA-15-240-RWT-Monopile_ElastoDyn.dat
-	Line 17:
-		- True                   TwSSDOF1    - First side-to-side tower bending-mode DOF (flag)
-		+ False                  TwSSDOF1    - First side-to-side tower bending-mode DOF (flag)
-	Initial Conditions:
-		- 7.3086                 BlPitch(1)  - Blade 1 initial pitch (degrees)
-		+ 22.7772                BlPitch(1)  - Blade 1 initial pitch (degrees)
-		- 7.55                   RotSpeed    - Initial or fixed rotor speed (rpm)
-		+ 7.56                   RotSpeed    - Initial or fixed rotor speed (rpm)
-		- 0.3190                 TTDspFA     - Initial fore-aft tower-top displacement (meters)
-		+ -0.0694                TTDspFA     - Initial fore-aft tower-top displacement (meters)
-		- -0.1277                TTDspSS     - Initial side-to-side tower-top displacement (meters)
-		+ 0.0                	 TTDspSS     - Initial side-to-side tower-top displacement (meters)
-	IEA-15-240-RWT-Monopile_FB.fst
-		+ Total simulation time to 30s
 
 2026/04/10:
 Added files for FBFF example (Copy of the FB file versions):

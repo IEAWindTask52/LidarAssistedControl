@@ -45,7 +45,12 @@ SUBROUTINE DISCON(avrSWAP, aviFAIL, accINFILE, avcOUTNAME, avcMSG) BIND (C, NAME
 
   IF (.NOT. SPState%initialized) THEN
     SPState%param_path = TRIM(inFileStr)
-
+    
+    print *, '--------------------------------------------------------------------'
+	print *, 'A signal provider for OpenFAST - v1.0'
+	print *, 'Developed by Flensburg University of Applied Sciences, Germany'
+	print *, '--------------------------------------------------------------------'
+    
     CALL parse_SignalProviderCsv_infile( &
       SPState%param_path, &
       SPState%csv_path, &

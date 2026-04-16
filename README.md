@@ -13,3 +13,22 @@ Please cite:
 
 ! License: MIT License
 ! Copyright (c) 2022 Flensburg University of Applied Sciences, WETI
+
+# How to compile?
+The sources for the listed DLLs can be found inside the *SourceCode* folder:
+- *FFP_v0.dll*
+- *WRAPPER.dll*
+- *SignalProvider.dll*
+
+We recommend to use "Cmake"+"Visual Studio"+"Intel Fortran Compiler".
+
+The "Cmake" GUI-based version is freely available from: https://cmake.org/download/
+
+- Step1: Use Cmake to generate Visual Studio project, remember to ensure "CMakeLists.txt" and the "src" folder are in the same folder. See the tutorial here: https://cmake.org/runningcmake/
+- Step2: Compile using visual studio. 
+
+Currently, the following combinations have been tested:
+
+- Visual Studio Community 2026 (Version: 18.2.1) + Intel Fortran Compiler IntelLLVM 2025.3.2
+
+The latest version of the compiler is available here: https://www.intel.com/content/www/us/en/developer/tools/oneapi/fortran-compiler-download.html

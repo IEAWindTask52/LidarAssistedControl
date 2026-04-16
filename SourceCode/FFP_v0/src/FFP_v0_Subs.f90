@@ -1,9 +1,9 @@
 ! Name:   		Baseline feedforward pitch (FFP) DLL for lidar-assisted feedforward pitch control.
-! Authors: 		Feng Guo, David Schlipf from Flensburg University of Applied Sciences, funded by LIKE -- Lidar Knowledge Europe, grant agreement No. 858358.   
+! Authors: 		Feng Guo, David Schlipf, Julius Preuschoff from Flensburg University of Applied Sciences, funded by LIKE -- Lidar Knowledge Europe, grant agreement No. 858358.   
 ! Target: 		This code aims to provide a reference Lidar-assisted control package for the community. Please cite the following paper if this code is helpful for your research:
 ! 				Guo, F., Schlipf, D., and Cheng, P. W.: Evaluation of lidar-assisted wind turbine control under various turbulence characteristics, Wind Energ. Sci. Discuss.
 ! 				[preprint], https://doi.org/10.5194/wes-2022-62, in review, 2022.    
-! Function: 	The FFP module reads in the rotor-effective wind speed from the avrSWAP array, then filters the signal and shifts it in time.
+! Function: 	The FFP module reads in the rotor-effective wind speed from the avrSWAP array.
 ! 				It eventually returns the feedforward pitch time derivative (rate), which is written into the avrSWAP array. 				
 ! Reference:	The subroutines rely on the legacy Bladed style data interface. See the Bladed manual for more detail.    
 ! 				The code is written based on the source code of ROSCO. Version 2.4.1, https://github.com/NREL/ROSCO, 2021. by NREL.
@@ -60,7 +60,6 @@ CONTAINS
         INTEGER(4),                 INTENT(IN   )	:: size_avcMSG
         TYPE(LidarErrorVariables),  INTENT(INOUT)   :: ErrVar
         TYPE(LidarVariables),       INTENT(INOUT)   :: LidarVar
-		INTEGER(4)                              	:: iBuffer  
         CHARACTER(*),               PARAMETER       :: RoutineName = 'SetLidarParameters'
 		
         ! Nothing is done in case of an error
@@ -117,7 +116,6 @@ CONTAINS
         CALL ReadEmptyLine(UnControllerParameters,CurLine)
               
         !------- Static pitch curve ----------------------------
-        CALL ReadEmptyLine(UnControllerParameters,CurLine)
         CALL ParseInput(UnControllerParameters,CurLine,'n_StaticPitchCurve',accINFILE(1), LidarVar%n_StaticPitchCurve,ErrVar)
         CALL ParseAry(  UnControllerParameters,CurLine,'StaticWind', LidarVar%StaticWind, LidarVar%n_StaticPitchCurve,accINFILE(1),ErrVar)
         CALL ParseAry(  UnControllerParameters,CurLine,'StaticPitch',LidarVar%StaticPitch,LidarVar%n_StaticPitchCurve,accINFILE(1),ErrVar)

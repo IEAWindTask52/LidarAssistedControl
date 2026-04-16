@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.6)
 project(FFP VERSION 2.0.1 LANGUAGES Fortran)
 
+message(STATUS "Fortran compiler ID: ${CMAKE_Fortran_COMPILER_ID}")
+message(STATUS "Fortran compiler: ${CMAKE_Fortran_COMPILER}")
+message(STATUS "Fortran compiler version: ${CMAKE_Fortran_COMPILER_VERSION}")
+
 set(CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_BINARY_DIR}/ftnmods")
 
 ##### from ROSCO ################################################
