@@ -1,10 +1,14 @@
 ! Input for the master DLL. It contains the name and input files of the sub-DLLs that will be called by the master DLL (DISCON.dll by default).
 !
 ! Do not change lines before this line. You can add additional DLLs after the number of DLLs, each should have a SubDLLName and SubDLLInputName. The DLLs will be called by the sequence below. No empty lines between each sub-DLL is allowed.
-3             						! NumberofSubDLLs 	- The name of the sub-DLL to be called
+5             						! NumberofSubDLLs 	- The name of the sub-DLL to be called
 "SignalProvider.dll"    			! SubDLLName        - The name of the sub-DLL input parameter file name
-"SignalProvider.IN"     ! SubDLLInputName   - The name of the sub-DLL input parameter file name
+"SignalProvider.IN"     			! SubDLLInputName   - The name of the sub-DLL input parameter file name
+"SignalProviderTorqueUpdate.dll"				! SubDLLName        - The name of the sub-DLL input parameter file name
+"SignalProviderTorqueUpdate.IN"     ! SubDLLInputName   - The name of the sub-DLL input parameter file name
 "FFP_v0.dll" 						! SubDLLName        - The name of the sub-DLL to be called (feedforward controller)
 "FFP_v0.IN"  						! SubDLLInputName   - The name of the sub-DLL input parameter file name
-"ROSCO.dll" 						! SubDLLName        - The name of the sub-DLL to be called (feedback controller)
+"ROSCO_MVFF.dll" 						! SubDLLName        - The name of the sub-DLL to be called (feedback controller)
 "ROSCO_FBFF.IN"   					! SubDLLInputName   - The name of the sub-DLL input parameter file name
+"TestBench_LogSwap.dll" 						! SubDLLName        
+"LogSwap.IN"   					! SubDLLInputName   
