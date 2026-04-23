@@ -1,9 +1,11 @@
-% IEA 15 MW monopile + perfect wind preview + PFC. Origin and changes in
-% files: see ChangeLogOpenFAST.txt. Purpose: Here, we use perfect wind
-% preview + a PFC module to demonstrate how an FF torque updates can be 
-% utilized for PFC. Here, only the rotor motion and tower motion 
-% (GenDOF and TwFADOF1) are enabled. 
-% Result: Cost ("30 s sprint"):  0.952481
+% IEA 15 MW monopile + perfect wind preview + PFC. 
+% Origin and changes in files: see ChangeLogOpenFAST.txt. 
+% Purpose: Here, we use perfect wind preview + a PFC module to demonstrate 
+% in a simple example how feedforward torque updates can be utilized for 
+% PFC. 
+% Here, only the rotor motion and tower motion (GenDOF and TwFADOF1) 
+% are enabled. 
+% Result: Cost ("30 s sprint"):  0.952510
 
 %% Setup
 clearvars;close all;clc;
