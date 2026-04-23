@@ -1,0 +1,6 @@
+CsvFilePath: Frequency/FrequencySignal.csv 		# Filename/path of the comma separated file (.csv, .wnd, etc.)
+SwapIndex: 179                          # Index in swap array to write the signal to
+InterpolateBetweenValues: true 			# true=linear interpolation, false=sample-and-hold
+PreviewTime: 0.0 				    	# preview time
+TimeColumnIndex: 1						# column number containing the time step (one-based column index)
+ValueColumnIndex: 2						# column number containing the corresponding value (one-based column index)

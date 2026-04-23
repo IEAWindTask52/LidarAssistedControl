@@ -1,0 +1,6 @@
+InputSwapIndex: 179          # read signal from this swap array index
+OutputSwapIndex: 178         # write result to this swap array index
+H: 1.0                       # [s] system equivalent inertia
+S: 15000000                  # [W] rated power
+f0: 50.0                     # [Hz] grid frequency
+OmegaRated: 0.79168          # [rad/s], rated rotor speed
