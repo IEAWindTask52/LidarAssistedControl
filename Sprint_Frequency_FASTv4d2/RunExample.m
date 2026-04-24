@@ -23,35 +23,43 @@ dos(['openfast_x64_v4d2.exe ',SimulationName,'_FBFF.fst']);
 FB                  = ReadFASTbinaryIntoStruct([SimulationName,'_FB.outb']);
 FBFF                = ReadFASTbinaryIntoStruct([SimulationName,'_FBFF.outb']);
 FBFF_R              = ReadROSCOtextIntoStruct([SimulationName,'_FBFF.RO.dbg']);
+f                   = readmatrix("Frequency\FrequencySignal.csv"); % import frequency signal
 
 % Plot 
-figure('Name','Simulation results')
+figure('Name','Simulation results with FF torque update')
 
-subplot(4,1,1);
+subplot(5,1,1);
 hold on; grid on; box on
 plot(FB.Time,       FB.Wind1VelX);
 plot(FBFF_R.Time,   FBFF_R.REWS);
 ylabel('[m/s]');
 legend('Wind1VelX','REWS preview','Interpreter','none','Location','best')
 
-subplot(4,1,2);
+subplot(5,1,2);
+hold on; grid on; box on
+plot(f(1:3001,1),f(1:3001,2))
+ylabel({'f','[Hz]'})
+legend("grid frequency")
+
+subplot(5,1,3);
 hold on; grid on; box on
 plot(FB.Time,       FB.BldPitch1);
 plot(FBFF.Time,     FBFF.BldPitch1);
 ylabel({'BldPitch1'; '[deg]'});
 legend('feedback only','feedback-feedforward','Location','best')
 
-subplot(4,1,3);
+subplot(5,1,4);
 hold on; grid on; box on
-plot(FB.Time,       FB.RotSpeed);
-plot(FBFF.Time,     FBFF.RotSpeed);
-ylabel({'RotSpeed';'[rpm]'});
+plot(FB.Time,       FB.GenTq/1e3);
+plot(FBFF.Time,     FBFF.GenTq/1e3);
+ylabel({'GenTq'; '[MNm]'});
+legend('feedback only','feedback-feedforward','Location','best')
 
-subplot(4,1,4);
+subplot(5,1,5);
 hold on; grid on; box on
-plot(FB.Time,       FB.TwrBsMyt/1e3);
-plot(FBFF.Time,     FBFF.TwrBsMyt/1e3);
-ylabel({'TwrBsMyt';'[MNm]'});
+plot(FBFF_R.Time,     FBFF_R.FF_TorqueUpdate/1e3);
+ylabel({'[kNm]'});
+legend("FF_{TorqueUpdate}")
 
 xlabel('time [s]')
 linkaxes(findobj(gcf, 'Type', 'Axes'),'x');
@@ -66,43 +74,3 @@ Cost = (max(abs(FBFF.RotSpeed(FBFF.Time>=t_Start)-RotSpeed_0))) / RotSpeed_0 ...
      + (max(abs(FBFF.TwrBsMyt(FBFF.Time>=t_Start)-TwrBsMyt_0))) / TwrBsMyt_0;
 
 fprintf('Cost ("30 s sprint"):  %f \n',Cost);
-
-%% Additional plots
-% import frequency signal
-f = readmatrix("Frequency\FrequencySignal.csv");
-
-% Plot 
-figure('Name','Simulation results with FF torque update')
-
-subplot(4,1,1);
-hold on; grid on; box on
-plot(FB.Time,       FB.Wind1VelX);
-plot(FBFF_R.Time,   FBFF_R.REWS);
-ylabel('[m/s]');
-legend('Wind1VelX','REWS preview','Interpreter','none','Location','best')
-title("inputs")
-
-subplot(4,1,2);
-hold on; grid on; box on
-plot(f(1:3001,1),f(1:3001,2))
-ylabel("f [Hz]")
-legend("grid frequency")
-
-subplot(4,1,3);
-hold on; grid on; box on
-% plot(FB.Time,       FB.TwrBsMyt/1e3);
-plot(FBFF_R.Time,     FBFF_R.FF_TorqueUpdate/1e3);
-ylabel({'[kNm]'});
-legend("FF_{TorqueUpdate}")
-title("outputs")
-
-subplot(4,1,4);
-hold on; grid on; box on
-plot(FB.Time,       FB.GenTq/1e3);
-plot(FBFF.Time,     FBFF.GenTq/1e3);
-ylabel({'GenTq'; '[MNm]'});
-legend('feedback only','feedback-feedforward','Location','best')
-
-xlabel('time [s]')
-linkaxes(findobj(gcf, 'Type', 'Axes'),'x');
-xlim([0 30])
