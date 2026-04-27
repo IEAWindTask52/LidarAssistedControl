@@ -33,7 +33,7 @@ SUBROUTINE DISCON(avrSWAP, aviFAIL, accINFILE, avcOUTNAME, avcMSG) BIND (C, NAME
 
   INTEGER :: ierr
   INTEGER :: avrSWAP_Status
-  REAL(8) :: t_now, x_now, dxdt_now, y_now
+  REAL(8) :: t_now, x_now, dxdt_now, y_now, x_avg
   CHARACTER(:), ALLOCATABLE :: inFileStr
 
   CHARACTER(*), PARAMETER :: RoutineName = 'PFC'
@@ -47,26 +47,36 @@ SUBROUTINE DISCON(avrSWAP, aviFAIL, accINFILE, avcOUTNAME, avcMSG) BIND (C, NAME
     SPState%param_path = TRIM(inFileStr)
     
     print *, '--------------------------------------------------------------------'
-	print *, 'A PFC module for OpenFAST - v1.0'
+	print *, 'A PFC module for OpenFAST - v1.0.3'
 	print *, 'Developed by Flensburg University of Applied Sciences, Germany'
 	print *, '--------------------------------------------------------------------'
     
     CALL parse_PFC_infile( &
-      SPState%param_path, &
-      SPState%swap_in_index, &
+      SPState%param_path, & 
       SPState%swap_out_index, &
       SPState%H, &
       SPState%S, &
       SPState%f0, &
       SPState%omega_rated, &
+      SPState%avg_window_size, &
       ierr, ErrMsg )
-
+    
     IF (ierr /= 0) THEN
       aviFAIL = -1
       CALL set_discon_message(avcMSG, RoutineName//': '//TRIM(ErrMsg))
       RETURN
     END IF
     
+    ! initialize moving average 
+    IF (ALLOCATED(SPState%avg_buffer)) DEALLOCATE(SPState%avg_buffer)
+    ALLOCATE(SPState%avg_buffer(SPState%avg_window_size))
+    
+    SPState%avg_buffer      = 0.0D0
+    SPState%avg_sum         = 0.0D0
+    SPState%avg_count       = 0
+    SPState%avg_index       = 1
+    SPState%avg_initialized = .FALSE.
+
     SPState%first_step  = .TRUE.
     SPState%t_prev      = 0.0D0
     SPState%x_prev      = 0.0D0
@@ -95,16 +105,33 @@ avrSWAP_Status = NINT(avrSWAP(1))
   END IF
 
   x_now = REAL(avrSWAP(SPState%swap_in_index), KIND=8)
+  IF (.NOT. SPState%avg_initialized) THEN
+    SPState%avg_buffer = x_now
+    SPState%avg_sum    = x_now * DBLE(SPState%avg_window_size)
+    SPState%avg_count  = SPState%avg_window_size
+    SPState%avg_index  = 1
 
+    SPState%avg_initialized = .TRUE.
+  END IF
+
+  CALL moving_average( &
+      x_now, &
+      SPState%avg_window_size, &
+      SPState%avg_buffer, &
+      SPState%avg_count, &
+      SPState%avg_index, &
+      SPState%avg_sum, &
+      x_avg )
+  
   CALL differentiate_signal( &
-    t_now, x_now, &
+    t_now, x_avg, &
     SPState%first_step, &
     SPState%t_prev, &
     SPState%x_prev, &
     dxdt_now )
 
   CALL compute_delta_MgFF( &
-    x_now, dxdt_now, &
+    x_avg, dxdt_now, &
     SPState%H, &
     SPState%S, &
     SPState%f0, &

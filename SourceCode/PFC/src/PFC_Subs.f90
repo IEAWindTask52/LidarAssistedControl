@@ -16,10 +16,10 @@ MODULE PFC_Subs
 
 CONTAINS
 
-  SUBROUTINE parse_PFC_infile(pfile, inIdx, outIdx, H, S, f0, omegaRated, ierr, err)
+  SUBROUTINE parse_PFC_infile(pfile, outIdx, H, S, f0, omegaRated, avgWindowSize, ierr, err)
     CHARACTER(*), INTENT(IN)  :: pfile
-    INTEGER,      INTENT(OUT) :: inIdx
     INTEGER,      INTENT(OUT) :: outIdx
+    INTEGER,      INTENT(OUT) :: avgWindowSize
     REAL(8),      INTENT(OUT) :: H, S, f0, omegaRated
     INTEGER,      INTENT(OUT) :: ierr
     CHARACTER(*), INTENT(OUT) :: err
@@ -27,19 +27,18 @@ CONTAINS
     INTEGER :: u, ios
     CHARACTER(512) :: line
     CHARACTER(:), ALLOCATABLE :: key, val
-    LOGICAL :: haveIn, haveOut
+    LOGICAL :: haveOut
 
     ierr = 0
     err  = ''
 
-    inIdx      = -1
-    outIdx     = -1
-    H          = 0.0D0
-    S          = 0.0D0
-    f0         = 0.0D0
-    omegaRated = 0.0D0
+    outIdx          = -1
+    H               = 0.0D0
+    S               = 0.0D0
+    f0              = 0.0D0
+    omegaRated      = 0.0D0
+    avgWindowSize   = 1
 
-    haveIn  = .FALSE.
     haveOut = .FALSE.
 
     OPEN(NEWUNIT=u, FILE=TRIM(pfile), STATUS='OLD', ACTION='READ', IOSTAT=ios)
@@ -58,76 +57,69 @@ CONTAINS
       IF (.NOT. split_key_value(line, key, val)) CYCLE
 
       CALL to_lower_inplace(key)
-
+      
       SELECT CASE (TRIM(key))
-      CASE ('inputswapindex')
-        READ(val, *, IOSTAT=ios) inIdx
-        IF (ios /= 0 .OR. inIdx < 1) THEN
-          ierr = 2
-          err  = 'InputSwapIndex must be an integer >= 1.'
-          CLOSE(u)
-          RETURN
-        END IF
-        haveIn = .TRUE.
+        CASE ('outputswapindex')
+            READ(val, *, IOSTAT=ios) outIdx
+            IF (ios /= 0 .OR. outIdx < 1) THEN
+              ierr = 3
+              err  = 'OutputSwapIndex must be an integer >= 1.'
+              CLOSE(u)
+              RETURN
+            END IF
+            haveOut = .TRUE.
 
-      CASE ('outputswapindex')
-        READ(val, *, IOSTAT=ios) outIdx
-        IF (ios /= 0 .OR. outIdx < 1) THEN
-          ierr = 3
-          err  = 'OutputSwapIndex must be an integer >= 1.'
-          CLOSE(u)
-          RETURN
-        END IF
-        haveOut = .TRUE.
+        CASE ('h')
+            READ(val, *, IOSTAT=ios) H
+            IF (ios /= 0) THEN
+              ierr = 8
+              err  = 'H must be a valid real number.'
+              CLOSE(u)
+              RETURN
+            END IF
 
-      CASE ('h')
-        READ(val, *, IOSTAT=ios) H
-        IF (ios /= 0) THEN
-          ierr = 8
-          err  = 'H must be a valid real number.'
-          CLOSE(u)
-          RETURN
-        END IF
+        CASE ('s')
+            READ(val, *, IOSTAT=ios) S
+            IF (ios /= 0) THEN
+              ierr = 9
+              err  = 'S must be a valid real number.'
+              CLOSE(u)
+              RETURN
+            END IF
 
-      CASE ('s')
-        READ(val, *, IOSTAT=ios) S
-        IF (ios /= 0) THEN
-          ierr = 9
-          err  = 'S must be a valid real number.'
-          CLOSE(u)
-          RETURN
-        END IF
+        CASE ('f0')
+            READ(val, *, IOSTAT=ios) f0
+            IF (ios /= 0) THEN
+              ierr = 10
+              err  = 'f0 must be a valid real number.'
+              CLOSE(u)
+              RETURN
+            END IF
 
-      CASE ('f0')
-        READ(val, *, IOSTAT=ios) f0
-        IF (ios /= 0) THEN
-          ierr = 10
-          err  = 'f0 must be a valid real number.'
-          CLOSE(u)
-          RETURN
-        END IF
-
-      CASE ('omegarated')
-        READ(val, *, IOSTAT=ios) omegaRated
-        IF (ios /= 0) THEN
-          ierr = 11
-          err  = 'OmegaRated must be a valid real number.'
-          CLOSE(u)
-          RETURN
-        END IF
-
-      CASE DEFAULT
-        ! ignore unknown keys
+        CASE ('omegarated')
+            READ(val, *, IOSTAT=ios) omegaRated
+            IF (ios /= 0) THEN
+              ierr = 11
+              err  = 'OmegaRated must be a valid real number.'
+              CLOSE(u)
+              RETURN
+            END IF
+        
+        CASE ('avgwindowsize')
+            READ(val, *, IOSTAT=ios) avgWindowSize
+            IF (ios /= 0 .OR. avgWindowSize < 1) THEN
+              ierr = 14
+              err  = 'AvgWindowSize must be an integer >= 1.'
+              CLOSE(u)
+              RETURN
+            END IF
+        
+          CASE DEFAULT
+            ! ignore unknown keys
       END SELECT
     END DO
 
     CLOSE(u)
-
-    IF (.NOT. haveIn) THEN
-      ierr = 12
-      err  = 'Missing required key: InputSwapIndex'
-      RETURN
-    END IF
 
     IF (.NOT. haveOut) THEN
       ierr = 13
@@ -199,5 +191,38 @@ SUBROUTINE differentiate_signal(t_now, x_now, first_step, t_prev, x_prev, dxdt)
   t_prev = t_now
   x_prev = x_now
 END SUBROUTINE differentiate_signal
+
+!-------------------------------------------------------------------------------
+
+SUBROUTINE moving_average(x_now, windowSize, buffer, count, index, sumVal, x_avg)
+  REAL(8), INTENT(IN)    :: x_now
+  INTEGER, INTENT(IN)    :: windowSize
+  REAL(8), INTENT(INOUT) :: buffer(:)
+  INTEGER, INTENT(INOUT) :: count
+  INTEGER, INTENT(INOUT) :: index
+  REAL(8), INTENT(INOUT) :: sumVal
+  REAL(8), INTENT(OUT)   :: x_avg
+
+  IF (windowSize <= 1) THEN
+    x_avg = x_now
+    RETURN
+  END IF
+
+  IF (count < windowSize) THEN
+    count = count + 1
+    buffer(index) = x_now
+    sumVal = sumVal + x_now
+  ELSE
+    sumVal = sumVal - buffer(index)
+    buffer(index) = x_now
+    sumVal = sumVal + x_now
+  END IF
+
+  x_avg = sumVal / REAL(count, KIND=8)
+
+  index = index + 1
+  IF (index > windowSize) index = 1
+
+END SUBROUTINE moving_average
 
 END MODULE PFC_Subs

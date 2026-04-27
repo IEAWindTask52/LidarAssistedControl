@@ -17,7 +17,7 @@ MODULE PFC_Types
     LOGICAL :: initialized = .FALSE.
 
     ! swap array indices
-    INTEGER :: swap_in_index  = -1
+    INTEGER :: swap_in_index  = 250
     INTEGER :: swap_out_index = -1
 
     ! calculation parameters
@@ -31,6 +31,14 @@ MODULE PFC_Types
     LOGICAL :: first_step = .TRUE.
     REAL(8) :: t_prev     = 0.0D0
     REAL(8) :: x_prev     = 0.0D0
+    
+    ! moving average
+    INTEGER :: avg_window_size = 1
+    INTEGER :: avg_count       = 0
+    INTEGER :: avg_index       = 1
+    REAL(8) :: avg_sum         = 0.0D0
+    REAL(8), ALLOCATABLE :: avg_buffer(:)
+    LOGICAL :: avg_initialized = .FALSE.
 
     ! bookkeeping
     CHARACTER(:), ALLOCATABLE :: param_path
