@@ -145,3 +145,6 @@ legend('FBFF','FBFF + PFC','Interpreter','none','Location','best')
 xlabel('time [s]')
 linkaxes(findobj(gcf, 'Type', 'Axes'),'x');
 xlim([1 30])
+
+fprintf("max M update: %f\n",max(FBFF_R.FF_TorqueUpdate)/1e6);
+fprintf("min M update: %f\n",min(FBFF_R.FF_TorqueUpdate)/1e6);
