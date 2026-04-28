@@ -37,10 +37,6 @@ switch SignalType
         error("No case with this name")
 end
 
-% calculate RoCoF
-
-
-
 % Plot signal
 figure("Name","FrequencySignalGeneration")
 subplot(211)
