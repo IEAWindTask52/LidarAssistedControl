@@ -1,0 +1,8 @@
+# Config file for PFC.dll
+# PFC.dll reads from AvrSWAP index 200
+OutputSwapIndex: 178  # write result to this swap array index
+H: 6.0                # [s] system equivalent inertia
+S: 100e6              # [W] rated power of system
+f0: 50.0              # [Hz] grid frequency
+OmegaRated: 0.79168   # [rad/s], rated rotor speed
+AvgWindowSize: 50     # moving average window size before RoCoF determination, 1 = disabled

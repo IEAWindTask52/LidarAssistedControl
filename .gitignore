@@ -11,14 +11,26 @@
 SimulationResults*
 slprj
 *.slxc
+.vs
 LidarAssistedControl.egg-info
+
 # add wind for sprint
 !Sprint/Wind/EOG_URef_12.wnd
 !Sprint/Wind/EOG_URef_12.sum
 
-.vs
-out
+#keep ascii based wind files
+!EOG_URef_25.wnd
+
+# ignore dll build folder
+out 
+
+# ignore MS Visual Studio settings
 SourceCode/FFP_v1/CMakeSettings.json
 SourceCode/SignalProvider/CMakeSettings.json
 SourceCode/WRAPPER/CMakeSettings.json
+SourceCode/PFC/CMakeSettings.json
+
+# ignore temp result folder
 /Sprint_FASTv4d2/results
+/Sprint_Frequency_FASTv4d2/results
+
