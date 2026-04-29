@@ -153,7 +153,7 @@ CONTAINS
                         'A wind turbine controller framework for public use in the scientific field    '//NEW_LINE('A')// &
                         'Developed in collaboration: National Renewable Energy Laboratory              '//NEW_LINE('A')// &
                         '                            Delft University of Technology, The Netherlands   '//NEW_LINE('A')// &
-						'modified by sowento/WETI for LAC Summer Games    							   '//NEW_LINE('A')// &
+						'modified by sowento/WETI for LAC Summer Games - v1.0  							   '//NEW_LINE('A')// &
                         '------------------------------------------------------------------------------'
             ! Specifically save accINFILE info (DISCON.IN)
             LocalVar%ACC_INFILE_SIZE = NINT(avrSWAP(50))

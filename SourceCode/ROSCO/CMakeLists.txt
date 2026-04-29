@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 project(ROSCO VERSION 2.6.0 LANGUAGES Fortran C)
 
 set(CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_BINARY_DIR}/ftnmods")
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 
 if (NOT CMAKE_BUILD_TYPE)
   # Sets the optimization level to -O2 and includes -g for debugging
@@ -17,13 +18,14 @@ else()
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -DIMPLICIT_DLLEXPORT -ffree-line-length-0 -fdefault-real-8 -fdefault-double-8 -cpp")  
 endif()
 elseif (WIN32)
-if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-# Ensure static linking to avoid requiring Fortran runtime dependencies
-set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-line-length-0 -static-libgcc -static-libgfortran -static -fdefault-real-8 -fdefault-double-8 -cpp")
-elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
-set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -libs:static -free -static -fpp -real-size:64 -double-size:64")
-#     set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} /ffree-line-length-0 /static-libgcc /static-libgfortran /static /fdefault-real-8 /fdefault-double-8 /cpp")
-endif()
+  if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-line-length-0 -static-libgcc -static-libgfortran -static -fdefault-real-8 -fdefault-double-8 -cpp")
+
+  elseif (CMAKE_Fortran_COMPILER_ID MATCHES "^Intel")
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} /free /fpp /real-size:64 /double-size:64")
+    set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} /O2 /libs:static /threads")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /libs:static /threads")
+  endif()
 endif()
 
 # Enable ZMQ_Client if compiler flag is set
@@ -96,6 +98,10 @@ if(ZMQ_CLIENT)
 endif()
 
 add_library(discon SHARED ${SOURCES})
+
+if (WIN32)
+  set_target_properties(discon PROPERTIES OUTPUT_NAME "ROSCO")
+endif()
 
 if(ZMQ_CLIENT)
 	target_include_directories(discon PUBLIC ${ZeroMQ_INCLUDE_DIR})
