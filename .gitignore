@@ -1,5 +1,4 @@
 *.asv
-*.outb
 *.out
 *.dbg
 *.pyc
@@ -8,7 +7,6 @@
 *.ipt
 *.twr
 *.sum
-SimulationResults*
 slprj
 *.slxc
 .vs
