@@ -64,7 +64,8 @@ for i_t=1:n_t-1
 
 end
 
-% calculate energy and loads
+% calculate overspeed, energy and loads
+MaxSpeed_FB = max(x_FB(:,1));
 Power_FB    = x_FB(:,1)*Parameter.Turbine.r_GB.*u_FB(:,2)*Parameter.Generator.eta_el; % generator speed *  torque * efficiency
 Energy_FB   = sum(Power_FB(1:n_t-1))*dt;
 M_yT_FB     = Parameter.Turbine.HubHeight*(Parameter.Turbine.c_eT*x_FB(:,3)+Parameter.Turbine.k_eT*x_FB(:,2));
@@ -111,7 +112,8 @@ for i_t=1:n_t-1
 
 end
 
-% calculate energy and loads
+% calculate overspeed, energy and loads
+MaxSpeed_LA = max(x_LA(:,1));
 Power_LA    = x_LA(:,1)*Parameter.Turbine.r_GB.*u_LA(:,2)*Parameter.Generator.eta_el; % generator speed *  torque * efficiency
 Energy_LA   = sum(Power_LA(1:n_t-1))*dt;
 M_yT_LA     = Parameter.Turbine.HubHeight*(Parameter.Turbine.c_eT*x_LA(:,3)+Parameter.Turbine.k_eT*x_LA(:,2));
@@ -182,10 +184,13 @@ fprintf('Smallest Detectable Eddy Size is estimated as %#.4g D \n',SDES)
 %% evaluate simulation results (should not be changed)
 
 Cost        = TowerDEL_LA/TowerDEL_FB;
-EnergyOK    = Energy_LA >= Energy_FB;
+EnergyOK    = Energy_LA   >= Energy_FB;
+MaxSpeedOK  = MaxSpeed_LA <= MaxSpeed_FB;
 
-if EnergyOK
-    fprintf('Cost for Summer Games 2026 is %#.4g %%.\n',Cost*100)
-else
+if EnergyOK && MaxSpeedOK
+    fprintf('Constraints OK. Cost for Summer Games 2026 is %#.4g %%.\n',Cost*100)
+elseif ~EnergyOK 
     fprintf('Energy too low. Cost for Summer Games 2026 is %#.4g %%.\n',Cost*100)
+elseif ~MaxSpeedOK 
+    fprintf('Maximum rotor speed too high. Cost for Summer Games 2026 is %#.4g %%.\n',Cost*100)    
 end
