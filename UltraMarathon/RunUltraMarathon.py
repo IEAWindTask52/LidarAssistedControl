@@ -31,20 +31,20 @@ from radPs2rpm import radPs2rpm
 
 # load data
 with h5py.File('data/DataSummerGames2026.mat', 'r') as Data:
-    time = np.array(Data['time']).squeeze()
-    lineOfSightWindSpeed = np.array(Data['lineOfSightWindSpeed']).T
-    isValid = np.array(Data['isValid']).T.astype(bool)
-    beamID = np.array(Data['beamID']).squeeze()
-    v_0 = np.array(Data['v_0']).squeeze()
+    time                    = np.array(Data['time']).squeeze()
+    lineOfSightWindSpeed    = np.array(Data['lineOfSightWindSpeed']).T
+    isValid                 = np.array(Data['isValid']).T.astype(bool)
+    beamID                  = np.array(Data['beamID']).squeeze()
+    v_0                     = np.array(Data['v_0']).squeeze()
 
 # simulation parameter (should not be changed)
-Parameter = NREL5MWDefaultParameter_SLOW()                      # turbine parameters
-Parameter = NREL5MWDefaultParameter_FBNREL(Parameter)           # controller parameters
-x_0 = np.array([rpm2radPs(12.1), 0.1, 0, np.deg2rad(14), 0])    # initial values for states x = [rotor speed, tower top displacement, tower top speed, pitch angle, pitch rate]
-dt = time[1] - time[0]                                          # [s]           time step size
-n_t = len(time)                                                 # [-]           number of time steps
-m = 4                                                           # [-]           Woehler Exponent for steel
-N_REF = 2e6 / (20 * 8750) * 12                                  # [-]           fraction of 2e6 in 20 years for 12 h
+Parameter   = NREL5MWDefaultParameter_SLOW()                            # turbine parameters
+Parameter   = NREL5MWDefaultParameter_FBNREL(Parameter)                 # controller parameters
+x_0         = np.array([rpm2radPs(12.1), 0.1, 0, np.deg2rad(14), 0])    # initial values for states x = [rotor speed, tower top displacement, tower top speed, pitch angle, pitch rate]
+dt          = time[1] - time[0]                                         # [s]           time step size
+n_t         = len(time)                                                 # [-]           number of time steps
+m           = 4                                                         # [-]           Woehler Exponent for steel
+N_REF       = 2e6 / (20 * 8750) * 12                                    # [-]           fraction of 2e6 in 20 years for 12 h
 
 # other parameters (please add here your parameters): as example, the simple LDP from the Summer Games 2025 and a very simple feedforward controller is used
 LDP = {
@@ -55,58 +55,58 @@ LDP = {
     'T_buffer': 0.2                             # [s]           Buffer time for filtered REWS signal
 }
 
-IndexGate = 0                                   # [-]           MATLAB IndexGate = 1
+IndexGate           = 0                         # [-]           MATLAB IndexGate = 1
 GradientStaticPitch = np.deg2rad(1)             # [rad/(m/s)]   Gradient in static pitch curve
 reset_LDP_v3()
 
 # simulation feedback only (should not be changed)
 # allocation and initialization
-x_FB = np.full((n_t, 5), np.nan)
-u_FB = np.full((n_t, 2), np.nan)
-x_FB[0, :] = x_0                                           # init states
+x_FB        = np.full((n_t, 5), np.nan)
+u_FB        = np.full((n_t, 2), np.nan)
+x_FB[0, :]  = x_0                                           # init states
 reset_FBController()                                       # clear persistent variables
 
 # loop over time
 for i_t in range(n_t - 1):
 
     # select current state, measurements and disturbance
-    x_ThisStep = x_FB[i_t, :]
-    y_ThisStep = np.array([x_FB[i_t, 0] * Parameter.Turbine.r_GB, x_FB[i_t, 3], x_FB[i_t, 2]])  # only [generator speed, pitch angle, tower top acceleration] are considered measurable
-    d_ThisStep = v_0[i_t]
+    x_ThisStep          = x_FB[i_t, :]
+    y_ThisStep          = np.array([x_FB[i_t, 0] * Parameter.Turbine.r_GB, x_FB[i_t, 3], x_FB[i_t, 2]])  # only [generator speed, pitch angle, tower top acceleration] are considered measurable
+    d_ThisStep          = v_0[i_t]
 
     # calculate feedback controller
-    u_ThisStep = FBController(y_ThisStep, 0, dt, Parameter)
+    u_ThisStep          = FBController(y_ThisStep, 0, dt, Parameter)
 
     # simulate wind turbine
-    x_NextStep = SLOW(x_ThisStep, u_ThisStep, d_ThisStep, dt, Parameter)
+    x_NextStep          = SLOW(x_ThisStep, u_ThisStep, d_ThisStep, dt, Parameter)
 
     # store simulation results
-    u_FB[i_t, :] = u_ThisStep
-    x_FB[i_t + 1, :] = x_NextStep
+    u_FB[i_t, :]        = u_ThisStep
+    x_FB[i_t + 1, :]    = x_NextStep
 
 # calculate overspeed, energy and loads
 MaxSpeed_FB = np.max(x_FB[:, 0])
-Power_FB = (x_FB[:, 0] * Parameter.Turbine.r_GB * u_FB[:, 1] * Parameter.Generator.eta_el)  # generator speed * torque * efficiency
-Energy_FB = np.sum(Power_FB[0:n_t - 1]) * dt
-M_yT_FB = Parameter.Turbine.HubHeight * (Parameter.Turbine.c_eT * x_FB[:, 2] + Parameter.Turbine.k_eT * x_FB[:, 1])
-c = np.array([[cycle[2], cycle[0]] for cycle in rainflow.extract_cycles(M_yT_FB)])
+Power_FB    = (x_FB[:, 0] * Parameter.Turbine.r_GB * u_FB[:, 1] * Parameter.Generator.eta_el)  # generator speed * torque * efficiency
+Energy_FB   = np.sum(Power_FB[0:n_t - 1]) * dt
+M_yT_FB     = Parameter.Turbine.HubHeight * (Parameter.Turbine.c_eT * x_FB[:, 2] + Parameter.Turbine.k_eT * x_FB[:, 1])
+c           = np.array([[cycle[2], cycle[0]] for cycle in rainflow.extract_cycles(M_yT_FB)])
 TowerDEL_FB = (np.sum(c[:, 1] ** m * c[:, 0]) / N_REF) ** (1 / m)
 
 # simulation lidar-assisted: please only adjust code between >>> <<<!
 # allocation and initialization
-x_LA = np.full((n_t, 5), np.nan)
-u_LA = np.full((n_t, 2), np.nan)
-v_0L = np.full(n_t, np.nan)
-x_LA[0, :] = x_0                                           # init states
+x_LA        = np.full((n_t, 5), np.nan)
+u_LA        = np.full((n_t, 2), np.nan)
+v_0L        = np.full(n_t, np.nan)
+x_LA[0, :]  = x_0                                           # init states
 reset_FBController()                                       # clear persistent variables
 
 # loop over time
 for i_t in range(n_t - 1):
 
     # select current state, measurements and disturbance
-    x_ThisStep = x_LA[i_t, :]
-    y_ThisStep = np.array([x_LA[i_t, 0] * Parameter.Turbine.r_GB, x_LA[i_t, 3], x_LA[i_t, 2]])  # only [generator speed, pitch angle, tower top acceleration] are considered measurable
-    d_ThisStep = v_0[i_t]
+    x_ThisStep          = x_LA[i_t, :]
+    y_ThisStep          = np.array([x_LA[i_t, 0] * Parameter.Turbine.r_GB, x_LA[i_t, 3], x_LA[i_t, 2]])  # only [generator speed, pitch angle, tower top acceleration] are considered measurable
+    d_ThisStep          = v_0[i_t]
 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # provide u_ThisStep only based on current (i_t) or past signals:
@@ -114,28 +114,28 @@ for i_t in range(n_t - 1):
     # - lidar signals: isValid, beamID, lineOfSightWindSpeed
 
     # simple lidar data processing
-    v_0L[i_t] = LDP_v3(isValid[i_t, IndexGate],beamID[i_t], lineOfSightWindSpeed[i_t, IndexGate], dt, LDP)
+    v_0L[i_t]           = LDP_v3(isValid[i_t, IndexGate],beamID[i_t], lineOfSightWindSpeed[i_t, IndexGate], dt, LDP)
 
     # calculate combined feedback-feedforward controller
-    WindAcceleration = (v_0L[i_t] - v_0L[max(i_t - 1, 0)]) / dt
-    u_FF_ThisStep = WindAcceleration * GradientStaticPitch  # simple collective pitch feedforward controller
-    u_ThisStep = FBController(y_ThisStep, u_FF_ThisStep, dt, Parameter)
+    WindAcceleration    = (v_0L[i_t] - v_0L[max(i_t - 1, 0)]) / dt
+    u_FF_ThisStep       = WindAcceleration * GradientStaticPitch  # simple collective pitch feedforward controller
+    u_ThisStep          = FBController(y_ThisStep, u_FF_ThisStep, dt, Parameter)
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # simulate wind turbine
-    x_NextStep = SLOW(x_ThisStep, u_ThisStep, d_ThisStep, dt, Parameter)
+    x_NextStep          = SLOW(x_ThisStep, u_ThisStep, d_ThisStep, dt, Parameter)
 
     # store simulation results
-    u_LA[i_t, :] = u_ThisStep
-    x_LA[i_t + 1, :] = x_NextStep
+    u_LA[i_t, :]        = u_ThisStep
+    x_LA[i_t + 1, :]    = x_NextStep
 
 # calculate overspeed, energy and loads
-MaxSpeed_LA = np.max(x_LA[:, 0])
-Power_LA = x_LA[:, 0] * Parameter.Turbine.r_GB * u_LA[:, 1] * Parameter.Generator.eta_el  # generator speed * torque * efficiency
-Energy_LA = np.sum(Power_LA[0:n_t - 1]) * dt
-M_yT_LA = Parameter.Turbine.HubHeight * (Parameter.Turbine.c_eT * x_LA[:, 2] + Parameter.Turbine.k_eT * x_LA[:, 1])
-c = np.array([[cycle[2], cycle[0]] for cycle in rainflow.extract_cycles(M_yT_LA)])
-TowerDEL_LA = (np.sum(c[:, 1] ** m * c[:, 0]) / N_REF) ** (1 / m)
+MaxSpeed_LA     = np.max(x_LA[:, 0])
+Power_LA        = x_LA[:, 0] * Parameter.Turbine.r_GB * u_LA[:, 1] * Parameter.Generator.eta_el  # generator speed * torque * efficiency
+Energy_LA       = np.sum(Power_LA[0:n_t - 1]) * dt
+M_yT_LA         = Parameter.Turbine.HubHeight * (Parameter.Turbine.c_eT * x_LA[:, 2] + Parameter.Turbine.k_eT * x_LA[:, 1])
+c               = np.array([[cycle[2], cycle[0]] for cycle in rainflow.extract_cycles(M_yT_LA)])
+TowerDEL_LA     = (np.sum(c[:, 1] ** m * c[:, 0]) / N_REF) ** (1 / m)
 # plot simulation results
 plt.figure(figsize=(10, 10))
 
@@ -179,8 +179,6 @@ plt.xlim([0, 600])
 
 plt.tight_layout()
 
-plt.show()
-
 # estimate coherence and SDES  (should not be changed)
 n_FFT = 2 ** 11
 
@@ -206,16 +204,16 @@ plt.ylabel('Coherence [-]')
 plt.xlim([1e-3, 1])
 plt.ylim([0, 1])
 
-Idx = np.arange(np.where(np.diff(gamma_Sq_est) > 0)[0][0] + 1)  # find monotonic descending values
-MCB = np.interp(0.5, gamma_Sq_est[Idx][::-1], k_est[Idx][::-1])  # measurement coherence bandwidth
-SDES = 2 * np.pi / MCB / 126
+Idx     = np.arange(np.where(np.diff(gamma_Sq_est) > 0)[0][0] + 1)  # find monotonic descending values
+MCB     = np.interp(0.5, gamma_Sq_est[Idx][::-1], k_est[Idx][::-1])  # measurement coherence bandwidth
+SDES    = 2 * np.pi / MCB / 126
 
 print(f'Smallest Detectable Eddy Size is estimated as {SDES:#.4g} D')
 
 # evaluate simulation results (should not be changed)
-Cost = TowerDEL_LA / TowerDEL_FB
-EnergyOK = Energy_LA >= Energy_FB
-MaxSpeedOK = MaxSpeed_LA <= MaxSpeed_FB
+Cost        = TowerDEL_LA / TowerDEL_FB
+EnergyOK    = Energy_LA >= Energy_FB
+MaxSpeedOK  = MaxSpeed_LA <= MaxSpeed_FB
 
 if EnergyOK and MaxSpeedOK:
     print(f'Constraints OK. Cost for Summer Games 2026 is {Cost * 100:#.4g} %.')

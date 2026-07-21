@@ -1,5 +1,7 @@
 # Wind turbine update
 
+from bisect import bisect_right
+
 import numpy as np
 
 
@@ -21,24 +23,24 @@ def SLOW(x_ThisStep, u_ThisStep, d_ThisStep, dt, Parameter):
 def state_eqs(x, u, d, Parameter):
 
     # Local variables
-    r_GB = Parameter.Turbine.r_GB
-    J = Parameter.Turbine.J
-    x_0T = Parameter.Turbine.x_0T
-    m_eT = Parameter.Turbine.m_eT
-    c_eT = Parameter.Turbine.c_eT
-    k_eT = Parameter.Turbine.k_eT
-    xi = Parameter.PitchActuator.xi
-    omega = Parameter.PitchActuator.omega
-    theta_dot_max = Parameter.PitchActuator.theta_dot_max
+    r_GB            = Parameter.Turbine.r_GB
+    J               = Parameter.Turbine.J
+    x_0T            = Parameter.Turbine.x_0T
+    m_eT            = Parameter.Turbine.m_eT
+    c_eT            = Parameter.Turbine.c_eT
+    k_eT            = Parameter.Turbine.k_eT
+    xi              = Parameter.PitchActuator.xi
+    omega           = Parameter.PitchActuator.omega
+    theta_dot_max   = Parameter.PitchActuator.theta_dot_max
 
-    v_0 = d
-    theta_c = u[0]                     # commanded pitch angle
-    M_g_c = u[1]                       # commanded generator torque
-    Omega = x[0]                       # rotor speed
-    x_T = x[1]                         # tower top displacement
-    x_T_dot = x[2]                     # tower top speed
-    theta = x[3]                       # pitch angle
-    theta_dot = x[4]                   # pitch rate
+    v_0         = d
+    theta_c     = u[0]                   # commanded pitch angle
+    M_g_c       = u[1]                   # commanded generator torque
+    Omega       = x[0]                   # rotor speed
+    x_T         = x[1]                   # tower top displacement
+    x_T_dot     = x[2]                   # tower top speed
+    theta       = x[3]                   # pitch angle
+    theta_dot   = x[4]                   # pitch rate
 
     # Allocation
     nx = 5
@@ -102,10 +104,10 @@ def CalculateAerodynamicTorque(x_T_dot, Omega, theta, v_0, Parameter):
 def CalculateAerodynamicThrust(x_T_dot, Omega, theta, v_0, Parameter):
 
     # Local variables
-    R = Parameter.Turbine.R
+    R   = Parameter.Turbine.R
     rho = Parameter.General.rho
 
-    v_rel = v_0 - x_T_dot                # relative speed of tower and wind
+    v_rel   = v_0 - x_T_dot                # relative speed of tower and wind
     lambda_ = Omega * R / v_rel
 
     c_T = QuickInterp2(
@@ -125,18 +127,17 @@ def CalculateAerodynamicThrust(x_T_dot, Omega, theta, v_0, Parameter):
 def QuickInterp2(X, Y, Z, XI, YI):
 
     # Keep XI and YI within the limits
-    XIc = min(max(X), XI)
-    XIc = max(min(X), XIc)
-
-    YIc = min(max(Y), YI)
-    YIc = max(min(Y), YIc)
+    # (X, Y are the sorted theta/lambda grids, so their min/max are just
+    # their first/last element - no need to scan the whole list)
+    XIc = min(X[-1], max(X[0], XI))
+    YIc = min(Y[-1], max(Y[0], YI))
 
     # Find X and Y values
     nX = len(X)
     nY = len(Y)
 
-    IndexX = np.searchsorted(X, XIc, side='right') - 1
-    IndexY = np.searchsorted(Y, YIc, side='right') - 1
+    IndexX = bisect_right(X, XIc) - 1
+    IndexY = bisect_right(Y, YIc) - 1
 
     IndexX = max(IndexX, 0)
     IndexX = min(IndexX, nX - 2)

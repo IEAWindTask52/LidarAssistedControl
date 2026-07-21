@@ -18,18 +18,18 @@ import numpy as np
 def FBController(y_ThisStep, u_FF_ThisStep, dt, Parameter):
 
     # Local variables
-    theta_K = Parameter.CPC.theta_K
-    kp = Parameter.CPC.kp
-    Ti = Parameter.CPC.Ti
-    Omega_g_rated = Parameter.CPC.Omega_g_rated
-    theta_min = Parameter.CPC.theta_min
-    theta_max = Parameter.CPC.theta_max
-    M_g_rated = Parameter.VSC.M_g_rated
-    f_cutoff = Parameter.Filter.f_cutoff
+    theta_K         = Parameter.CPC.theta_K
+    kp              = Parameter.CPC.kp
+    Ti              = Parameter.CPC.Ti
+    Omega_g_rated   = Parameter.CPC.Omega_g_rated
+    theta_min       = Parameter.CPC.theta_min
+    theta_max       = Parameter.CPC.theta_max
+    M_g_rated       = Parameter.VSC.M_g_rated
+    f_cutoff        = Parameter.Filter.f_cutoff
 
     # Measurements
-    Omega_g = y_ThisStep[0]                 # generator speed
-    theta = y_ThisStep[1]                   # blade pitch angle
+    Omega_g         = y_ThisStep[0]                 # generator speed
+    theta           = y_ThisStep[1]                 # blade pitch angle
 
     # Feedforward inputs
     if np.isscalar(u_FF_ThisStep):

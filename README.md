@@ -1,7 +1,7 @@
-# LAC SummerGames 2025
-The LAC SummerGames 2025 were launched as follow-up to the successful LAC Summer Games 24 to encourage professionals and particularly students in the art of designing and deploying lidar data processing algorithms and lidar-assisted controllers. Participants will be given the opportunity to increase their knowledge in LAC and by that, the SummerGames will trigger creativity and motivate the development of new concepts.
+# LAC SummerGames 2026
+The LAC SummerGames 2026 were launched as follow-up to the successful LAC Summer Games 24 and 25 to encourage professionals and particularly students in the art of designing and deploying lidar data processing algorithms and lidar-assisted controllers. Participants will be given the opportunity to increase their knowledge in LAC and by that, the SummerGames will trigger creativity and motivate the development of new concepts.
 
-All the necessary information regarding the three different disciplines and the general timeline can be found in the official document: (to be uploaded).
+All the necessary information regarding the two different disciplines and the general timeline can be found in the official document: (to be uploaded).
 
 The best way to get started would be to familiarize yourself with the code of the given examples and reproduce the results presented in the official document.
 
@@ -14,21 +14,34 @@ Please cite:
 ! License: MIT License
 ! Copyright (c) 2022 Flensburg University of Applied Sciences, WETI
 
-# How to compile?
-The sources for the listed DLLs can be found inside the *SourceCode* folder:
-- *FFP_v0.dll*
-- *WRAPPER.dll*
-- *SignalProvider.dll*
+# How to started?
+You are already in the right repository and branch, you can clone this right away using git, GithubDesktop or by downloading the *.zip file. 
 
-We recommend to use "Cmake"+"Visual Studio"+"Intel Fortran Compiler".
+In this repository, we provide 2 scripts for LAC one Matlab- and one Python-script doing the same.
+- To get started with the Matlab script you need to navigate to the UltraMarathon folder and then you can reproduce the results as in the description document via *RunUltraMarathon.m* script. The script is using functions that are provided in the functions folder and the data is loaded from the data folder, both folders are added to your path.
+- To get started with Python scripts unlike Matlab users need to install various modules like numpy, pandas, or scipy. To make it simpler we have provided a *setup.py* script that installs all the necessary modules in your environment, in addition it gives a short introduction how setup to run the script in the bash or IDE's (VS Code, PyCharm and Spyder). Then the *RunUltraMarathon.py* works similar to the **.m* version. 
 
-The "Cmake" GUI-based version is freely available from: https://cmake.org/download/
+You can now freely implement you own controller or lidar data processing algorithms. In the main program you are only allowed to work between the symbols >  < as shown in the below Matlab example:
+````
+    % >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    % provide u_ThisStep only based on current (i_t) or past signals:
+    % - turbine signals: y_ThisStep, measureable part of x_LA
+    % - lidar   signals: isValid, beamID, lineOfSightWindSpeed
 
-- Step1: Use Cmake to generate Visual Studio project, remember to ensure "CMakeLists.txt" and the "src" folder are in the same folder. See the tutorial here: https://cmake.org/runningcmake/
-- Step2: Compile using visual studio. 
+    % simple lidar data processing
+    v_0L(i_t)           = LDP_v3(isValid(i_t,IndexGate),beamI(i_t),lineOfSightWindSpeed(i_t,IndexGate),dt,LDP);
 
-Currently, the following combinations have been tested:
+    % calculate combined feedback-feedforward controller
+    WindAcceleration    = (v_0L(i_t)-v_0L(max(i_t-1,1)))/dt;
+    u_FF_ThisStep       = WindAcceleration*GradientStaticPitch; % simple collective pitch feedforward controller
+    u_ThisStep          = FBController(y_ThisStep,u_FF_ThisStep,dt,Parameter);
+    % <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+````
 
-- Visual Studio Community 2026 (Version: 18.2.1) + Intel Fortran Compiler IntelLLVM 2025.3.2
+# Support
+If you have questions regarding the Summer Games in general or regarding the code which might be interesting for others as well, please use our [Forum](https://github.com/IEAWindTask52/LidarAssistedControl/discussions) on GitHub.
 
-The latest version of the compiler is available here: https://www.intel.com/content/www/us/en/developer/tools/oneapi/fortran-compiler-download.html
+If you require further support, please don't hesitate to contact our support team via email:
+- [Felix Lehmann](mailto:felix.lehmann@hs-flensburg.de)
+- [Simon Weich](mailto:simon.weich@hs-flensburg.de)
+- [David Schlipf](mailto:david.schlipf@hs-flensburg.de)
