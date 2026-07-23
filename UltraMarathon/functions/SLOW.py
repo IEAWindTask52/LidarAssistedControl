@@ -16,7 +16,15 @@ def SLOW(x_ThisStep, u_ThisStep, d_ThisStep, dt, Parameter):
     dx = 1/6 * (k1 + 2*k2 + 2*k3 + k4)
     x_NextStep = x_ThisStep + dt * dx
 
-    return x_NextStep
+    # outputs: only [generator speed, pitch angel, tower top acceleration, electrical power] are considered measureable
+    y_NextStep = np.array([
+        x_NextStep[0] * Parameter.Turbine.r_GB,
+        x_NextStep[3],
+        dx[2],
+        x_NextStep[0] * Parameter.Turbine.r_GB * u_ThisStep[1] * Parameter.Generator.eta_el
+    ])
+
+    return x_NextStep, y_NextStep
 
 
 # Right side of ODE
@@ -50,7 +58,7 @@ def state_eqs(x, u, d, Parameter):
     M_a = CalculateAerodynamicTorque(
         x_T_dot,
         Omega,
-        theta_c,
+        theta,
         v_0,
         Parameter
     )
@@ -58,7 +66,7 @@ def state_eqs(x, u, d, Parameter):
     F_a = CalculateAerodynamicThrust(
         x_T_dot,
         Omega,
-        theta_c,
+        theta,
         v_0,
         Parameter
     )

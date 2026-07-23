@@ -6,7 +6,7 @@
 # Details see instructions: <TODO: DOI url>.
 # Initial result:
 # Smallest Detectable Eddy Size is estimated as 1.737 D
-# Cost for Summer Games 2026 is 95.09 %.
+# Cost for Summer Games 2026 is 94.32 %.
 
 # setup
 import numpy as np
@@ -39,14 +39,15 @@ with h5py.File('data/DataSummerGames2026.mat', 'r') as Data:
 
 # simulation parameter (should not be changed)
 Parameter   = NREL5MWDefaultParameter_SLOW()                            # turbine parameters
-Parameter   = NREL5MWDefaultParameter_FBNREL(Parameter)                 # controller parameters
 x_0         = np.array([rpm2radPs(12.1), 0.1, 0, np.deg2rad(14), 0])    # initial values for states x = [rotor speed, tower top displacement, tower top speed, pitch angle, pitch rate]
+y_0         = np.array([rpm2radPs(12.1) * 97, np.deg2rad(14), 0, 5e6])  # initial values for measurements y = [generator speed, commanded pitch angle, tower top acceleration, electrical power]
 dt          = time[1] - time[0]                                         # [s]           time step size
 n_t         = len(time)                                                 # [-]           number of time steps
 m           = 4                                                         # [-]           Woehler Exponent for steel
-N_REF       = 2e6 / (20 * 8750) * 12                                    # [-]           fraction of 2e6 in 20 years for 12 h
+N_REF       = 2e6 / (20 * 8760) * 12                                    # [-]           fraction of 2e6 in 20 years for 12 h
 
 # other parameters (please add here your parameters): as example, the simple LDP from the Summer Games 2025 and a very simple feedforward controller is used
+Parameter = NREL5MWDefaultParameter_FBNREL(Parameter)  # controller parameters
 LDP = {
     'NumberOfBeams': 4,                         # [-]           Number of beams measuring at different directions
     'AngleToCenterline': 19.176,                # [deg]         Angle around centerline
@@ -62,32 +63,34 @@ reset_LDP_v3()
 # simulation feedback only (should not be changed)
 # allocation and initialization
 x_FB        = np.full((n_t, 5), np.nan)
+y_FB        = np.full((n_t, 4), np.nan)
 u_FB        = np.full((n_t, 2), np.nan)
-x_FB[0, :]  = x_0                                           # init states
-reset_FBController()                                       # clear persistent variables
+x_FB[0, :]  = x_0                               # init states
+y_FB[0, :]  = y_0                               # init measurements
+reset_FBController()                            # clear persistent variables
 
 # loop over time
 for i_t in range(n_t - 1):
 
     # select current state, measurements and disturbance
     x_ThisStep          = x_FB[i_t, :]
-    y_ThisStep          = np.array([x_FB[i_t, 0] * Parameter.Turbine.r_GB, x_FB[i_t, 3], x_FB[i_t, 2]])  # only [generator speed, pitch angle, tower top acceleration] are considered measurable
+    y_ThisStep          = y_FB[i_t, :]
     d_ThisStep          = v_0[i_t]
 
     # calculate feedback controller
     u_ThisStep          = FBController(y_ThisStep, 0, dt, Parameter)
 
     # simulate wind turbine
-    x_NextStep          = SLOW(x_ThisStep, u_ThisStep, d_ThisStep, dt, Parameter)
+    x_NextStep, y_NextStep = SLOW(x_ThisStep, u_ThisStep, d_ThisStep, dt, Parameter)
 
     # store simulation results
     u_FB[i_t, :]        = u_ThisStep
     x_FB[i_t + 1, :]    = x_NextStep
+    y_FB[i_t + 1, :]    = y_NextStep
 
 # calculate overspeed, energy and loads
-MaxSpeed_FB = np.max(x_FB[:, 0])
-Power_FB    = (x_FB[:, 0] * Parameter.Turbine.r_GB * u_FB[:, 1] * Parameter.Generator.eta_el)  # generator speed * torque * efficiency
-Energy_FB   = np.sum(Power_FB[0:n_t - 1]) * dt
+MaxSpeed_FB = np.max(y_FB[:, 0])
+Energy_FB   = np.sum(y_FB[:, 3]) * dt
 M_yT_FB     = Parameter.Turbine.HubHeight * (Parameter.Turbine.c_eT * x_FB[:, 2] + Parameter.Turbine.k_eT * x_FB[:, 1])
 c           = np.array([[cycle[2], cycle[0]] for cycle in rainflow.extract_cycles(M_yT_FB)])
 TowerDEL_FB = (np.sum(c[:, 1] ** m * c[:, 0]) / N_REF) ** (1 / m)
@@ -95,17 +98,19 @@ TowerDEL_FB = (np.sum(c[:, 1] ** m * c[:, 0]) / N_REF) ** (1 / m)
 # simulation lidar-assisted: please only adjust code between >>> <<<!
 # allocation and initialization
 x_LA        = np.full((n_t, 5), np.nan)
+y_LA        = np.full((n_t, 4), np.nan)
 u_LA        = np.full((n_t, 2), np.nan)
 v_0L        = np.full(n_t, np.nan)
-x_LA[0, :]  = x_0                                           # init states
-reset_FBController()                                       # clear persistent variables
+x_LA[0, :]  = x_0                               # init states
+y_LA[0, :]  = y_0                               # init measurements
+reset_FBController()                            # clear persistent variables
 
 # loop over time
 for i_t in range(n_t - 1):
 
     # select current state, measurements and disturbance
     x_ThisStep          = x_LA[i_t, :]
-    y_ThisStep          = np.array([x_LA[i_t, 0] * Parameter.Turbine.r_GB, x_LA[i_t, 3], x_LA[i_t, 2]])  # only [generator speed, pitch angle, tower top acceleration] are considered measurable
+    y_ThisStep          = y_LA[i_t, :]
     d_ThisStep          = v_0[i_t]
 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -123,19 +128,20 @@ for i_t in range(n_t - 1):
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # simulate wind turbine
-    x_NextStep          = SLOW(x_ThisStep, u_ThisStep, d_ThisStep, dt, Parameter)
+    x_NextStep, y_NextStep = SLOW(x_ThisStep, u_ThisStep, d_ThisStep, dt, Parameter)
 
     # store simulation results
     u_LA[i_t, :]        = u_ThisStep
     x_LA[i_t + 1, :]    = x_NextStep
+    y_LA[i_t + 1, :]    = y_NextStep
 
 # calculate overspeed, energy and loads
-MaxSpeed_LA     = np.max(x_LA[:, 0])
-Power_LA        = x_LA[:, 0] * Parameter.Turbine.r_GB * u_LA[:, 1] * Parameter.Generator.eta_el  # generator speed * torque * efficiency
-Energy_LA       = np.sum(Power_LA[0:n_t - 1]) * dt
+MaxSpeed_LA     = np.max(y_LA[:, 0])
+Energy_LA       = np.sum(y_LA[:, 3]) * dt
 M_yT_LA         = Parameter.Turbine.HubHeight * (Parameter.Turbine.c_eT * x_LA[:, 2] + Parameter.Turbine.k_eT * x_LA[:, 1])
 c               = np.array([[cycle[2], cycle[0]] for cycle in rainflow.extract_cycles(M_yT_LA)])
 TowerDEL_LA     = (np.sum(c[:, 1] ** m * c[:, 0]) / N_REF) ** (1 / m)
+
 # plot simulation results
 plt.figure(figsize=(10, 10))
 
@@ -212,7 +218,7 @@ print(f'Smallest Detectable Eddy Size is estimated as {SDES:#.4g} D')
 
 # evaluate simulation results (should not be changed)
 Cost        = TowerDEL_LA / TowerDEL_FB
-EnergyOK    = Energy_LA >= Energy_FB
+EnergyOK    = (Energy_FB - Energy_LA) <= 0.1 * 60 * 60 * 1e3  # energy loss over 12h up to 0.1kWh acceptable
 MaxSpeedOK  = MaxSpeed_LA <= MaxSpeed_FB
 
 if EnergyOK and MaxSpeedOK:
