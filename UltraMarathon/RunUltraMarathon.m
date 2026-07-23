@@ -6,9 +6,10 @@
 % Details see instructions: <TODO: DOI url>.
 % Initial result: 
 % Smallest Detectable Eddy Size is estimated as 1.737 D 
-% Cost for Summer Games 2026 is 95.09 %.
+% Cost for Summer Games 2026 is 94.32 %.
 
 %% add paths and load data
+
 clearvars;
 close all;
 clc;
@@ -18,15 +19,16 @@ load('DataSummerGames2026.mat','time','lineOfSightWindSpeed','isValid','beamID',
 %% simulation parameter (should not be changed)
 
 Parameter   = NREL5MWDefaultParameter_SLOW;             % turbine parameters
-Parameter   = NREL5MWDefaultParameter_FBNREL(Parameter);% controller parameters
 x_0         = [rpm2radPs(12.1),0.1,0,deg2rad(14),0];    % initial values for states x = [rotor speed, tower top displacement, tower top speed, pitch angle, pitch rate]
+y_0         = [rpm2radPs(12.1)*97,deg2rad(14),0,5e6];   % initial values for measurements y = [generator speed, commanded pitch angle, tower top acceleration, electrical power]
 dt          = time(2)-time(1);                          % [s]           time step size
 n_t         = length(time);                             % [-]           number of time steps
 m           = 4;                                        % [-]           Woehler Exponent for steel
-N_REF       = 2e6/(20*8750)*12;                         % [-]           fraction of 2e6 in 20 years for 12 h
+N_REF       = 2e6/(20*8760)*12;                         % [-]           fraction of 2e6 in 20 years for 12 h
 
 %% other parameters (please add here your parameters): as example, the simple LDP from the Summer Games 2025 and a very simple feedforward controller is used
 
+Parameter               = NREL5MWDefaultParameter_FBNREL(Parameter);  % controller parameters
 LDP.NumberOfBeams       = 4;                            % [-]           Number of beams measuring at different directions               
 LDP.AngleToCenterline   = 19.176;                       % [deg]         Angle around centerline
 LDP.FlagLPF             = 1;                            % [0/1]         Enable low-pass filter (flag)
@@ -40,34 +42,36 @@ clear  LDP_v3
 
 % allocation and initalization
 x_FB        = NaN(n_t,5);
+y_FB        = NaN(n_t,4);
 u_FB        = NaN(n_t,2);
 x_FB(1,:)   = x_0; % init states
+y_FB(1,:)   = y_0; % init measurements
 clear FBController % clear persistent variables
 
 % loop over time
 for i_t=1:n_t-1
     
     % select current state, meaasurements and disturbance
-    x_ThisStep          = x_FB(i_t,:);
-    y_ThisStep          = [x_FB(i_t,1)*Parameter.Turbine.r_GB,x_FB(i_t,4),x_FB(i_t,3)]; % only [generator speed, pitch angel, tower top acceleration] are considered measureable
-    d_ThisStep          = v_0(i_t);
+    x_ThisStep              = x_FB(i_t,:);
+    y_ThisStep              = y_FB(i_t,:);
+    d_ThisStep              = v_0(i_t);
   
     % calculate feedback controller
-    u_ThisStep          = FBController(y_ThisStep,0,dt,Parameter);
+    u_ThisStep              = FBController(y_ThisStep,0,dt,Parameter);
 
     % simulate wind turbine
-    x_NextStep          = SLOW(x_ThisStep,u_ThisStep,d_ThisStep,dt,Parameter);
+    [x_NextStep,y_NextStep] = SLOW(x_ThisStep,u_ThisStep,d_ThisStep,dt,Parameter);
 
     % store simulation results
-    u_FB(i_t,:)         = u_ThisStep;
-    x_FB(i_t+1,:)       = x_NextStep;
+    u_FB(i_t,:)             = u_ThisStep;
+    x_FB(i_t+1,:)           = x_NextStep;
+    y_FB(i_t+1,:)           = y_NextStep;
 
 end
 
 % calculate overspeed, energy and loads
-MaxSpeed_FB = max(x_FB(:,1));
-Power_FB    = x_FB(:,1)*Parameter.Turbine.r_GB.*u_FB(:,2)*Parameter.Generator.eta_el; % generator speed *  torque * efficiency
-Energy_FB   = sum(Power_FB(1:n_t-1))*dt;
+MaxSpeed_FB = max(y_FB(:,1));
+Energy_FB   = sum(y_FB(:,4))*dt;
 M_yT_FB     = Parameter.Turbine.HubHeight*(Parameter.Turbine.c_eT*x_FB(:,3)+Parameter.Turbine.k_eT*x_FB(:,2));
 c           = rainflow(M_yT_FB);
 TowerDEL_FB = (sum(c(:,2).^m.*c(:,1))/N_REF).^(1/m);
@@ -76,18 +80,20 @@ TowerDEL_FB = (sum(c(:,2).^m.*c(:,1))/N_REF).^(1/m);
 
 % allocation and initalization
 x_LA        = NaN(n_t,5);
+y_LA        = NaN(n_t,4);
 u_LA        = NaN(n_t,2);
 v_0L        = NaN(n_t,1);
 x_LA(1,:)   = x_0; % init states
+y_LA(1,:)   = y_0; % init measurements
 clear FBController % clear persistent variables
 
 % loop over time
 for i_t=1:n_t-1
     
     % select current state, meaasurements and disturbance
-    x_ThisStep          = x_LA(i_t,:);
-    y_ThisStep          = [x_LA(i_t,1)*Parameter.Turbine.r_GB,x_LA(i_t,4),x_LA(i_t,3)]; % only [generator speed, pitch angel, tower top acceleration] are considered measureable
-    d_ThisStep          = v_0(i_t);
+    x_ThisStep              = x_LA(i_t,:);
+    y_ThisStep              = y_LA(i_t,:);    
+    d_ThisStep              = v_0(i_t);
   
     % >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     % provide u_ThisStep only based on current (i_t) or past signals:
@@ -95,27 +101,27 @@ for i_t=1:n_t-1
     % - lidar   signals: isValid, beamID, lineOfSightWindSpeed
 
     % simple lidar data processing
-    v_0L(i_t)           = LDP_v3(isValid(i_t,IndexGate),beamID(i_t),lineOfSightWindSpeed(i_t,IndexGate),dt,LDP);
+    v_0L(i_t)               = LDP_v3(isValid(i_t,IndexGate),beamID(i_t),lineOfSightWindSpeed(i_t,IndexGate),dt,LDP);
 
     % calculate combined feedback-feedforward controller
-    WindAcceleration    = (v_0L(i_t)-v_0L(max(i_t-1,1)))/dt;
-    u_FF_ThisStep       = WindAcceleration*GradientStaticPitch; % simple collective pitch feedforward controller
-    u_ThisStep          = FBController(y_ThisStep,u_FF_ThisStep,dt,Parameter);
+    WindAcceleration        = (v_0L(i_t)-v_0L(max(i_t-1,1)))/dt;
+    u_FF_ThisStep           = WindAcceleration*GradientStaticPitch; % simple collective pitch feedforward controller
+    u_ThisStep              = FBController(y_ThisStep,u_FF_ThisStep,dt,Parameter);
     % <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     % simulate wind turbine
-    x_NextStep          = SLOW(x_ThisStep,u_ThisStep,d_ThisStep,dt,Parameter);
+    [x_NextStep,y_NextStep] = SLOW(x_ThisStep,u_ThisStep,d_ThisStep,dt,Parameter);
 
     % store simulation results
-    u_LA(i_t,:)         = u_ThisStep;
-    x_LA(i_t+1,:)       = x_NextStep;
+    u_LA(i_t,:)             = u_ThisStep;
+    x_LA(i_t+1,:)           = x_NextStep;
+    y_LA(i_t+1,:)           = y_NextStep;    
 
 end
 
 % calculate overspeed, energy and loads
-MaxSpeed_LA = max(x_LA(:,1));
-Power_LA    = x_LA(:,1)*Parameter.Turbine.r_GB.*u_LA(:,2)*Parameter.Generator.eta_el; % generator speed *  torque * efficiency
-Energy_LA   = sum(Power_LA(1:n_t-1))*dt;
+MaxSpeed_LA = max(y_LA(:,1));
+Energy_LA   = sum(y_LA(:,4))*dt;
 M_yT_LA     = Parameter.Turbine.HubHeight*(Parameter.Turbine.c_eT*x_LA(:,3)+Parameter.Turbine.k_eT*x_LA(:,2));
 c           = rainflow(M_yT_LA);
 TowerDEL_LA = (sum(c(:,2).^m.*c(:,1))/N_REF).^(1/m);
@@ -184,7 +190,7 @@ fprintf('Smallest Detectable Eddy Size is estimated as %#.4g D \n',SDES)
 %% evaluate simulation results (should not be changed)
 
 Cost        = TowerDEL_LA/TowerDEL_FB;
-EnergyOK    = Energy_LA   >= Energy_FB;
+EnergyOK    = Energy_FB - Energy_LA <= 0.1 * 60*60*1e3; % energy loss over 12h up to 0.1kWh acceptable
 MaxSpeedOK  = MaxSpeed_LA <= MaxSpeed_FB;
 
 if EnergyOK && MaxSpeedOK

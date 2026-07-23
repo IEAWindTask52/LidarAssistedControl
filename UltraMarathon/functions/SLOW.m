@@ -1,5 +1,5 @@
 %% Wind turbine update
-function x_NextStep = SLOW(x_ThisStep,u_ThisStep,d_ThisStep,dt,Parameter)
+function [x_NextStep,y_NextStep] = SLOW(x_ThisStep,u_ThisStep,d_ThisStep,dt,Parameter)
 
 % RK4 (assuming d_NextStep = d_ThisStep)
 k1         	    = state_eqs(x_ThisStep,            u_ThisStep,d_ThisStep,Parameter);
@@ -8,6 +8,13 @@ k3       	    = state_eqs(x_ThisStep + 1/2*k2*dt,u_ThisStep,d_ThisStep,Parameter
 k4        	    = state_eqs(x_ThisStep +     k3*dt,u_ThisStep,d_ThisStep,Parameter);
 dx              = 1/6*(k1 + 2*k2 + 2*k3 + k4);
 x_NextStep      = x_ThisStep + dt*dx; 
+
+% outputs: only [generator speed, pitch angel, tower top acceleration, electrical power] are considered measureable
+y_NextStep      = [x_NextStep(1)*Parameter.Turbine.r_GB,...
+                   x_NextStep(4),...
+                   dx(3),...
+                   x_NextStep(1)*Parameter.Turbine.r_GB*u_ThisStep(2)*Parameter.Generator.eta_el];
+
 
 end 
 
@@ -39,8 +46,8 @@ nx              = 5;
 dx              = zeros(1,nx);
 
 % Aerodynamics
-M_a             = CalculateAerodynamicTorque(x_T_dot,Omega,theta_c,v_0,Parameter);
-F_a             = CalculateAerodynamicThrust(x_T_dot,Omega,theta_c,v_0,Parameter);
+M_a             = CalculateAerodynamicTorque(x_T_dot,Omega,theta,v_0,Parameter);
+F_a             = CalculateAerodynamicThrust(x_T_dot,Omega,theta,v_0,Parameter);
 
 % ODEs
 dx(1)           = 1/J     * ( M_a - M_g_c*r_GB);
