@@ -35,7 +35,7 @@ SourceCode/PFC/CMakeSettings.json
 /Sprint_Frequency_FASTv4d2/results
 
 # ignore Python virtual environment created by setup_python.py
-.venv/
+UltraMarathon/python/venv/
 __pycache__/
 
 .vscode/settings.json

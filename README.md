@@ -17,9 +17,9 @@ Please cite:
 # How to started?
 You are already in the right repository and branch, you can clone this right away using git, GithubDesktop or by downloading the *.zip file. 
 
-In this repository, we provide 2 scripts for LAC one Matlab- and one Python-script doing the same.
-- To get started with the Matlab script you need to navigate to the UltraMarathon folder and then you can reproduce the results as in the description document via *RunUltraMarathon.m* script. The script is using functions that are provided in the functions folder and the data is loaded from the data folder, both folders are added to your path.
-- To get started with Python scripts unlike Matlab users need to install various modules like numpy, pandas, or scipy. To make it simpler we have provided a *setup.py* script that installs all the necessary modules in your environment, in addition it gives a short introduction how setup to run the script in the bash or IDE's (VS Code, PyCharm and Spyder). Then the *RunUltraMarathon.py* works similar to the **.m* version. 
+In this repository, we provide 2 scripts for LAC one Matlab- and one Python-script doing the same. Inside the UltraMarathon folder, the shared *data* folder holds the measurement data used by both, while the Matlab and Python versions each live in their own self-contained subfolder.
+- To get started with the Matlab script you need to navigate to the UltraMarathon/matlab folder and then you can reproduce the results as in the description document via *RunUltraMarathon.m* script. The script is using functions that are provided in the functions folder and the data is loaded from the ../data folder, both folders are added to your path.
+- To get started with Python scripts unlike Matlab users need to install various modules like numpy, scipy, h5py, matplotlib and rainflow. To make it simpler we have provided a *setup/setup_python.py* script (inside UltraMarathon/python) that installs all the necessary modules into a local virtual environment, in addition it gives a short introduction how setup to run the script in the bash or IDE's (VS Code and PyCharm). Then the *RunUltraMarathon.py* works similar to the *.m* version. 
 
 You can now freely implement you own controller or lidar data processing algorithms. In the main program you are only allowed to work between the symbols >  < as shown in the below Matlab example:
 ````
