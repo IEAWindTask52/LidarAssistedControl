@@ -5,7 +5,7 @@ All the necessary information regarding the two different disciplines and the ge
 
 The best way to get started would be to familiarize yourself with the code of the given examples and reproduce the results presented in the official document.
 
-This code is an extention of 
+This code is an extension of 
 https://github.com/MSCA-LIKE/Baseline-Lidar-assisted-Controller, which has been used in the research funded by LIKE -- Lidar Knowledge Europe, grant agreement No. 858358. 
 
 Please cite:
@@ -14,27 +14,27 @@ Please cite:
 ! License: MIT License
 ! Copyright (c) 2022 Flensburg University of Applied Sciences, WETI
 
-# How to started?
+# How to get started?
 You are already in the right repository and branch, you can clone this right away using git, GithubDesktop or by downloading the *.zip file. 
 
 In this repository, we provide 2 scripts for LAC one Matlab- and one Python-script doing the same. Inside the UltraMarathon folder, the shared *data* folder holds the measurement data used by both, while the Matlab and Python versions each live in their own self-contained subfolder.
 - To get started with the Matlab script you need to navigate to the UltraMarathon/matlab folder and then you can reproduce the results as in the description document via *RunUltraMarathon.m* script. The script is using functions that are provided in the functions folder and the data is loaded from the ../data folder, both folders are added to your path.
 - To get started with Python scripts unlike Matlab users need to install various modules like numpy, scipy, h5py, matplotlib and rainflow. To make it simpler we have provided a *setup/setup_python.py* script (inside UltraMarathon/python) that installs all the necessary modules into a local virtual environment, in addition it gives a short introduction how setup to run the script in the bash or IDE's (VS Code and PyCharm). Then the *RunUltraMarathon.py* works similar to the *.m* version. 
 
-You can now freely implement you own controller or lidar data processing algorithms. In the main program you are only allowed to work between the symbols >  < as shown in the below Matlab example:
+You can now freely implement your own controller or lidar data processing algorithms. In the main program you are only allowed to work between the symbols >  < as shown in the below Matlab example. Inside the block you have the measurements `y_ThisStep`, the lidar signals and your own past values available, but neither the full turbine state nor the true wind speed:
 ````
     % >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    % provide u_ThisStep only based on current (i_t) or past signals:
-    % - turbine signals: y_ThisStep, measureable part of x_LA
-    % - lidar   signals: isValid, beamID, lineOfSightWindSpeed
+    % First discipline (Preview Quality): Provide v_0L(i_t)  only based on current (i_t) or past lidar signals: isValid, beamID, lineOfSightWindSpeed
+    % Second discipline (Load Reduction): Provide u_ThisStep only based on current (i_t) or past lidar signals and turbine signals from y_ThisStep
 
     % simple lidar data processing
-    v_0L(i_t)           = LDP_v3(isValid(i_t,IndexGate),beamI(i_t),lineOfSightWindSpeed(i_t,IndexGate),dt,LDP);
+    v_0L(i_t)               = LDP_v3(isValid(i_t,IndexGate),beamID(i_t),lineOfSightWindSpeed(i_t,IndexGate),dt,LDP);
 
     % calculate combined feedback-feedforward controller
-    WindAcceleration    = (v_0L(i_t)-v_0L(max(i_t-1,1)))/dt;
-    u_FF_ThisStep       = WindAcceleration*GradientStaticPitch; % simple collective pitch feedforward controller
-    u_ThisStep          = FBController(y_ThisStep,u_FF_ThisStep,dt,Parameter);
+    WindAcceleration        = (v_0L(i_t)-v_0L(max(i_t-1,1)))/dt;
+    u_FF_ThisStep           = WindAcceleration*GradientStaticPitch; % simple collective pitch feedforward controller
+    y_ThisStep              = y_LA(i_t,:);
+    u_ThisStep              = FBController(y_ThisStep,u_FF_ThisStep,dt,Parameter);
     % <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ````
 

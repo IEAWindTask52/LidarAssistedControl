@@ -5,7 +5,7 @@
 # with 126 m rotor diameter and a 4-beam-pulsed lidar system.
 # Details see instructions: <TODO: DOI url>.
 # Initial result:
-# Smallest Detectable Eddy Size is estimated as 1.737 D
+# Smallest Detectable Eddy Size is estimated as 1.737 D.
 # Cost for Summer Games 2026 is 94.32 %.
 
 # setup
@@ -38,8 +38,8 @@ with h5py.File('../data/DataSummerGames2026.mat', 'r') as Data:
 
 # simulation parameter (should not be changed)
 Parameter   = NREL5MWDefaultParameter_SLOW()                            # turbine parameters
-x_0         = np.array([rpm2radPs(12.1), 0.1, 0, np.deg2rad(14), 0])    # initial values for states x = [rotor speed, tower top displacement, tower top speed, pitch angle, pitch rate]
-y_0         = np.array([rpm2radPs(12.1) * 97, np.deg2rad(14), 0, 5e6])  # initial values for measurements y = [generator speed, commanded pitch angle, tower top acceleration, electrical power]
+x_0         = np.array([rpm2radPs(12.1), 0.2, 0, np.deg2rad(13), 0])    # initial values for states x = [rotor speed, tower top displacement, tower top speed, pitch angle, pitch rate]
+y_0         = np.array([rpm2radPs(12.1) * 97, np.deg2rad(13), 0, 5e6])  # initial values for measurements y = [generator speed, pitch angle, tower top acceleration, electrical power]
 dt          = time[1] - time[0]                                         # [s]           time step size
 n_t         = len(time)                                                 # [-]           number of time steps
 m           = 4                                                         # [-]           Woehler Exponent for steel
@@ -71,15 +71,13 @@ reset_FBController()                            # clear persistent variables
 # loop over time
 for i_t in range(n_t - 1):
 
-    # select current state, measurements and disturbance
-    x_ThisStep          = x_FB[i_t, :]
-    y_ThisStep          = y_FB[i_t, :]
-    d_ThisStep          = v_0[i_t]
-
     # calculate feedback controller
+    y_ThisStep          = y_FB[i_t, :]
     u_ThisStep          = FBController(y_ThisStep, 0, dt, Parameter)
 
     # simulate wind turbine
+    x_ThisStep          = x_FB[i_t, :]
+    d_ThisStep          = v_0[i_t]
     x_NextStep, y_NextStep = SLOW(x_ThisStep, u_ThisStep, d_ThisStep, dt, Parameter)
 
     # store simulation results
@@ -87,12 +85,14 @@ for i_t in range(n_t - 1):
     x_FB[i_t + 1, :]    = x_NextStep
     y_FB[i_t + 1, :]    = y_NextStep
 
-# calculate overspeed, energy and loads
-MaxSpeed_FB = np.max(y_FB[:, 0])
-Energy_FB   = np.sum(y_FB[:, 3]) * dt
-M_yT_FB     = Parameter.Turbine.HubHeight * (Parameter.Turbine.c_eT * x_FB[:, 2] + Parameter.Turbine.k_eT * x_FB[:, 1])
-c           = np.array([[cycle[2], cycle[0]] for cycle in rainflow.extract_cycles(M_yT_FB)])
-TowerDEL_FB = (np.sum(c[:, 1] ** m * c[:, 0]) / N_REF) ** (1 / m)
+# calculate overspeed, energy, loads, power quality and pitch travel
+MaxSpeed_FB     = np.max(y_FB[:, 0])
+Energy_FB       = np.sum(y_FB[:, 3]) * dt
+PowerStd_FB     = np.std(y_FB[:, 3], ddof=1)
+M_yT_FB         = Parameter.Turbine.HubHeight * (Parameter.Turbine.c_eT * x_FB[:, 2] + Parameter.Turbine.k_eT * x_FB[:, 1])
+c               = np.array([[cycle[2], cycle[0]] for cycle in rainflow.extract_cycles(M_yT_FB)])
+TowerDEL_FB     = (np.sum(c[:, 1] ** m * c[:, 0]) / N_REF) ** (1 / m)
+PitchTravel_FB  = np.sum(np.abs(np.diff(x_FB[:, 3])))
 
 # simulation lidar-assisted: please only adjust code between >>> <<<!
 # allocation and initialization
@@ -107,26 +107,23 @@ reset_FBController()                            # clear persistent variables
 # loop over time
 for i_t in range(n_t - 1):
 
-    # select current state, measurements and disturbance
-    x_ThisStep          = x_LA[i_t, :]
-    y_ThisStep          = y_LA[i_t, :]
-    d_ThisStep          = v_0[i_t]
-
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # provide u_ThisStep only based on current (i_t) or past signals:
-    # - turbine signals: y_ThisStep, measurable part of x_LA
-    # - lidar signals: isValid, beamID, lineOfSightWindSpeed
+    # First discipline (Preview Quality): Provide v_0L[i_t] only based on current (i_t) or past lidar signals: isValid, beamID, lineOfSightWindSpeed
+    # Second discipline (Load Reduction): Provide u_ThisStep only based on current (i_t) or past lidar signals and turbine signals from y_ThisStep
 
     # simple lidar data processing
-    v_0L[i_t]           = LDP_v3(isValid[i_t, IndexGate],beamID[i_t], lineOfSightWindSpeed[i_t, IndexGate], dt, LDP)
+    v_0L[i_t]           = LDP_v3(isValid[i_t, IndexGate], beamID[i_t], lineOfSightWindSpeed[i_t, IndexGate], dt, LDP)
 
     # calculate combined feedback-feedforward controller
     WindAcceleration    = (v_0L[i_t] - v_0L[max(i_t - 1, 0)]) / dt
     u_FF_ThisStep       = WindAcceleration * GradientStaticPitch  # simple collective pitch feedforward controller
+    y_ThisStep          = y_LA[i_t, :]
     u_ThisStep          = FBController(y_ThisStep, u_FF_ThisStep, dt, Parameter)
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # simulate wind turbine
+    x_ThisStep          = x_LA[i_t, :]
+    d_ThisStep          = v_0[i_t]
     x_NextStep, y_NextStep = SLOW(x_ThisStep, u_ThisStep, d_ThisStep, dt, Parameter)
 
     # store simulation results
@@ -134,12 +131,14 @@ for i_t in range(n_t - 1):
     x_LA[i_t + 1, :]    = x_NextStep
     y_LA[i_t + 1, :]    = y_NextStep
 
-# calculate overspeed, energy and loads
+# calculate overspeed, energy, loads, power quality and pitch travel
 MaxSpeed_LA     = np.max(y_LA[:, 0])
 Energy_LA       = np.sum(y_LA[:, 3]) * dt
+PowerStd_LA     = np.std(y_LA[:, 3], ddof=1)
 M_yT_LA         = Parameter.Turbine.HubHeight * (Parameter.Turbine.c_eT * x_LA[:, 2] + Parameter.Turbine.k_eT * x_LA[:, 1])
 c               = np.array([[cycle[2], cycle[0]] for cycle in rainflow.extract_cycles(M_yT_LA)])
 TowerDEL_LA     = (np.sum(c[:, 1] ** m * c[:, 0]) / N_REF) ** (1 / m)
+PitchTravel_LA  = np.sum(np.abs(np.diff(x_LA[:, 3])))
 
 # plot simulation results
 plt.figure(figsize=(10, 10))
@@ -150,7 +149,6 @@ plt.plot(time, v_0L, label='lidar')
 plt.grid()
 plt.ylabel('[m/s]')
 plt.legend(loc='best')
-plt.xlim([0, 600])
 
 plt.subplot(512)
 plt.plot(time, np.rad2deg(u_FB[:, 0]), label='FB')
@@ -158,21 +156,18 @@ plt.plot(time, np.rad2deg(u_LA[:, 0]), label='LA')
 plt.grid()
 plt.ylabel('pitch angle\n[deg]')
 plt.legend(loc='best')
-plt.xlim([0, 600])
 
 plt.subplot(513)
 plt.plot(time, u_FB[:, 1] * 1e3)
 plt.plot(time, u_LA[:, 1] * 1e3)
 plt.grid()
 plt.ylabel('generator torque\n[kNm]')
-plt.xlim([0, 600])
 
 plt.subplot(514)
 plt.plot(time, radPs2rpm(x_FB[:, 0]))
 plt.plot(time, radPs2rpm(x_LA[:, 0]))
 plt.grid()
 plt.ylabel('rotor speed\n[rpm]')
-plt.xlim([0, 600])
 
 plt.subplot(515)
 plt.plot(time, M_yT_FB / 1e6)
@@ -180,7 +175,6 @@ plt.plot(time, M_yT_LA / 1e6)
 plt.grid()
 plt.ylabel('tower base bending moment\n[MNm]')
 plt.xlabel('time [s]')
-plt.xlim([0, 600])
 
 plt.tight_layout()
 
@@ -210,21 +204,29 @@ plt.xlim([1e-3, 1])
 plt.ylim([0, 1])
 
 Idx     = np.arange(np.where(np.diff(gamma_Sq_est) > 0)[0][0] + 1)  # find monotonic descending values
-MCB     = np.interp(0.5, gamma_Sq_est[Idx][::-1], k_est[Idx][::-1])  # measurement coherence bandwidth
-SDES    = 2 * np.pi / MCB / 126
-
-print(f'Smallest Detectable Eddy Size is estimated as {SDES:#.4g} D')
+if np.min(gamma_Sq_est[Idx]) <= 0.5 and np.max(gamma_Sq_est[Idx]) > 0.5:
+    MCB     = np.interp(0.5, gamma_Sq_est[Idx][::-1], k_est[Idx][::-1])  # measurement coherence bandwidth
+    SDES    = 2 * np.pi / MCB / 126
+    print(f'Smallest Detectable Eddy Size is estimated as {SDES:#.4g} D.')
+else:
+    print('Smallest Detectable Eddy Size cannot be estimated since the monotonic descending values in the coherence do not cross 0.5.')
 
 # evaluate simulation results (should not be changed)
-Cost        = TowerDEL_LA / TowerDEL_FB
-EnergyOK    = (Energy_FB - Energy_LA) <= 0.1 * 60 * 60 * 1e3  # energy loss over 12h up to 0.1kWh acceptable
-MaxSpeedOK  = MaxSpeed_LA <= MaxSpeed_FB
+Cost            = TowerDEL_LA / TowerDEL_FB
+EnergyOK        = (Energy_FB - Energy_LA) <= 1 * 60 * 60 * 1e3  # energy loss over 12h up to 1kWh acceptable
+MaxSpeedOK      = MaxSpeed_LA <= MaxSpeed_FB                    # same or less overspeed
+PowerStdOK      = PowerStd_LA <= PowerStd_FB                    # same or better power quality
+PitchTravelOK   = PitchTravel_LA <= PitchTravel_FB              # same or less pitch actuator duty
 
-if EnergyOK and MaxSpeedOK:
+if EnergyOK and MaxSpeedOK and PowerStdOK and PitchTravelOK:
     print(f'Constraints OK. Cost for Summer Games 2026 is {Cost * 100:#.4g} %.')
 elif not EnergyOK:
     print(f'Energy too low. Cost for Summer Games 2026 is {Cost * 100:#.4g} %.')
 elif not MaxSpeedOK:
     print(f'Maximum rotor speed too high. Cost for Summer Games 2026 is {Cost * 100:#.4g} %.')
+elif not PowerStdOK:
+    print(f'Power standard deviation too high. Cost for Summer Games 2026 is {Cost * 100:#.4g} %.')
+elif not PitchTravelOK:
+    print(f'Pitch travel too high. Cost for Summer Games 2026 is {Cost * 100:#.4g} %.')
 
 plt.show()

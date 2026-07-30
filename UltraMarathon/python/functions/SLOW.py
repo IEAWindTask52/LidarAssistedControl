@@ -16,7 +16,7 @@ def SLOW(x_ThisStep, u_ThisStep, d_ThisStep, dt, Parameter):
     dx = 1/6 * (k1 + 2*k2 + 2*k3 + k4)
     x_NextStep = x_ThisStep + dt * dx
 
-    # outputs: only [generator speed, pitch angel, tower top acceleration, electrical power] are considered measureable
+    # outputs: only [generator speed, pitch angle, tower top acceleration, electrical power] are considered measurable
     y_NextStep = np.array([
         x_NextStep[0] * Parameter.Turbine.r_GB,
         x_NextStep[3],
@@ -40,6 +40,9 @@ def state_eqs(x, u, d, Parameter):
     xi              = Parameter.PitchActuator.xi
     omega           = Parameter.PitchActuator.omega
     theta_dot_max   = Parameter.PitchActuator.theta_dot_max
+    R               = Parameter.Turbine.R
+    rho             = Parameter.General.rho
+    SS              = Parameter.Turbine.SS
 
     v_0         = d
     theta_c     = u[0]                   # commanded pitch angle
@@ -55,21 +58,11 @@ def state_eqs(x, u, d, Parameter):
     dx = np.zeros(nx)
 
     # Aerodynamics
-    M_a = CalculateAerodynamicTorque(
-        x_T_dot,
-        Omega,
-        theta,
-        v_0,
-        Parameter
-    )
-
-    F_a = CalculateAerodynamicThrust(
-        x_T_dot,
-        Omega,
-        theta,
-        v_0,
-        Parameter
-    )
+    v_rel   = v_0 - x_T_dot              # relative speed of tower and wind
+    lambda_ = Omega * R / v_rel
+    c_P, c_T = QuickInterp2(SS['theta'], SS['lambda'], SS['c_P'], SS['c_T'], theta, lambda_)
+    M_a = 1/2 * rho * np.pi * R**3 * c_P / lambda_ * v_rel**2
+    F_a = 1/2 * rho * np.pi * R**2 * c_T * v_rel**2
 
     # ODEs
     dx[0] = 1/J * (M_a - M_g_c * r_GB)
@@ -85,54 +78,12 @@ def state_eqs(x, u, d, Parameter):
     return dx
 
 
-# Aerodynamic Torque
-def CalculateAerodynamicTorque(x_T_dot, Omega, theta, v_0, Parameter):
-
-    # Local variables
-    R = Parameter.Turbine.R
-    rho = Parameter.General.rho
-
-    v_rel = v_0 - x_T_dot                # relative speed of tower and wind
-    lambda_ = Omega * R / v_rel
-
-    c_P = QuickInterp2(
-        Parameter.Turbine.SS['theta'],
-        Parameter.Turbine.SS['lambda'],
-        Parameter.Turbine.SS['c_P'],
-        theta,
-        lambda_
-    )
-
-    M_a = 1/2 * rho * np.pi * R**3 * c_P / lambda_ * v_rel**2
-
-    return M_a
-
-
-# Aerodynamic Thrust
-def CalculateAerodynamicThrust(x_T_dot, Omega, theta, v_0, Parameter):
-
-    # Local variables
-    R   = Parameter.Turbine.R
-    rho = Parameter.General.rho
-
-    v_rel   = v_0 - x_T_dot                # relative speed of tower and wind
-    lambda_ = Omega * R / v_rel
-
-    c_T = QuickInterp2(
-        Parameter.Turbine.SS['theta'],
-        Parameter.Turbine.SS['lambda'],
-        Parameter.Turbine.SS['c_T'],
-        theta,
-        lambda_
-    )
-
-    F_a = 1/2 * rho * np.pi * R**2 * c_T * v_rel**2
-
-    return F_a
-
-
 # QuickInterp2
-def QuickInterp2(X, Y, Z, XI, YI):
+def QuickInterp2(X, Y, Z1, Z2, XI, YI):
+
+    # Bilinear interpolation of two tables sharing one grid. The bracketing
+    # indices and the weights depend only on (XI, YI), so they are found once
+    # and reused for both tables.
 
     # Keep XI and YI within the limits
     # (X, Y are the sorted theta/lambda grids, so their min/max are just
@@ -140,7 +91,7 @@ def QuickInterp2(X, Y, Z, XI, YI):
     XIc = min(X[-1], max(X[0], XI))
     YIc = min(Y[-1], max(Y[0], YI))
 
-    # Find X and Y values
+    # Find X and Y intervals
     nX = len(X)
     nY = len(Y)
 
@@ -158,18 +109,25 @@ def QuickInterp2(X, Y, Z, XI, YI):
     Y1 = Y[IndexY]
     Y2 = Y[IndexY + 1]
 
-    # Z values
-    Z11 = Z[IndexY,     IndexX]
-    Z12 = Z[IndexY,     IndexX + 1]
-    Z21 = Z[IndexY + 1, IndexX]
-    Z22 = Z[IndexY + 1, IndexX + 1]
+    # weights, shared by both tables (XI and YI unclamped, as before, so a query
+    # outside the grid extrapolates linearly from the edge cell)
+    wX1 = XI - X1
+    wX2 = X2 - XI
+    wY1 = YI - Y1
+    wY2 = Y2 - YI
 
     # Interpolation
-    ZI = (
-        Z11 * (X2 - XI) * (Y2 - YI)
-        + Z12 * (XI - X1) * (Y2 - YI)
-        + Z21 * (X2 - XI) * (YI - Y1)
-        + Z22 * (XI - X1) * (YI - Y1)
+    ZI1 = (
+        Z1[IndexY,     IndexX]     * wX2 * wY2
+        + Z1[IndexY,     IndexX + 1] * wX1 * wY2
+        + Z1[IndexY + 1, IndexX]     * wX2 * wY1
+        + Z1[IndexY + 1, IndexX + 1] * wX1 * wY1
+    ) / (X2 - X1) / (Y2 - Y1)
+    ZI2 = (
+        Z2[IndexY,     IndexX]     * wX2 * wY2
+        + Z2[IndexY,     IndexX + 1] * wX1 * wY2
+        + Z2[IndexY + 1, IndexX]     * wX2 * wY1
+        + Z2[IndexY + 1, IndexX + 1] * wX1 * wY1
     ) / (X2 - X1) / (Y2 - Y1)
 
-    return ZI
+    return ZI1, ZI2

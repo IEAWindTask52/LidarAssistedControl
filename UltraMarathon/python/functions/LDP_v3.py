@@ -6,11 +6,14 @@ def LDP_v3(isValid, beamID, lineOfSightWindSpeed, DT, LDP):
     # (REWS) equal to the LDP_v1/FFP_v1 without the need of compiling a DLL.
     # Code is intended to be as close as possible to the Fortran Code.
     # v3: similar to v1, but includes ignoring of signals with invalid data.
-    # 2006 version to be applied in each time step
+    # 2026 version to be applied in each time step.
 
     # Persistent variables
     if not hasattr(LDP_v3, 'PreviousBeamID'):
         LDP_v3.PreviousBeamID = -1                  # force WFR on first call
+
+    if not hasattr(LDP_v3, 'REWS'):
+        LDP_v3.REWS = 18                            # only necessary if first lineOfSightWindSpeed is not valid
 
     # If there is a new measurement perform wind field reconstruction
     if beamID != LDP_v3.PreviousBeamID:
@@ -48,7 +51,7 @@ def LDP_v3(isValid, beamID, lineOfSightWindSpeed, DT, LDP):
 
 
 def WindFieldReconstruction(v_los, isValid, NumberOfBeams, AngleToCenterline):
-    # Matlab version of the subroutine WindFieldReconstruction
+    # Python version of the subroutine WindFieldReconstruction
     # in LDP_v1_Subs.f90 extended to deal with invalid data.
 
     # Initialize u_est_Buffer
@@ -84,7 +87,7 @@ def WindFieldReconstruction(v_los, isValid, NumberOfBeams, AngleToCenterline):
 
 
 def LPFilter(InputSignal, DT, CornerFreq):
-    # Matlab version of the function LPFilter in FFP_v1_Subs.f90
+    # Python version of the function LPFilter in FFP_v1_Subs.f90
 
     # Initialization
     if not hasattr(LPFilter, 'OutputSignalLast'):
@@ -114,7 +117,7 @@ def LPFilter(InputSignal, DT, CornerFreq):
 def Buffer(REWS, DT, T_buffer):
 
     # Initialize REWS_f_Buffer
-    nBuffer = 2000                              # Size of REWS_f_buffer, 20 seconds at 100 Hz [-]
+    nBuffer = 400                               # Size of REWS_f_buffer, max 20 seconds at 20 Hz [-]
 
     if not hasattr(Buffer, 'REWS_f_Buffer'):
         Buffer.REWS_f_Buffer = np.ones(nBuffer) * REWS

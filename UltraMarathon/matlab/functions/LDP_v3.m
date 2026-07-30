@@ -1,15 +1,18 @@
 function REWS_b  = LDP_v3 (isValid,beamID,lineOfSightWindSpeed,DT,LDP)
 % Function to postprocess lidar data to get the rotor-effective wind speed
 % (REWS) equal to the LDP_v1/FFP_v1 without the need of compiling a DLL. 
-% Code is intented to be as close as possible to the Fortran Code.
+% Code is intended to be as close as possible to the Fortran Code.
 % v3: similar to v1, but includes ignoring of signals with invalid data.
-% 2006 version to be applied in each time step
+% 2026 version to be applied in each time step.
 
 % persistent variables
 persistent PreviousBeamID REWS                  
 if isempty(PreviousBeamID)      
-    PreviousBeamID   = -1;  % force WFR on first call
-end 
+    PreviousBeamID  = -1;  % force WFR on first call
+end
+if isempty(REWS)
+    REWS            = 18; % only necessary if first lineOfSightWindSpeed is not valid
+end
 
 % if there is a new measurement perform wind field reconstruction    
 if beamID ~= PreviousBeamID  
@@ -34,7 +37,7 @@ end
 
 
 function REWS = WindFieldReconstruction(v_los,isValid,NumberOfBeams,AngleToCenterline)
-% matlab version of the subroutine WindFieldReconstruction in LDP_v1_Subs.f90
+% Matlab version of the subroutine WindFieldReconstruction in LDP_v1_Subs.f90
 % extended to deal with invalid data. 
 
 % init u_est_Buffer
@@ -59,7 +62,7 @@ REWS  	        = mean(u_est_Buffer,'omitnan');
 end
 
 function OutputSignal = LPFilter(InputSignal,DT,CornerFreq)
-% matlab version of the function LPFilter in FFP_v1_Subs.f90
+% Matlab version of the function LPFilter in FFP_v1_Subs.f90
 
 % Initialization
 persistent OutputSignalLast InputSignalLast;
@@ -85,7 +88,7 @@ end
 function REWS_b = Buffer(REWS,DT,T_buffer)
 
 % init REWS_f_Buffer
-nBuffer = 2000; % Size of REWS_f_buffer, 20 seconds at 100 Hz  [-] 
+nBuffer = 400; % Size of REWS_f_buffer, max 20 seconds at 20 Hz  [-] 
 persistent REWS_f_Buffer;
 if isempty(REWS_f_Buffer)      
     REWS_f_Buffer = ones(nBuffer,1)*REWS;   

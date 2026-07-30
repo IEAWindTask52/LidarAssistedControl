@@ -5,7 +5,7 @@
 % with 126 m rotor diameter and a 4-beam-pulsed lidar system.
 % Details see instructions: <TODO: DOI url>.
 % Initial result: 
-% Smallest Detectable Eddy Size is estimated as 1.737 D 
+% Smallest Detectable Eddy Size is estimated as 1.737 D. 
 % Cost for Summer Games 2026 is 94.32 %.
 
 %% add paths and load data
@@ -19,8 +19,8 @@ load('DataSummerGames2026.mat','time','lineOfSightWindSpeed','isValid','beamID',
 %% simulation parameter (should not be changed)
 
 Parameter   = NREL5MWDefaultParameter_SLOW;             % turbine parameters
-x_0         = [rpm2radPs(12.1),0.1,0,deg2rad(14),0];    % initial values for states x = [rotor speed, tower top displacement, tower top speed, pitch angle, pitch rate]
-y_0         = [rpm2radPs(12.1)*97,deg2rad(14),0,5e6];   % initial values for measurements y = [generator speed, commanded pitch angle, tower top acceleration, electrical power]
+x_0         = [rpm2radPs(12.1),0.2,0,deg2rad(13),0];    % initial values for states x = [rotor speed, tower top displacement, tower top speed, pitch angle, pitch rate]
+y_0         = [rpm2radPs(12.1)*97,deg2rad(13),0,5e6];   % initial values for measurements y = [generator speed, pitch angle, tower top acceleration, electrical power]
 dt          = time(2)-time(1);                          % [s]           time step size
 n_t         = length(time);                             % [-]           number of time steps
 m           = 4;                                        % [-]           Woehler Exponent for steel
@@ -40,7 +40,7 @@ clear  LDP_v3
 
 %% simulation feedback only (should not be changed)
 
-% allocation and initalization
+% allocation and initialization
 x_FB        = NaN(n_t,5);
 y_FB        = NaN(n_t,4);
 u_FB        = NaN(n_t,2);
@@ -51,15 +51,13 @@ clear FBController % clear persistent variables
 % loop over time
 for i_t=1:n_t-1
     
-    % select current state, meaasurements and disturbance
-    x_ThisStep              = x_FB(i_t,:);
-    y_ThisStep              = y_FB(i_t,:);
-    d_ThisStep              = v_0(i_t);
-  
     % calculate feedback controller
+    y_ThisStep              = y_FB(i_t,:);
     u_ThisStep              = FBController(y_ThisStep,0,dt,Parameter);
 
     % simulate wind turbine
+    x_ThisStep              = x_FB(i_t,:);
+    d_ThisStep              = v_0(i_t);
     [x_NextStep,y_NextStep] = SLOW(x_ThisStep,u_ThisStep,d_ThisStep,dt,Parameter);
 
     % store simulation results
@@ -69,16 +67,18 @@ for i_t=1:n_t-1
 
 end
 
-% calculate overspeed, energy and loads
-MaxSpeed_FB = max(y_FB(:,1));
-Energy_FB   = sum(y_FB(:,4))*dt;
-M_yT_FB     = Parameter.Turbine.HubHeight*(Parameter.Turbine.c_eT*x_FB(:,3)+Parameter.Turbine.k_eT*x_FB(:,2));
-c           = rainflow(M_yT_FB);
-TowerDEL_FB = (sum(c(:,2).^m.*c(:,1))/N_REF).^(1/m);
+% calculate overspeed, energy, loads, power quality and pitch travel
+MaxSpeed_FB     = max(y_FB(:,1));
+Energy_FB       = sum(y_FB(:,4))*dt;
+PowerStd_FB     = std(y_FB(:,4));
+M_yT_FB         = Parameter.Turbine.HubHeight*(Parameter.Turbine.c_eT*x_FB(:,3)+Parameter.Turbine.k_eT*x_FB(:,2));
+c               = rainflow(M_yT_FB);
+TowerDEL_FB     = (sum(c(:,2).^m.*c(:,1))/N_REF).^(1/m);
+PitchTravel_FB  = sum(abs(diff(x_FB(:,4))));
 
 %% simulation lidar-assisted: please only adjust code between >>> <<<! 
 
-% allocation and initalization
+% allocation and initialization
 x_LA        = NaN(n_t,5);
 y_LA        = NaN(n_t,4);
 u_LA        = NaN(n_t,2);
@@ -89,16 +89,10 @@ clear FBController % clear persistent variables
 
 % loop over time
 for i_t=1:n_t-1
-    
-    % select current state, meaasurements and disturbance
-    x_ThisStep              = x_LA(i_t,:);
-    y_ThisStep              = y_LA(i_t,:);    
-    d_ThisStep              = v_0(i_t);
-  
+
     % >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    % provide u_ThisStep only based on current (i_t) or past signals:
-    % - turbine signals: y_ThisStep, measureable part of x_LA
-    % - lidar   signals: isValid, beamID, lineOfSightWindSpeed
+    % First discipline (Preview Quality): Provide v_0L(i_t)  only based on current (i_t) or past lidar signals: isValid, beamID, lineOfSightWindSpeed
+    % Second discipline (Load Reduction): Provide u_ThisStep only based on current (i_t) or past lidar signals and turbine signals from y_ThisStep
 
     % simple lidar data processing
     v_0L(i_t)               = LDP_v3(isValid(i_t,IndexGate),beamID(i_t),lineOfSightWindSpeed(i_t,IndexGate),dt,LDP);
@@ -106,10 +100,13 @@ for i_t=1:n_t-1
     % calculate combined feedback-feedforward controller
     WindAcceleration        = (v_0L(i_t)-v_0L(max(i_t-1,1)))/dt;
     u_FF_ThisStep           = WindAcceleration*GradientStaticPitch; % simple collective pitch feedforward controller
+    y_ThisStep              = y_LA(i_t,:);
     u_ThisStep              = FBController(y_ThisStep,u_FF_ThisStep,dt,Parameter);
     % <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     % simulate wind turbine
+    x_ThisStep              = x_LA(i_t,:);
+    d_ThisStep              = v_0(i_t);    
     [x_NextStep,y_NextStep] = SLOW(x_ThisStep,u_ThisStep,d_ThisStep,dt,Parameter);
 
     % store simulation results
@@ -119,12 +116,14 @@ for i_t=1:n_t-1
 
 end
 
-% calculate overspeed, energy and loads
-MaxSpeed_LA = max(y_LA(:,1));
-Energy_LA   = sum(y_LA(:,4))*dt;
-M_yT_LA     = Parameter.Turbine.HubHeight*(Parameter.Turbine.c_eT*x_LA(:,3)+Parameter.Turbine.k_eT*x_LA(:,2));
-c           = rainflow(M_yT_LA);
-TowerDEL_LA = (sum(c(:,2).^m.*c(:,1))/N_REF).^(1/m);
+% calculate overspeed, energy, loads, power quality and pitch travel
+MaxSpeed_LA     = max(y_LA(:,1));
+Energy_LA       = sum(y_LA(:,4))*dt;
+PowerStd_LA     = std(y_LA(:,4));
+M_yT_LA         = Parameter.Turbine.HubHeight*(Parameter.Turbine.c_eT*x_LA(:,3)+Parameter.Turbine.k_eT*x_LA(:,2));
+c               = rainflow(M_yT_LA);
+TowerDEL_LA     = (sum(c(:,2).^m.*c(:,1))/N_REF).^(1/m);
+PitchTravel_LA  = sum(abs(diff(x_LA(:,4))));
 
 %% plot simulation results
 
@@ -164,9 +163,8 @@ ylabel({'tower base bending moment';'[MNm]'});
 xlabel('time [s]')
 
 linkaxes(findobj(gcf, 'Type', 'Axes'),'x');
-xlim([0 600])  % limit to first 10 min
 
-%% estimate coherence and SDES  (should not be changed) 
+%% estimate coherence and SDES (should not be changed) 
 
 n_FFT           	    = 2^11; 
 [gamma_Sq_est,f_est]    = mscohere(v_0(1:n_t-1)-mean(v_0(1:n_t-1)),v_0L(1:n_t-1)-mean(v_0L(1:n_t-1)),hamming(n_FFT),[],n_FFT,1/dt);
@@ -182,21 +180,31 @@ ylabel('Coherence [-]')
 xlim([1e-3 1])
 ylim([0 1])
 
-Idx         = [1:find(diff(gamma_Sq_est)>0,1,'first')];     % find monotonic descending values
-MCB         = interp1(gamma_Sq_est(Idx),k_est(Idx),0.5);    % measurement coherence bandwidth
-SDES        = 2*pi/MCB/126;             
-fprintf('Smallest Detectable Eddy Size is estimated as %#.4g D \n',SDES)
+Idx         = (1:find(diff(gamma_Sq_est)>0,1,'first'));     % find monotonic descending values
+if min(gamma_Sq_est(Idx)) <= 0.5 && max(gamma_Sq_est(Idx)) > 0.5
+    MCB     = interp1(gamma_Sq_est(Idx),k_est(Idx),0.5);    % measurement coherence bandwidth
+    SDES    = 2*pi/MCB/126;    
+    fprintf('Smallest Detectable Eddy Size is estimated as %#.4g D.\n',SDES)
+else
+    fprintf('Smallest Detectable Eddy Size cannot be estimated since the monotonic descending values in the coherence do not cross 0.5.\n')
+end
 
 %% evaluate simulation results (should not be changed)
 
-Cost        = TowerDEL_LA/TowerDEL_FB;
-EnergyOK    = Energy_FB - Energy_LA <= 0.1 * 60*60*1e3; % energy loss over 12h up to 0.1kWh acceptable
-MaxSpeedOK  = MaxSpeed_LA <= MaxSpeed_FB;
+Cost            = TowerDEL_LA/TowerDEL_FB;
+EnergyOK        = Energy_FB - Energy_LA <= 1 * 60*60*1e3;   % energy loss over 12h up to 1kWh acceptable
+MaxSpeedOK      = MaxSpeed_LA <= MaxSpeed_FB;               % same or less overspeed
+PowerStdOK      = PowerStd_LA <= PowerStd_FB;               % same or better power quality
+PitchTravelOK   = PitchTravel_LA <= PitchTravel_FB;         % same or less pitch actuator duty
 
-if EnergyOK && MaxSpeedOK
+if EnergyOK && MaxSpeedOK && PowerStdOK && PitchTravelOK
     fprintf('Constraints OK. Cost for Summer Games 2026 is %#.4g %%.\n',Cost*100)
 elseif ~EnergyOK 
     fprintf('Energy too low. Cost for Summer Games 2026 is %#.4g %%.\n',Cost*100)
 elseif ~MaxSpeedOK 
     fprintf('Maximum rotor speed too high. Cost for Summer Games 2026 is %#.4g %%.\n',Cost*100)    
+elseif ~PowerStdOK
+    fprintf('Power standard deviation too high. Cost for Summer Games 2026 is %#.4g %%.\n',Cost*100)
+elseif ~PitchTravelOK
+    fprintf('Pitch travel too high. Cost for Summer Games 2026 is %#.4g %%.\n',Cost*100)
 end
