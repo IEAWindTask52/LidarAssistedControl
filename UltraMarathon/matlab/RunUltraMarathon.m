@@ -3,10 +3,10 @@
 % We want to learn how Lidar Assisted Control (LAC) can be applied to real 
 % world data. The data has been collected on April 5, 2026 on a turbine
 % with 126 m rotor diameter and a 4-beam-pulsed lidar system.
-% Details see instructions: <TODO: DOI url>.
+% Details see instructions: https://doi.org/10.5281/zenodo.21728615.
 % Initial result: 
-% Smallest Detectable Eddy Size is estimated as 1.737 D. 
-% Cost for Summer Games 2026 is 94.32 %.
+% Smallest Detectable Eddy Size is estimated as 1.738 D.
+% Constraints OK. Cost for Summer Games 2026 is 94.96 %.
 
 %% add paths and load data
 
@@ -74,7 +74,7 @@ PowerStd_FB     = std(y_FB(:,4));
 M_yT_FB         = Parameter.Turbine.HubHeight*(Parameter.Turbine.c_eT*x_FB(:,3)+Parameter.Turbine.k_eT*x_FB(:,2));
 c               = rainflow(M_yT_FB);
 TowerDEL_FB     = (sum(c(:,2).^m.*c(:,1))/N_REF).^(1/m);
-PitchTravel_FB  = sum(abs(diff(x_FB(:,4))));
+PitchTravel_FB  = sum(abs(diff(y_FB(:,2))));
 
 %% simulation lidar-assisted: please only adjust code between >>> <<<! 
 
@@ -123,43 +123,45 @@ PowerStd_LA     = std(y_LA(:,4));
 M_yT_LA         = Parameter.Turbine.HubHeight*(Parameter.Turbine.c_eT*x_LA(:,3)+Parameter.Turbine.k_eT*x_LA(:,2));
 c               = rainflow(M_yT_LA);
 TowerDEL_LA     = (sum(c(:,2).^m.*c(:,1))/N_REF).^(1/m);
-PitchTravel_LA  = sum(abs(diff(x_LA(:,4))));
+PitchTravel_LA  = sum(abs(diff(y_LA(:,2))));
 
 %% plot simulation results
+
+IdxPlot     = time<=600;
 
 figure
 
 subplot(511)
 hold on; grid on; box on
-plot(time,v_0)
-plot(time,v_0L)
+plot(time(IdxPlot),v_0(IdxPlot))
+plot(time(IdxPlot),v_0L(IdxPlot))
 ylabel('[m/s]');
 legend('rotor','lidar','Location','best')
 
 subplot(512)
 hold on; grid on; box on
-plot(time,rad2deg(u_FB(:,1)))
-plot(time,rad2deg(u_LA(:,1)))
+plot(time(IdxPlot),rad2deg(u_FB(IdxPlot,1)))
+plot(time(IdxPlot),rad2deg(u_LA(IdxPlot,1)))
 ylabel({'pitch angle'; '[deg]'});
 legend('FB','LA','Location','best')
 
 subplot(513)
 hold on; grid on; box on
-plot(time,u_FB(:,2)*1e3)
-plot(time,u_LA(:,2)*1e3)
+plot(time(IdxPlot),u_FB(IdxPlot,2)/1e3)
+plot(time(IdxPlot),u_LA(IdxPlot,2)/1e3)
 ylabel({'generator torque';'[kNm]'});
 
 subplot(514)
 hold on; grid on; box on
-plot(time,radPs2rpm(x_FB(:,1)))
-plot(time,radPs2rpm(x_LA(:,1)))
+plot(time(IdxPlot),radPs2rpm(x_FB(IdxPlot,1)))
+plot(time(IdxPlot),radPs2rpm(x_LA(IdxPlot,1)))
 ylabel({'rotor speed';'[rpm]'});
 
 subplot(515)
 hold on; grid on; box on
-plot(time,M_yT_FB/1e6)
-plot(time,M_yT_LA/1e6)
-ylabel({'tower base bending moment';'[MNm]'});
+plot(time(IdxPlot),M_yT_FB(IdxPlot)/1e6)
+plot(time(IdxPlot),M_yT_LA(IdxPlot)/1e6)
+ylabel({'tower bending moment';'[MNm]'});
 xlabel('time [s]')
 
 linkaxes(findobj(gcf, 'Type', 'Axes'),'x');

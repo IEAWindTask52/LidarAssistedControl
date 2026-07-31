@@ -3,10 +3,10 @@
 # We want to learn how Lidar Assisted Control (LAC) can be applied to real
 # world data. The data has been collected on April 5, 2026 on a turbine
 # with 126 m rotor diameter and a 4-beam-pulsed lidar system.
-# Details see instructions: <TODO: DOI url>.
+# Details see instructions: https://doi.org/10.5281/zenodo.21728615.
 # Initial result:
-# Smallest Detectable Eddy Size is estimated as 1.737 D.
-# Cost for Summer Games 2026 is 94.32 %.
+# Smallest Detectable Eddy Size is estimated as 1.738 D.
+# Constraints OK. Cost for Summer Games 2026 is 94.96 %.
 
 # setup
 import numpy as np
@@ -92,7 +92,7 @@ PowerStd_FB     = np.std(y_FB[:, 3], ddof=1)
 M_yT_FB         = Parameter.Turbine.HubHeight * (Parameter.Turbine.c_eT * x_FB[:, 2] + Parameter.Turbine.k_eT * x_FB[:, 1])
 c               = np.array([[cycle[2], cycle[0]] for cycle in rainflow.extract_cycles(M_yT_FB)])
 TowerDEL_FB     = (np.sum(c[:, 1] ** m * c[:, 0]) / N_REF) ** (1 / m)
-PitchTravel_FB  = np.sum(np.abs(np.diff(x_FB[:, 3])))
+PitchTravel_FB  = np.sum(np.abs(np.diff(y_FB[:, 1])))
 
 # simulation lidar-assisted: please only adjust code between >>> <<<!
 # allocation and initialization
@@ -138,40 +138,42 @@ PowerStd_LA     = np.std(y_LA[:, 3], ddof=1)
 M_yT_LA         = Parameter.Turbine.HubHeight * (Parameter.Turbine.c_eT * x_LA[:, 2] + Parameter.Turbine.k_eT * x_LA[:, 1])
 c               = np.array([[cycle[2], cycle[0]] for cycle in rainflow.extract_cycles(M_yT_LA)])
 TowerDEL_LA     = (np.sum(c[:, 1] ** m * c[:, 0]) / N_REF) ** (1 / m)
-PitchTravel_LA  = np.sum(np.abs(np.diff(x_LA[:, 3])))
+PitchTravel_LA  = np.sum(np.abs(np.diff(y_LA[:, 1])))
 
 # plot simulation results
+IdxPlot = time <= 600
+
 plt.figure(figsize=(10, 10))
 
 plt.subplot(511)
-plt.plot(time, v_0, label='rotor')
-plt.plot(time, v_0L, label='lidar')
+plt.plot(time[IdxPlot], v_0[IdxPlot], label='rotor')
+plt.plot(time[IdxPlot], v_0L[IdxPlot], label='lidar')
 plt.grid()
 plt.ylabel('[m/s]')
 plt.legend(loc='best')
 
 plt.subplot(512)
-plt.plot(time, np.rad2deg(u_FB[:, 0]), label='FB')
-plt.plot(time, np.rad2deg(u_LA[:, 0]), label='LA')
+plt.plot(time[IdxPlot], np.rad2deg(u_FB[IdxPlot, 0]), label='FB')
+plt.plot(time[IdxPlot], np.rad2deg(u_LA[IdxPlot, 0]), label='LA')
 plt.grid()
 plt.ylabel('pitch angle\n[deg]')
 plt.legend(loc='best')
 
 plt.subplot(513)
-plt.plot(time, u_FB[:, 1] * 1e3)
-plt.plot(time, u_LA[:, 1] * 1e3)
+plt.plot(time[IdxPlot], u_FB[IdxPlot, 1] / 1e3)
+plt.plot(time[IdxPlot], u_LA[IdxPlot, 1] / 1e3)
 plt.grid()
 plt.ylabel('generator torque\n[kNm]')
 
 plt.subplot(514)
-plt.plot(time, radPs2rpm(x_FB[:, 0]))
-plt.plot(time, radPs2rpm(x_LA[:, 0]))
+plt.plot(time[IdxPlot], radPs2rpm(x_FB[IdxPlot, 0]))
+plt.plot(time[IdxPlot], radPs2rpm(x_LA[IdxPlot, 0]))
 plt.grid()
 plt.ylabel('rotor speed\n[rpm]')
 
 plt.subplot(515)
-plt.plot(time, M_yT_FB / 1e6)
-plt.plot(time, M_yT_LA / 1e6)
+plt.plot(time[IdxPlot], M_yT_FB[IdxPlot] / 1e6)
+plt.plot(time[IdxPlot], M_yT_LA[IdxPlot] / 1e6)
 plt.grid()
 plt.ylabel('tower base bending moment\n[MNm]')
 plt.xlabel('time [s]')
