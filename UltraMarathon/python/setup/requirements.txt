@@ -1,5 +1,5 @@
-numpy        # arrays / numerics
-scipy        # PowerAndThrustCoefficientsNREL5MW.mat loading, coherence estimate
-h5py         # DataSummerGames2026.mat is MATLAB v7.3 (HDF5) format
-matplotlib   # plots
-rainflow     # rainflow cycle counting for the tower DEL calculation
+numpy==2.5.1        # arrays / numerics
+scipy==1.18.0       # PowerAndThrustCoefficientsNREL5MW.mat loading, coherence estimate
+h5py==3.16.0        # DataSummerGames2026.mat is MATLAB v7.3 (HDF5) format
+matplotlib==3.11.1  # plots
+rainflow==3.2.0     # rainflow cycle counting for the tower DEL calculation
