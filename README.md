@@ -1,9 +1,9 @@
 # LAC SummerGames 2026
 The LAC SummerGames 2026 were launched as follow-up to the successful LAC Summer Games 24 and 25 to encourage professionals and particularly students in the art of designing and deploying lidar data processing algorithms and lidar-assisted controllers. Participants will be given the opportunity to increase their knowledge in LAC and by that, the SummerGames will trigger creativity and motivate the development of new concepts.
 
-All the necessary information regarding the two different disciplines and the general timeline can be found in the official document: (to be uploaded).
+All the necessary information regarding the two different disciplines and the general timeline can be found in the official [document](https://zenodo.org/records/21728616).
 
-The best way to get started would be to familiarize yourself with the code of the given examples and reproduce the results presented in the official document.
+The best way to get started would be to familiarize yourself with the code of the given examples and reproduce the results presented in the official [document](https://zenodo.org/records/21728616).
 
 This code is an extension of 
 https://github.com/MSCA-LIKE/Baseline-Lidar-assisted-Controller, which has been used in the research funded by LIKE -- Lidar Knowledge Europe, grant agreement No. 858358. 
