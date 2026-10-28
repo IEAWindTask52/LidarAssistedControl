@@ -59,12 +59,18 @@ Modifications           = {
                         '5','R','"IEA-10.0-198-RWT_DISCON_v2d6mod.IN"'  InputFiles{6,2};                         
                         % DISCON.IN: change minimum generator speed
                         '6','I','! FlagLAC'         @(VariationValues) num2str(VariationValues(2),'%02d') 
+                        % --- NEW: Enable Pitch Actuator (Using 'R' for safe string replacement) ---
+                        '6','R','0                   ! PA_Mode',         '2                   ! PA_Mode'
+                        '6','R','3.140000000000        ! PA_CornerFreq', '6.0                 ! PA_CornerFreq'
+                        % --- NEW: Reduce Maximum Pitch Rate to 5 deg/s (0.08726 rad/s) ---
+                        '6','R','0.174440000000      ! PC_MaxRat',   '0.087260000000      ! PC_MaxRat'
+                        '6','R','-0.17444000000      ! PC_MinRat',   '-0.087260000000      ! PC_MinRat'
                         };
 
 % PlotTimeResults
 ID = 1;
 PostProcessingConfig.Plots.BasicTimePlot{ID}.Enable     = 1;
-PostProcessingConfig.Plots.BasicTimePlot{ID}.Channels   = {'Wind1VelX';'BldPitch1';'RotSpeed'};
+PostProcessingConfig.Plots.BasicTimePlot{ID}.Channels   = {'Wind1VelX';'BldPitch1';'RotSpeed';'TwrBsMyt'};
 PostProcessingConfig.Plots.BasicTimePlot{ID}.gca.xlim   = [0 50];
 PostProcessingConfig.Plots.BasicTimePlot{ID}.legend     = MyLegend;
 
@@ -94,7 +100,7 @@ copyfile(['..\OpenFAST\',ExeFile],fullfile(SimulationFolder,ExeFile))
 % TimeResults
 TimeResults = CollectTimeResults(DataFiles,PostProcessingConfig);
 PlotTimeResults(TimeResults,PostProcessingConfig);
-
+    
 % Statistics
 Statistics = CalculateStatistics(TimeResults,PostProcessingConfig);
 PlotStatistics(Statistics,PostProcessingConfig);  
