@@ -1,9 +1,4 @@
-% Script to compare DLC 1.2 for "FeedbackOnly", "LAC_CircularCW", and "LAC_4BeamPulsed". 
-% Result:
-% Improvements by LAC_CircularCW over FeedbackOnly :
-% Cost for Summer Games 2024 ("DLC 1.2 Marathon"): 1.433506
-% Improvements by LAC_4BeamPulsed over FeedbackOnly :
-% Cost for Summer Games 2024 ("DLC 1.2 Marathon"): 1.323144
+% Script to compare DLC 1.2 for different controllers
 
 % setup
 clearvars;close all;clc
@@ -12,7 +7,7 @@ addpath(genpath('..\WetiMatlabFunctions'))
 %% Calculate life-time weighted DEL and mean
 SimulationModes     = { 
     'FeedbackOnly_org'
-    'FeedbackOnly'
+    'FeedbackOnly_org_PA'
     };
 nSimulationModes    = length(SimulationModes);
 
@@ -37,7 +32,6 @@ for iSimulationMode = 1:nSimulationModes
 end
 
 %% Plots
-VS_MaxTq    = 15600000; % Maximum generator torque in Region 3 [Nm] 
 
 figure('Name','Life-time weighted DEL')
 subplot(311)
@@ -92,9 +86,8 @@ title('Maximum generator torque')
 plot(WindSpeedBins,ProcessResults(1).max_GenTq_PerBin/1e3,'o-')
 plot(WindSpeedBins,ProcessResults(2).max_GenTq_PerBin/1e3,'.-')
 % plot(WindSpeedBins,ProcessResults(3).max_GenTq_PerBin/1e3,'.-')
-plot(WindSpeedBins([1,end]),[1 1]*VS_MaxTq/1e6,'k-')
 ylabel('Genrator torque [MW]')
-legend(cat(1,SimulationModes,'maximum'),'location','best','Interpreter','none')
+legend(SimulationModes,'location','best','Interpreter','none')
 xlabel('wind speed [m/s]')
 
 
