@@ -131,11 +131,11 @@ PostProcessingConfig.CalculateStatistics = {
 
 
 % CalculateFrequencyResults
-Step                    = 50;
+Step                    = 5;
 nData                   = 600*100/Step; % assuming 100 Hz and 10 min
 nBlocks                 = 4;
 window                  = nData/nBlocks;
-AutoSpectrumChannels    = {'TwrBsMyt';};
+AutoSpectrumChannels    = {'TwrBsMyt';'GenSpeed'};
 PostProcessingConfig.CalculateFrequencyResults = {
     'AutoSpectrum'      @(Data,Time)EstimateAutoSpectrum(Data,Time,Step,StartTime=StartTime,window=window)  AutoSpectrumChannels;
     }; 
@@ -153,5 +153,17 @@ for iURef = 1:nURef
     PostProcessingConfig.Plots.BasicFrequencyPlot{ID}.gca.yScale = 'log';
     PostProcessingConfig.Plots.BasicFrequencyPlot{ID}.IndicesConsideredDataFiles        = [1:nSeed]+(iURef-1)*nSeed;   
 end
- 
+
+for iURef = 1:nURef
+    ID = iURef;
+    PostProcessingConfig.Plots.BasicFrequencyPlot{ID}.Enable     = 1;
+    PostProcessingConfig.Plots.BasicFrequencyPlot{ID}.Channels   = {'AutoSpectrum_GenSpeed'};
+    PostProcessingConfig.Plots.BasicFrequencyPlot{ID}.x          = 'f';
+    PostProcessingConfig.Plots.BasicFrequencyPlot{ID}.yCell      = {'S'};
+    PostProcessingConfig.Plots.BasicFrequencyPlot{ID}.ylabelCell = {'[(rpm)^2/Hz]'};  
+    PostProcessingConfig.Plots.BasicFrequencyPlot{ID}.xlabel     = 'frequency [Hz]';  
+    PostProcessingConfig.Plots.BasicFrequencyPlot{ID}.gca.xScale = 'log';
+    PostProcessingConfig.Plots.BasicFrequencyPlot{ID}.gca.yScale = 'log';
+    PostProcessingConfig.Plots.BasicFrequencyPlot{ID}.IndicesConsideredDataFiles        = [1:nSeed]+(iURef-1)*nSeed;   
+end
 end
