@@ -1,4 +1,11 @@
-function Statistics = CalculateStatistics(TimeResults,PostProcessingConfig)
+function Statistics = CalculateStatistics(TimeResults,PostProcessingConfig,options)
+
+% inputs
+arguments
+    TimeResults             cell
+    PostProcessingConfig    struct 
+    options.Display         char {mustBeMember(options.Display,{'off','on'})} = 'off'
+end
 
 % init
 Statistics                      = table;
@@ -25,13 +32,25 @@ for iStatistic = 1:nStatistics
 
     % loop over Channels
     for iChannel = 1:nChannels
+        % define Variable name etc.
         ThisChannel             = ThisChannelCell{iChannel};
         Variable                = [ThisStatisticsID,'_',ThisChannel];   
         Value                   = NaN(nDataFiles,1); % Allocation
+        % display if requested
+        if strcmp(options.Display,'on')                
+            MyText      = "Processing " + Variable + "\n";
+            fprintf(MyText);
+        end 
+        % loop over data
         for iDataFile = 1:nDataFiles % parfor is slower
-            Data                = TimeResults{iDataFile}.(ThisChannel).Data; 
-            Time                = TimeResults{iDataFile}.(ThisChannel).Time;
-            Value(iDataFile)    = ThisFunction(Data,Time);
+            ThisTimeSeries      = TimeResults{iDataFile}.(ThisChannel);
+            Data                = ThisTimeSeries.Data;
+            Time                = ThisTimeSeries.Time;
+            ThisValue           = ThisFunction(Data,Time);
+            if isempty(ThisValue)
+                ThisValue       = NaN;
+            end
+            Value(iDataFile)    = ThisValue;
         end
         Statistics.(Variable)   = Value;    
     end

@@ -6,7 +6,7 @@ arguments
     PreProcessingVariation  (:,3) cell
     InputFiles              (:,2) cell
     Modifications           (:,4) cell
-    Tool                    {mustBeMember(Tool,{'OpenFAST','Flex5'})} = 'OpenFAST'
+    Tool                    {mustBeMember(Tool,{'OpenFAST','Flex5','Slow'})} = 'OpenFAST'
 end
 
 [nVariation, nPermutation, Permutation] = CreatePermutationMatrix(PreProcessingVariation);
@@ -28,6 +28,8 @@ for iPermutation = 1:nPermutation
             ResultFile      = fullfile(SimulationFolder,[SimulationName,'.outb']);       
         case 'Flex5'
             ResultFile      = fullfile(SimulationFolder,[SimulationName,'.res']);
+        case 'Slow'
+            ResultFile      = fullfile(SimulationFolder,[SimulationName,'.mat']);                        
     end
     DataFiles{iPermutation} = ResultFile;   
     
@@ -43,9 +45,10 @@ for iPermutation = 1:nPermutation
                 ThisModifications{iModification,4} = ThisFunction(VariationValues);
             end
         end        
-        % replace <SimulationName>
-        ThisModifications       = replace(ThisModifications,'<SimulationName>',SimulationName);
-        ThisInputFiles          = replace(InputFiles,'<SimulationName>',SimulationName);
+        % replace <SimulationName> in 4th column of ThisModifications and InputFiles
+        CharCellIdx                         = cellfun(@ischar,ThisModifications(:,4));
+        ThisModifications(CharCellIdx,4)    = replace(ThisModifications(CharCellIdx,4),'<SimulationName>',SimulationName);
+        ThisInputFiles                      = replace(InputFiles,'<SimulationName>',SimulationName);
         % adjust InputFiles
         AdjustInputFiles(ThisInputFiles,ThisModifications,SimulationFolder)
         % update counter and store SimulationName        

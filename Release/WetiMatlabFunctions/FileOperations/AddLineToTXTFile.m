@@ -8,30 +8,41 @@
 % nLine             line after which the new line is added
 % NewLine           String with new line
 % -----------------------------
-function AddLineToTXTFile(TXTFile,nLine,NewLine)
+function AddLineToTXTFile(TXTFile, nLine, NewLine)
 
-[FOLDER,NAME,EXT]   = fileparts(TXTFile); 
-TempTXTFile         = fullfile(FOLDER,[NAME,'_temp',EXT]);
-fid                 = fopen(TXTFile);
-fidTemp             = fopen(TempTXTFile,'w+');
+    % 1. Read the entire file into memory as a single text block
+    fid = fopen(TXTFile, 'r');
+    if fid == -1
+        error('AddLineToTXTFile:CannotOpenFile', 'Cannot open file "%s" for reading.', TXTFile);
+    end
+    rawText = fread(fid, '*char')';
+    fclose(fid);
 
-% copy file up to nLine
-for iLine=1:nLine
-   s            = fgetl(fid);
-   fprintf(fidTemp,'%s\r\n',s);
+    % 2. Split raw text into a cell array of lines (supports both \r\n and \n)
+    lines = strsplit(rawText, {'\r\n', '\n'}, 'CollapseDelimiters', false);
+    
+    % Remove trailing empty cell if the file ended with a newline character
+    if ~isempty(lines) && isempty(lines{end})
+        lines(end) = [];
+    end
+
+    % 3. Insert the new line directly into the cell array without loops
+    if nLine >= length(lines)
+        lines = [lines, {NewLine}];
+    elseif nLine <= 0
+        lines = [{NewLine}, lines];
+    else
+        lines = [lines(1:nLine), {NewLine}, lines(nLine+1:end)];
+    end
+
+    % 4. Overwrite the file in one single vectorized operation
+    fid = fopen(TXTFile, 'w');
+    if fid == -1
+        error('AddLineToTXTFile:CannotWriteFile', 'Cannot open file "%s" for writing.', TXTFile);
+    end
+    % Expanding lines{:} passes all lines as an argument list; fprintf applies 
+    % '%s\r\n' sequentially at C-speed (ensures OpenFAST-compatible line endings)
+    fprintf(fid, '%s\r\n', lines{:});
+    fclose(fid);
+
 end
-
-% add new line
-fprintf(fidTemp,'%s\r\n',NewLine);
-
-% copy rest of file
-while ~feof(fid)
-   s            = fgetl(fid);
-   fprintf(fidTemp,'%s\r\n',s);
-end
-
-% close files
-fclose(fid);
-fclose(fidTemp);
-delete(TXTFile);
-movefile(TempTXTFile,TXTFile);

@@ -19,25 +19,30 @@ MainFolder      = pwd;
 cd(SimulationFolder)
 
 % run simulations
-switch Tool
-    case 'Flex5'
-        for i_Simulation    = 1:n_Simulation   
-            SimulationName  = SimulationNames{i_Simulation};
-            fprintf('Running simulation %s (%d/%d)\n',SimulationName,i_Simulation,n_Simulation);        
-            [status(i_Simulation),result{i_Simulation}] = ...
-                system([ExeFile,...
-                ' ',SimulationName,'.inf',...
-                ' ',SimulationName,'.log',...
-                ' ',SimulationName,'.res']);
-        end
-    case 'OpenFAST'
-        parfor (i_Simulation    = 1:n_Simulation,options.nCore)    
-            SimulationName  = SimulationNames{i_Simulation};
-            fprintf('Running simulation %s (%d/%d)\n',SimulationName,i_Simulation,n_Simulation);        
-            [status(i_Simulation),result{i_Simulation}] = ...
-                system([ExeFile,...
-                ' ',SimulationName,'.fst']);
-        end
+if n_Simulation>0
+    switch Tool
+        case 'Flex5'
+            for i_Simulation    = 1:n_Simulation   
+                SimulationName  = SimulationNames{i_Simulation};
+                fprintf('Running simulation %s (%d/%d)\n',SimulationName,i_Simulation,n_Simulation);        
+                [status(i_Simulation),result{i_Simulation}] = ...
+                    system([ExeFile,...
+                    ' ',SimulationName,'.inf',...
+                    ' ',SimulationName,'.log',...
+                    ' ',SimulationName,'.res']);
+            end
+        case 'OpenFAST'
+            tic
+            parfor (i_Simulation    = 1:n_Simulation,options.nCore)    
+                SimulationName  = SimulationNames{i_Simulation};
+                fprintf('Running simulation %s (%d/%d)\n',SimulationName,i_Simulation,n_Simulation);        
+                [status(i_Simulation),result{i_Simulation}] = ...
+                    system([ExeFile,...
+                    ' ',SimulationName,'.fst']);
+            end
+            T_Simulation = toc;
+            fprintf('Average time per simulation: %d s.\n',round(T_Simulation/n_Simulation));      
+    end
 end
 
 % back to main folder

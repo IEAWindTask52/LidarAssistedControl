@@ -3,7 +3,7 @@ function	[v_0,t] = CalculateREWSfromWindField(TurbSimResultFile,R,nLoop)
 % read in wind field
 [velocity, y, z, nz, ny, dz, dy, dt, zHub, z1, SummVars] = ReadBLgrid(TurbSimResultFile);
 h                   = SummVars(1);
-[Y,Z]               = meshgrid(y,z-h);
+[Z,Y]               = meshgrid(z-h,y); % Y is a matrix where each column is a copy of y to fit to (iy,iz)
 DistanceToHub       = (Y(:).^2+Z(:).^2).^0.5;
 IsInRotorDisc       = DistanceToHub<=R;
 

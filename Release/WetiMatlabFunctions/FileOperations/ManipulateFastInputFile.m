@@ -5,38 +5,60 @@
 % -----------------------------
 % Input:
 % TXTFile           String with name of .txt file
-% Identifier        Identifier in FAST style input file 
+% Identifier        Identifier in FAST style input file (supports regex)
 % NewString         String with replacement
 % -----------------------------
 % Output:
 % n                 number of replacements
-% -----------------------------
-% Created: 
-% David Schlipf on 20-Dec-2022
-% (c) WETI
 % ----------------------------------
-function n = ManipulateFastInputFile(TXTFile,Identifier,NewString)
+function n = ManipulateFastInputFile(TXTFile, Identifier, NewString)
 
-[FOLDER,NAME,EXT]   = fileparts(TXTFile); 
-TempTXTFile         = fullfile(FOLDER,[NAME,'_temp',EXT]);
-fid                 = fopen(TXTFile);
-fidTemp             = fopen(TempTXTFile,'w+');
-n                   = 0;
-
-while ~feof(fid)
-    CurrentLine   	= fgetl(fid);
-    % make sure only whole word are found (case sensitive)
-    StartIdx        = regexp(CurrentLine, ['\s',Identifier,'(\s|$)'], 'start', 'once')+1;
-    if isempty(StartIdx)
-        fprintf(fidTemp,'%s\r\n',CurrentLine);
-    else
-        NewLine = [NewString,' ',CurrentLine(StartIdx:end)];
-        fprintf(fidTemp,'%s\r\n',NewLine);
-        n = n+1;
+    % 1. Read the entire file into memory as a single text block
+    fid = fopen(TXTFile, 'r');
+    if fid == -1
+        error('ManipulateFastInputFile:CannotOpenFile', 'Cannot open file "%s" for reading.', TXTFile);
     end
-end
+    rawText = fread(fid, '*char')';
+    fclose(fid);
 
-fclose(fid);
-fclose(fidTemp);
-delete(TXTFile);
-movefile(TempTXTFile,TXTFile);
+    % 2. Split raw text into a cell array of lines (supports both \r\n and \n)
+    lines = strsplit(rawText, {'\r\n', '\n'}, 'CollapseDelimiters', false);
+    
+    % Remove trailing empty cell if the file ended with a newline character
+    if ~isempty(lines) && isempty(lines{end})
+        lines(end) = [];
+    end
+
+    % 3. Vectorized regex search across the entire cell array at once
+    % This restores full regex support (e.g., 'BlPitch\((1|2|3)\)') while
+    % remaining extremely fast by avoiding loops.
+    pattern = ['\s', Identifier, '(\s|$)'];
+    startIndices = regexp(lines, pattern, 'start', 'once');
+    
+    % Find all line indices that had a regex match
+    candidateIdx = find(~cellfun(@isempty, startIndices));
+    n = length(candidateIdx);
+
+    % 4. Perform the string replacement directly on matching lines
+    for i = 1:n
+        idx = candidateIdx(i);
+        currentLine = lines{idx};
+
+        % Add 1 to step past the leading whitespace '\s' from the pattern
+        startIdx = startIndices{idx} + 1;
+        lines{idx} = [NewString, ' ', currentLine(startIdx:end)];
+    end
+
+    % 5. Overwrite the file only if changes occurred (vectorized, no loop)
+    if n > 0
+        fid = fopen(TXTFile, 'w');
+        if fid == -1
+            error('ManipulateFastInputFile:CannotWriteFile', 'Cannot open file "%s" for writing.', TXTFile);
+        end
+        % Expanding lines{:} passes all lines as an argument list; fprintf applies 
+        % '%s\r\n' sequentially at C-speed (ensures OpenFAST-compatible line endings)
+        fprintf(fid, '%s\r\n', lines{:});
+        fclose(fid);
+    end
+
+end

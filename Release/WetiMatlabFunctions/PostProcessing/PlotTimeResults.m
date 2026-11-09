@@ -1,7 +1,7 @@
 function PlotTimeResults(TimeResults,PostProcessingConfig)
 
 %% BasicTimePlot
-if isfield(PostProcessingConfig.Plots,'BasicTimePlot')
+if isfield(PostProcessingConfig,'Plots') && isfield(PostProcessingConfig.Plots,'BasicTimePlot')
     nFigures        = length(PostProcessingConfig.Plots.BasicTimePlot);    
     for iFigure=1:nFigures
         PlotConfig  = PostProcessingConfig.Plots.BasicTimePlot{iFigure};
@@ -20,16 +20,38 @@ if isfield(PostProcessingConfig.Plots,'BasicTimePlot')
             for iChannel = 1:nChannels
                 ThisChannel     = PlotConfig.Channels{iChannel};
                 subplot(nChannels,1,iChannel)                    
-                hold on; box on; grid on                
+                hold on; box on; grid on  
+                % yScale
+                if isfield(PlotConfig,'yScaleCell')
+                    yScale      = PlotConfig.yScaleCell{iChannel};
+                elseif isfield(PlotConfig,'yScale')
+                    yScale      = PlotConfig.yScale;
+                else
+                    yScale      = 1;
+                end                  
                 % plot data
                 for iConsideredDataFile=1:nConsideredDataFiles
                     iDataFile               = IndicesConsideredDataFiles(iConsideredDataFile);
-                    plot(TimeResults{iDataFile}.(ThisChannel))                                                                                
-                end
-                % ylabel: use unit from last considered file
-                ylabel(['[',TimeResults{iDataFile}.(ThisChannel).DataInfo.Units,']'])
-                % plot title: fixed to channels
-                title(ThisChannel,'Interpreter','none')
+                    plot(TimeResults{iDataFile}.(ThisChannel).Time,yScale*TimeResults{iDataFile}.(ThisChannel).Data)                                                                                
+                end  
+                % ylabel: can be defined for each subplot or globally,
+                % default unit
+                if isfield(PlotConfig,'ylabelCell')
+                    ylabel(PlotConfig.ylabelCell{iChannel})
+                elseif isfield(PlotConfig,'ylabel')
+                    ylabel(PlotConfig.ylabel)
+                else
+                    ylabel(['[',TimeResults{iDataFile}.(ThisChannel).DataInfo.Units,']'])
+                end 
+                % title: can be defined for each subplot or globally
+                % default Channel
+                if isfield(PlotConfig,'titleCell')
+                    title(PlotConfig.titleCell{iChannel},'Interpreter','none')
+                elseif isfield(PlotConfig,'title')
+                    title(PlotConfig.title,'Interpreter','none')
+                else
+                    title(ThisChannel,'Interpreter','none')
+                end                   
                 % plot legend
                 if isfield(PlotConfig,'legend')
                     legend(PlotConfig.legend,'Interpreter','none')
@@ -45,12 +67,14 @@ if isfield(PostProcessingConfig.Plots,'BasicTimePlot')
             end
             % xlabel: fixed to time
             xlabel('time [s]')
+            % link axes
+            linkaxes(findobj(gcf, 'Type', 'Axes'), 'x')
         end
     end
 end
 
 %% ComparisonTimePlot
-if isfield(PostProcessingConfig.Plots,'ComparisonTimePlot')
+if isfield(PostProcessingConfig,'Plots') && isfield(PostProcessingConfig.Plots,'ComparisonTimePlot')
     nFigures     = length(PostProcessingConfig.Plots.ComparisonTimePlot);    
     for iFigure=1:nFigures
         PlotConfig      = PostProcessingConfig.Plots.ComparisonTimePlot{iFigure};
@@ -70,18 +94,29 @@ if isfield(PostProcessingConfig.Plots,'ComparisonTimePlot')
                 subplot(nConsideredDataFiles,1,iConsideredDataFile)
                 hold on; box on; grid on                
                 iDataFile   = IndicesConsideredDataFiles(iConsideredDataFile);
+                % plot data
                 for iChannel = 1:nChannels
+                    % yScale
+                    if isfield(PlotConfig,'yScaleCell')
+                        yScale      = PlotConfig.yScaleCell{iChannel};
+                    elseif isfield(PlotConfig,'yScale')
+                        yScale      = PlotConfig.yScale;
+                    else
+                        yScale      = 1;
+                    end                    
                     ThisChannel  = PlotConfig.Channels{iChannel};
-                    plot(TimeResults{iConsideredDataFile}.(ThisChannel))  
+                    plot(TimeResults{iDataFile}.(ThisChannel).Time,yScale*TimeResults{iDataFile}.(ThisChannel).Data)   
                 end
                 % ylabel: need to be defined due to different channels 
                 if isfield(PlotConfig,'ylabel')
                     ylabel(PlotConfig.ylabel)
                 end
                 % plot title
-                if isfield(PlotConfig,'title')
-                    title(PlotConfig.title{iDataFile},'Interpreter','none')
-                end
+                if isfield(PlotConfig,'titleCell')
+                    title(PlotConfig.titleCell{iConsideredDataFile},'Interpreter','none')
+                elseif isfield(PlotConfig,'title')
+                    title(PlotConfig.title,'Interpreter','none')
+                end                 
                 % plot legend: fixed to Channels
                 legend(PlotConfig.Channels,'Interpreter','none')              
                 % set gca properties
@@ -95,6 +130,8 @@ if isfield(PostProcessingConfig.Plots,'ComparisonTimePlot')
             end 
             % xlabel: fixed to time
             xlabel('time [s]')
+            % link axes
+            linkaxes(findobj(gcf, 'Type', 'Axes'), 'x')
         end
     end
 end

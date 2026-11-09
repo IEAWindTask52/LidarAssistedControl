@@ -1,23 +1,35 @@
-function TSC = ReadFASTbinaryIntoTSC(FileName)
-% based on LoadFAST
+function TSC = ReadFASTbinaryIntoTSC(FileName,Units)
+
+% inputs
+arguments
+    FileName                char
+    Units                   struct = struct()
+end
 
 % read in data  and get time
-[Channels, ChanName, ChanUnit, ~, ~] = ReadFASTbinary(FileName);
+[Channels, ChannelNames, ChanUnit, ~, ~] = ReadFASTbinary(FileName);
 time                = Channels(:, 1);
 
 % create a tscollection object 
 TSC                 = tscollection(time);
 TSC.Name            = FileName; % set name 
-TSC.TimeInfo.Units  = 's';
+TSC.TimeInfo.Units  = 'seconds';
 
 % loop over channels
-nChannel            = length(ChanName);
+nChannel            = length(ChannelNames);
 for iChannel = 2:nChannel
     % create time series
-    TS                  = timeseries(ChanName{iChannel});
+    TS                  = timeseries(ChannelNames{iChannel});
     TS.Time             = Channels(:, 1);
     TS.Data             = Channels(:, iChannel);
-    TS.DataInfo.Units   = erase(ChanUnit{iChannel},{'(';')'});% remove ()
+
+    % units 
+    if isfield(Units,ChannelNames{iChannel})
+        TS.DataInfo.Units   = Units.(ChannelNames{iChannel});
+    else
+        TS.DataInfo.Units   = erase(ChanUnit{iChannel},{'(';')'});% remove ()
+    end    
+    
     % add to tscollection object 
     TSC = TSC.addts(TS);
 end

@@ -15,7 +15,7 @@ for i_Modification = 1:n_Modification
     NewFile                 = InputFiles{i_File,2};
     TXTFile                 = fullfile(SimulationFolder,NewFile);
     switch Mode
-        case 'I' % Identifier
+        case 'I' % Identifier (Identifier second)
             Identifier      = Modifications{i_Modification,3};
             NewString       = Modifications{i_Modification,4};
             ManipulateFastInputFile(TXTFile,Identifier,NewString);
@@ -27,6 +27,18 @@ for i_Modification = 1:n_Modification
             nLine           = str2double(Modifications{i_Modification,3});
             NewLine         = Modifications{i_Modification,4};            
             AddLineToTXTFile(TXTFile,nLine,NewLine)
+        case 'Y' % YAML
+            Identifier      = Modifications{i_Modification,3};
+            NewValue        = Modifications{i_Modification,4};
+            ManipulateYamlFile(TXTFile,Identifier,NewValue);
+        case 'D' % Rediscon .din files (Identifier first)
+            Identifier      = Modifications{i_Modification,3};
+            NewString       = Modifications{i_Modification,4};
+            ManipulateDinInputFile(TXTFile,Identifier,NewString);   
+        case 'O' % Overwrite line
+            nLine           = str2double(Modifications{i_Modification,3});
+            NewLine         = Modifications{i_Modification,4};            
+            OverwriteLineTXTFile(TXTFile,nLine,NewLine)            
     end
 end
 

@@ -108,7 +108,7 @@ dt     = dx/MFFWS;
 %-----------------------------------------
 %READ THE SUMMARY FILE FOR SCALING FACTORS
 %-----------------------------------------                   
-disp('Reading the summary file....');
+% disp('Reading the summary file....');
 
 indx     = SummVars;
 fid_sum  = fopen( [ FileName '.sum' ] );
@@ -195,7 +195,7 @@ fclose(fid_sum);
 %-----------------------------------------
 %READ THE GRID DATA FROM THE BINARY FILE
 %-----------------------------------------                   
-disp('Reading and scaling the grid data...');
+% disp('Reading and scaling the grid data...');
 
 % nffc     = 3;
 nv       = nffc*ny*nz;               % the size of one time step
@@ -246,7 +246,7 @@ zHub = SummVars(1);
 z1   = zHub - ZGoffset - dz*(nz-1)/2;  %this is the bottom of the grid
 z    = [0:nz-1]*dz + z1;
 
-disp('Finished.');
-disp('');
+% disp('Finished.');
+% disp('');
 
 return;

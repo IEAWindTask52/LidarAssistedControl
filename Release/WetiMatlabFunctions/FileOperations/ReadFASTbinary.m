@@ -80,8 +80,8 @@ if fid > 0
         ChanUnit{iChan}= strtrim( char(ChanUnitASCII') );
     end            
 
-    disp( ['Reading from the file ' FileName ' with heading: ' ] );
-    disp( ['   "' DescStr '".' ] ) ;
+%     disp( ['Reading from the file ' FileName ' with heading: ' ] );
+%     disp( ['   "' DescStr '".' ] ) ;
     
     %-------------------------        
     % get the channel time series

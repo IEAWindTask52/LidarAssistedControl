@@ -11,11 +11,19 @@ if isfield(PostProcessingConfig.Plots,'BasicStatisticsPlot')
             for iSubplot = 1:nSubplots
                 ThisVariable  = PlotConfig.Variables{iSubplot};
                 subplot(nSubplots,1,iSubplot)                    
-                hold on; box on; grid on                                
-                plot(PlotConfig.x,Statistics.(ThisVariable))
-                % ylabel
+                hold on; box on; grid on
+                % plot legend
+                if isfield(PlotConfig,'scale')
+                    scale = PlotConfig.scale;
+                else
+                    scale = 1;                    
+                end                
+                plot(PlotConfig.x,Statistics.(ThisVariable)*scale)
+                % ylabel: can be defined for each subplot or globally
                 if isfield(PlotConfig,'ylabelCell')
                     ylabel(PlotConfig.ylabelCell{iSubplot})
+                elseif isfield(PlotConfig,'ylabel')
+                    ylabel(PlotConfig.ylabel)
                 end
                 % plot title: fixed to variables
                 title(ThisVariable,'Interpreter','none')
